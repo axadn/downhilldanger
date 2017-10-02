@@ -13,7 +13,7 @@ It doesn't require any plugins or external libraries, relying on the standard We
 ### Wireframes
 
 This app will consist of a single canvas to display gameplay. There will be gameplay instructions on the left side.
-
+![wireframes](js_wireframes.png)
 
 ### Architecture and Technologies
 
