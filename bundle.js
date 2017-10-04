@@ -1135,6 +1135,11 @@ const boxMan ={
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__ = __webpack_require__(0);
 
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 16;
+const EDGE_COLLISION_DAMP_FACTOR = 0.2;
+const MAX_SPEED = 3.5;
+const EDGE_COLLISION_PADDING_ROTATION = 0.5;
+const ACCELERATION = 0.3;
+const STEER_SPEED = 3;
 
 
 class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["b" /* default */]{
@@ -1159,11 +1164,18 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
     else{
       this.fallSpeed = 0;
+      this._accelerate();
     }
     this._moveForward();
   }
+  _accelerate(){
+    this.speed += ACCELERATION/__WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["a" /* UPDATE_INTERVAL */];
+    if(this.speed > MAX_SPEED){
+      this.speed = MAX_SPEED;
+    }
+  }
   _steer(direction){
-    const zRot = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["zRotationMatrix"](direction * 1/__WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["a" /* UPDATE_INTERVAL */] );
+    const zRot = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["zRotationMatrix"](direction * STEER_SPEED /__WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["a" /* UPDATE_INTERVAL */] );
     this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat_4_multiply"](
       zRot,
       this.transformationMatrix,
@@ -1188,10 +1200,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _handleEdgeCollision(collisionData){
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat_4_multiply"](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["translationMatrix"](0, -this.speed, 0),
-      this.transformationMatrix
-    );
+
+
     const edgeAlign =
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisToVec"](
         __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["multiplyVec4ByMatrix4"](
@@ -1204,6 +1214,17 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       edgeAlign,
       this.transformationMatrix
     );
+    const paddingRotation =  collisionData.toggleLeft? - EDGE_COLLISION_PADDING_ROTATION :
+      EDGE_COLLISION_PADDING_ROTATION;
+    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat_4_multiply"](
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["zRotationMatrix"](paddingRotation),
+      this.transformationMatrix
+    );
+    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat_4_multiply"](
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["translationMatrix"](0, this.speed, 0),
+      this.transformationMatrix
+    );
+    this.speed *= EDGE_COLLISION_DAMP_FACTOR;
   };
   _moveForward(){
     let worldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4TranslationComponent"](
@@ -1295,8 +1316,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game_object_mesh__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__ = __webpack_require__(1);
-const SEGMENT_WIDTH = 27;
-const SEGMENT_LENGTH = 10;
+const SEGMENT_WIDTH = 50;
+const SEGMENT_LENGTH = 30;
 const EDGE_LOOP_RESOLUTION = 5;
 const SLOPE_BUFFER_AMOUNT = 50;
 const BACK_BUFFER_ANOUNT = 10;
@@ -1408,7 +1429,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["b" /
     if(__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["vectorDot"](posOffset, edgeNormal) < 0){
       let edgeVector =  toggleLeft? vec0: vec1;
       return{normal: edgeNormal, vector: edgeVector, pos0: currentSegPoint,
-        pos1: nextSegPoint};
+        pos1: nextSegPoint, toggleLeft};
     }
     return false;
   }

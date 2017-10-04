@@ -1,5 +1,10 @@
 import GameObject from "../game_object/game_object";
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 16;
+const EDGE_COLLISION_DAMP_FACTOR = 0.2;
+const MAX_SPEED = 3.5;
+const EDGE_COLLISION_PADDING_ROTATION = 0.5;
+const ACCELERATION = 0.3;
+const STEER_SPEED = 3;
 import * as MathUtils from "../utils/math_utils";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
 export default class Character extends GameObject{
@@ -24,11 +29,18 @@ export default class Character extends GameObject{
     }
     else{
       this.fallSpeed = 0;
+      this._accelerate();
     }
     this._moveForward();
   }
+  _accelerate(){
+    this.speed += ACCELERATION/UPDATE_INTERVAL;
+    if(this.speed > MAX_SPEED){
+      this.speed = MAX_SPEED;
+    }
+  }
   _steer(direction){
-    const zRot = MathUtils.zRotationMatrix(direction * 1/UPDATE_INTERVAL );
+    const zRot = MathUtils.zRotationMatrix(direction * STEER_SPEED /UPDATE_INTERVAL );
     this.transformationMatrix = MathUtils.mat_4_multiply(
       zRot,
       this.transformationMatrix,
@@ -53,10 +65,8 @@ export default class Character extends GameObject{
     }
   }
   _handleEdgeCollision(collisionData){
-    this.transformationMatrix = MathUtils.mat_4_multiply(
-      MathUtils.translationMatrix(0, -this.speed, 0),
-      this.transformationMatrix
-    );
+
+
     const edgeAlign =
       MathUtils.axisToVec(
         MathUtils.multiplyVec4ByMatrix4(
@@ -69,6 +79,17 @@ export default class Character extends GameObject{
       edgeAlign,
       this.transformationMatrix
     );
+    const paddingRotation =  collisionData.toggleLeft? - EDGE_COLLISION_PADDING_ROTATION :
+      EDGE_COLLISION_PADDING_ROTATION;
+    this.transformationMatrix = MathUtils.mat_4_multiply(
+      MathUtils.zRotationMatrix(paddingRotation),
+      this.transformationMatrix
+    );
+    this.transformationMatrix = MathUtils.mat_4_multiply(
+      MathUtils.translationMatrix(0, this.speed, 0),
+      this.transformationMatrix
+    );
+    this.speed *= EDGE_COLLISION_DAMP_FACTOR;
   };
   _moveForward(){
     let worldPos = MathUtils.mat4TranslationComponent(

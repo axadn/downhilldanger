@@ -1,5 +1,5 @@
-const SEGMENT_WIDTH = 27;
-const SEGMENT_LENGTH = 10;
+const SEGMENT_WIDTH = 50;
+const SEGMENT_LENGTH = 30;
 const EDGE_LOOP_RESOLUTION = 5;
 const SLOPE_BUFFER_AMOUNT = 50;
 const BACK_BUFFER_ANOUNT = 10;
@@ -111,7 +111,7 @@ export default class Slope extends GameObject{
     if(MathUtils.vectorDot(posOffset, edgeNormal) < 0){
       let edgeVector =  toggleLeft? vec0: vec1;
       return{normal: edgeNormal, vector: edgeVector, pos0: currentSegPoint,
-        pos1: nextSegPoint};
+        pos1: nextSegPoint, toggleLeft};
     }
     return false;
   }
