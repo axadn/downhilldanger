@@ -382,6 +382,17 @@ t2
 
 t0
 */
+const vectorMag = (vector)=>{
+  return Math.sqrt(vectorSquareMag(vector));
+};
+/* harmony export (immutable) */ __webpack_exports__["vectorMag"] = vectorMag;
+
+
+const vectorNormalize = (vector)=>{
+  return scaleVector(vector, 1/vectorMag(vector));
+};
+/* harmony export (immutable) */ __webpack_exports__["vectorNormalize"] = vectorNormalize;
+
 const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
   const normal = vectorCross(subtractVectors(t1, t2),
   subtractVectors(t1, t0));
@@ -390,6 +401,42 @@ const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
   return addVectors(origin, scaleVector(direction, magnitude));
 };
 /* harmony export (immutable) */ __webpack_exports__["vectorTriangleIntersection"] = vectorTriangleIntersection;
+
+
+//https://stackoverflow.com/questions/193918/what-is-the-easiest-way-to-align-the-z-axis-with-a-vector
+const axisToVec = (axis,vec)=>{
+  const vec1 = vectorNormalize(vec);
+  const dot =vectorDot(axis,vec1)
+  if(Math.abs(dot) > 1){
+    return identityMatrix4;
+  }
+  const angle = Math.acos(dot);
+  if(Math.abs(angle) < 0.001){
+    return identityMatrix4;
+  }
+  const rotAxis = vectorNormalize(vectorCross(vec1, axis));
+  return axisAngleToMatrix(rotAxis, angle);
+};
+/* harmony export (immutable) */ __webpack_exports__["axisToVec"] = axisToVec;
+
+
+const axisAngleToMatrix = (axis, angle) =>{
+  const x = axis[0];
+  const y = axis[1];
+  const z = axis[2];
+  const c = Math.cos(angle);
+  const s = Math.sin(angle);
+  const t = 1 - c;
+  return(
+  [
+    t*x*x+c, t*x*y-z*s, t*x*z+y*s,0,
+    t*x*y+z*s, t*y*y+c, t*y*z-x*s, 0,
+    t*x*z-y*s, t*y*z+x*s, t*z*z+c, 0 ,
+    0,         0,         0,       1
+  ]);
+
+};
+/* harmony export (immutable) */ __webpack_exports__["axisAngleToMatrix"] = axisAngleToMatrix;
 
 
 
@@ -522,6 +569,7 @@ function main(){
 //    () => rasterizer.draw(boxMan));
 
   window.rasterizer = rasterizer;
+  rasterizer.cameraTarget = boxMan;
   slope.generateSegment();
 
   //slope.mesh.buffers = rasterizer.sendMeshToGPU(slope.mesh);
@@ -578,6 +626,8 @@ const handleKeyDown = rasterizer => e => {
 /* unused harmony export createProgram */
 /* unused harmony export compileShader */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__math_utils__ = __webpack_require__(0);
+const DEFAULT_CAMERA_DIST = 1;
+
 
 
 class ObjectsRasterizer{
@@ -589,7 +639,7 @@ class ObjectsRasterizer{
       return;
     }
 
-
+    this.cameraDist = DEFAULT_CAMERA_DIST;
     this.viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["identityMatrix4"];
     this.perspectiveMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["simple_perspective_matrix"],
       __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleMatrix"](scale, scale, scale));
@@ -808,14 +858,31 @@ class ObjectsRasterizer{
     const viewMatrixUniformLocation = this.gl.getUniformLocation(program, "view_matrix");
     this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
 
-    this.gl.drawElements(this.gl.TRIANGLES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
+    this.gl.drawElements(this.gl.LINES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
   }
 
   calculateViewMatrix(){
-    let cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["swapYZMatrix"];
-    cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](cameraMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["zRotationMatrix"](this.rotation[2]));
-    cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](cameraMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["xRotationMatrix"](this.rotation[0]));
-    cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](cameraMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["translationMatrix"](this.position[0],this.position[1], this.position[2]));
+    let cameraMatrix =  __WEBPACK_IMPORTED_MODULE_0__math_utils__["swapYZMatrix"];
+    if(this.cameraTarget){
+      cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](
+        cameraMatrix, this.cameraTarget.transformationMatrix);
+        cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](
+        __WEBPACK_IMPORTED_MODULE_0__math_utils__["xRotationMatrix"](0.5, 0, 0),
+          cameraMatrix
+        );
+      cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["translationMatrix"](0, 0, -8),
+        cameraMatrix
+      );
+
+    }
+    else{
+      cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["swapYZMatrix"];
+    }
+
+    //cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.zRotationMatrix(this.rotation[2]));
+  //  cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.xRotationMatrix(this.rotation[0]));
+  //  cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.translationMatrix(this.position[0],this.position[1], this.position[2]));
     //cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.xRotationMatrix(this.rotation[0]));
     //cameraMatrix = MathUtils.mat_4_multiply()
     //viewMatrix = MathUtils.inverse_mat4_rot_pos(cameraMatrix);
@@ -1118,8 +1185,18 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
         );
       }
     }
-
+    const planeAlign = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisToVec"](
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["multiplyVec4ByMatrix4"](
+        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4RotationComponent"](this.transformationMatrix),
+        [0,0,1,1]
+      ),
+      this.surfacePlaneNormal
+    );
     this.transformationMatrix = transformationMatrixAfterMove;
+    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat_4_multiply"](
+      planeAlign,
+      this.transformationMatrix
+    );
   }
 
   _getSurfaceData(){
@@ -1201,7 +1278,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
   }
 
   generateNewSegmentRotation(){
-    this.segmentRotation[0] -= 0.05;
+    this.segmentRotation[0] -= 0.01;
     //this.segmentRotation[1] += 0.3;
     //this.segmentRotation[2] += 0.3;
   }

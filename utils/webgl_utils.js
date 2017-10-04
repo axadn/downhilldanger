@@ -1,3 +1,5 @@
+const DEFAULT_CAMERA_DIST = 1;
+
 import * as MathUtils from "./math_utils";
 
 export class ObjectsRasterizer{
@@ -9,7 +11,7 @@ export class ObjectsRasterizer{
       return;
     }
 
-
+    this.cameraDist = DEFAULT_CAMERA_DIST;
     this.viewMatrix = MathUtils.identityMatrix4;
     this.perspectiveMatrix = MathUtils.mat_4_multiply(MathUtils.simple_perspective_matrix,
       MathUtils.scaleMatrix(scale, scale, scale));
@@ -228,14 +230,31 @@ export class ObjectsRasterizer{
     const viewMatrixUniformLocation = this.gl.getUniformLocation(program, "view_matrix");
     this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
 
-    this.gl.drawElements(this.gl.TRIANGLES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
+    this.gl.drawElements(this.gl.LINES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
   }
 
   calculateViewMatrix(){
-    let cameraMatrix = MathUtils.swapYZMatrix;
-    cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.zRotationMatrix(this.rotation[2]));
-    cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.xRotationMatrix(this.rotation[0]));
-    cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.translationMatrix(this.position[0],this.position[1], this.position[2]));
+    let cameraMatrix =  MathUtils.swapYZMatrix;
+    if(this.cameraTarget){
+      cameraMatrix = MathUtils.mat_4_multiply(
+        cameraMatrix, this.cameraTarget.transformationMatrix);
+        cameraMatrix = MathUtils.mat_4_multiply(
+        MathUtils.xRotationMatrix(0.5, 0, 0),
+          cameraMatrix
+        );
+      cameraMatrix = MathUtils.mat_4_multiply(
+      MathUtils.translationMatrix(0, 0, -8),
+        cameraMatrix
+      );
+
+    }
+    else{
+      cameraMatrix = MathUtils.swapYZMatrix;
+    }
+
+    //cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.zRotationMatrix(this.rotation[2]));
+  //  cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.xRotationMatrix(this.rotation[0]));
+  //  cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.translationMatrix(this.position[0],this.position[1], this.position[2]));
     //cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.xRotationMatrix(this.rotation[0]));
     //cameraMatrix = MathUtils.mat_4_multiply()
     //viewMatrix = MathUtils.inverse_mat4_rot_pos(cameraMatrix);

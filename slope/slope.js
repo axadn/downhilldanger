@@ -38,7 +38,7 @@ export default class Slope extends GameObject{
   }
 
   generateNewSegmentRotation(){
-    this.segmentRotation[0] -= 0.05;
+    this.segmentRotation[0] -= 0.01;
     //this.segmentRotation[1] += 0.3;
     //this.segmentRotation[2] += 0.3;
   }

@@ -261,10 +261,49 @@ t2
 
 t0
 */
+export const vectorMag = (vector)=>{
+  return Math.sqrt(vectorSquareMag(vector));
+};
+
+export const vectorNormalize = (vector)=>{
+  return scaleVector(vector, 1/vectorMag(vector));
+};
 export const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
   const normal = vectorCross(subtractVectors(t1, t2),
   subtractVectors(t1, t0));
   const diffVector = subtractVectors(origin, t0);
   const magnitude = -1 * vectorDot(diffVector, normal) / vectorDot(direction, normal);
   return addVectors(origin, scaleVector(direction, magnitude));
+};
+
+//https://stackoverflow.com/questions/193918/what-is-the-easiest-way-to-align-the-z-axis-with-a-vector
+export const axisToVec = (axis,vec)=>{
+  const vec1 = vectorNormalize(vec);
+  const dot =vectorDot(axis,vec1)
+  if(Math.abs(dot) > 1){
+    return identityMatrix4;
+  }
+  const angle = Math.acos(dot);
+  if(Math.abs(angle) < 0.001){
+    return identityMatrix4;
+  }
+  const rotAxis = vectorNormalize(vectorCross(vec1, axis));
+  return axisAngleToMatrix(rotAxis, angle);
+};
+
+export const axisAngleToMatrix = (axis, angle) =>{
+  const x = axis[0];
+  const y = axis[1];
+  const z = axis[2];
+  const c = Math.cos(angle);
+  const s = Math.sin(angle);
+  const t = 1 - c;
+  return(
+  [
+    t*x*x+c, t*x*y-z*s, t*x*z+y*s,0,
+    t*x*y+z*s, t*y*y+c, t*y*z-x*s, 0,
+    t*x*z-y*s, t*y*z+x*s, t*z*z+c, 0 ,
+    0,         0,         0,       1
+  ]);
+
 };

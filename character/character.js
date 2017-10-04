@@ -56,8 +56,18 @@ export default class Character extends GameObject{
         );
       }
     }
-
+    const planeAlign = MathUtils.axisToVec(
+      MathUtils.multiplyVec4ByMatrix4(
+        MathUtils.mat4RotationComponent(this.transformationMatrix),
+        [0,0,1,1]
+      ),
+      this.surfacePlaneNormal
+    );
     this.transformationMatrix = transformationMatrixAfterMove;
+    this.transformationMatrix = MathUtils.mat_4_multiply(
+      planeAlign,
+      this.transformationMatrix
+    );
   }
 
   _getSurfaceData(){

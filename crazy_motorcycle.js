@@ -23,6 +23,7 @@ function main(){
 //    () => rasterizer.draw(boxMan));
 
   window.rasterizer = rasterizer;
+  rasterizer.cameraTarget = boxMan;
   slope.generateSegment();
 
   //slope.mesh.buffers = rasterizer.sendMeshToGPU(slope.mesh);
