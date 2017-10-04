@@ -1,5 +1,5 @@
-const DEFAULT_ANIMATION_FRAMERATE = 60;
-const UPDATE_INTERVAL = 33;
+export const DEFAULT_ANIMATION_FRAMERATE = 60;
+export const UPDATE_INTERVAL = 33;
 import * as MathUtils from "../utils/math_utils";
 export default class GameObject {
   constructor(mesh, transformationMatrix = MathUtils.identityMatrix4){
@@ -7,7 +7,7 @@ export default class GameObject {
     this.transformationMatrix = transformationMatrix;
     setInterval(this.update.bind(this), UPDATE_INTERVAL);
   }
-  update(){
+  update(timestamp){
 
   }
   playAnimation(name, loop = true){

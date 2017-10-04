@@ -1,5 +1,6 @@
 import * as MathUtils from "./utils/math_utils";
 import * as WebGLUtils from "./utils/webgl_utils";
+import * as Input from "./input.js";
 import monkeyData from "./untitled.js";
 import boxManMesh from "./boxMan.js";
 import GameObject from "./game_object/game_object";
@@ -8,7 +9,7 @@ import Slope from "./slope/slope";
 import Mesh from "./game_object/mesh";
 document.addEventListener("DOMContentLoaded", main);
 function main(){
-  const slope = new Slope(MathUtils.translationMatrix(-3.2,-3,-4));
+  const slope = new Slope(MathUtils.translationMatrix(0,-3,-4));
   window.slope = slope;
   const rasterizer = new WebGLUtils.ObjectsRasterizer();
   boxManMesh.skinned = true;
@@ -33,10 +34,10 @@ function main(){
   rasterizer.rotation[0] -= 0.4;
   rasterizer.position[2] += 0.7;
   rasterizer.objects.slope = slope;
-  window.setInterval( () => {
-    slope.generateSegment();
-  }, 80);
   rasterizer.position = [0,-6,0];
+
+  window.addEventListener("keydown", Input.keyDown(boxMan));
+  window.addEventListener("keyup", Input.keyUp(boxMan));
 
 }
 

@@ -302,7 +302,7 @@ export const axisAngleToMatrix = (axis, angle) =>{
   [
     t*x*x+c, t*x*y-z*s, t*x*z+y*s,0,
     t*x*y+z*s, t*y*y+c, t*y*z-x*s, 0,
-    t*x*z-y*s, t*y*z+x*s, t*z*z+c, 0 ,
+    t*x*z-y*s, t*y*z+x*s, t*z*z+c, 0,
     0,         0,         0,       1
   ]);
 

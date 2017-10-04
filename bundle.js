@@ -431,7 +431,7 @@ const axisAngleToMatrix = (axis, angle) =>{
   [
     t*x*x+c, t*x*y-z*s, t*x*z+y*s,0,
     t*x*y+z*s, t*y*y+c, t*y*z-x*s, 0,
-    t*x*z-y*s, t*y*z+x*s, t*z*z+c, 0 ,
+    t*x*z-y*s, t*y*z+x*s, t*z*z+c, 0,
     0,         0,         0,       1
   ]);
 
@@ -447,7 +447,11 @@ const axisAngleToMatrix = (axis, angle) =>{
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__ = __webpack_require__(0);
 const DEFAULT_ANIMATION_FRAMERATE = 60;
+/* unused harmony export DEFAULT_ANIMATION_FRAMERATE */
+
 const UPDATE_INTERVAL = 33;
+/* harmony export (immutable) */ __webpack_exports__["a"] = UPDATE_INTERVAL;
+
 
 class GameObject {
   constructor(mesh, transformationMatrix = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["identityMatrix4"]){
@@ -455,7 +459,7 @@ class GameObject {
     this.transformationMatrix = transformationMatrix;
     setInterval(this.update.bind(this), UPDATE_INTERVAL);
   }
-  update(){
+  update(timestamp){
 
   }
   playAnimation(name, loop = true){
@@ -482,7 +486,7 @@ class GameObject {
       timestamp - this.lastTimeStamp > 1000 / this.currentAnimationFramerate);
   }
 }
-/* harmony export (immutable) */ __webpack_exports__["a"] = GameObject;
+/* harmony export (immutable) */ __webpack_exports__["b"] = GameObject;
 
 
 
@@ -538,12 +542,14 @@ class Mesh {
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_webgl_utils__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__untitled_js__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__boxMan_js__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__game_object_game_object__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__character_character__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__slope_slope__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__game_object_mesh__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__input_js__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__untitled_js__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__boxMan_js__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__game_object_game_object__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__character_character__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__slope_slope__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__game_object_mesh__ = __webpack_require__(2);
+
 
 
 
@@ -554,12 +560,12 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 document.addEventListener("DOMContentLoaded", main);
 function main(){
-  const slope = new __WEBPACK_IMPORTED_MODULE_6__slope_slope__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["translationMatrix"](-3.2,-3,-4));
+  const slope = new __WEBPACK_IMPORTED_MODULE_7__slope_slope__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["translationMatrix"](0,-3,-4));
   window.slope = slope;
   const rasterizer = new __WEBPACK_IMPORTED_MODULE_1__utils_webgl_utils__["a" /* ObjectsRasterizer */]();
-  __WEBPACK_IMPORTED_MODULE_3__boxMan_js__["a" /* default */].skinned = true;
-  __WEBPACK_IMPORTED_MODULE_3__boxMan_js__["a" /* default */].textured = true;
-  const boxMan = new __WEBPACK_IMPORTED_MODULE_5__character_character__["a" /* default */](new __WEBPACK_IMPORTED_MODULE_7__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_3__boxMan_js__["a" /* default */]), undefined, slope);
+  __WEBPACK_IMPORTED_MODULE_4__boxMan_js__["a" /* default */].skinned = true;
+  __WEBPACK_IMPORTED_MODULE_4__boxMan_js__["a" /* default */].textured = true;
+  const boxMan = new __WEBPACK_IMPORTED_MODULE_6__character_character__["a" /* default */](new __WEBPACK_IMPORTED_MODULE_8__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_4__boxMan_js__["a" /* default */]), undefined, slope);
   boxMan.playAnimation("rest");
   rasterizer.objects.boxMan = boxMan;
   window.boxMan = boxMan;
@@ -579,10 +585,10 @@ function main(){
   rasterizer.rotation[0] -= 0.4;
   rasterizer.position[2] += 0.7;
   rasterizer.objects.slope = slope;
-  window.setInterval( () => {
-    slope.generateSegment();
-  }, 80);
   rasterizer.position = [0,-6,0];
+
+  window.addEventListener("keydown", __WEBPACK_IMPORTED_MODULE_2__input_js__["a" /* keyDown */](boxMan));
+  window.addEventListener("keyup", __WEBPACK_IMPORTED_MODULE_2__input_js__["b" /* keyUp */](boxMan));
 
 }
 
@@ -1131,17 +1137,19 @@ const boxMan ={
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 16;
 
 
-class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["a" /* default */]{
+class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["b" /* default */]{
   constructor(mesh, boundingBox, slope, transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["identityMatrix4"]){
     super(mesh, transformationMatrix);
     this.mesh = mesh;
     this.boundingBox = boundingBox;
-    this.speed = 2;
+    this.speed = 0.2;
     this.fallSpeed = 0;
     this.slope = slope;
     this.currentSegmentNumber = 0;
+    this.input = {left: false, right: false, back: false}
   }
   update(){
+    this._handleConrols();
     this._getSurfaceData();
     const distanceFromSurface = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorSquareMag"](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["subtractVectors"]
         (__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4TranslationComponent"](
@@ -1154,22 +1162,71 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
     this._moveForward();
   }
+  _steer(direction){
+    const zRot = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["zRotationMatrix"](direction * 1/__WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["a" /* UPDATE_INTERVAL */] );
+    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat_4_multiply"](
+      zRot,
+      this.transformationMatrix,
 
+    );
+  }
+  _convertLocalRotMatToWorldTransform(localRot){
+    return __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat_4_multipl"]
+    y(
+      localRot,
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4RotationComponent"](this.transformationMatrix)
+    );
+  }
+  _handleConrols(){
+    if(this.input.left ? !this.input.right : this.input.right){
+      if(this.input.right){
+        this._steer(-1);
+      }
+      else{
+        this._steer(1);
+      }
+    }
+  }
+  _handleEdgeCollision(collisionData){
+    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat_4_multiply"](
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["translationMatrix"](0, -this.speed, 0),
+      this.transformationMatrix
+    );
+    const edgeAlign =
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisToVec"](
+        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["multiplyVec4ByMatrix4"](
+          __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4RotationComponent"](this.transformationMatrix),
+          [0,1,0,1]
+      ),
+      collisionData.vector
+    );
+    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat_4_multiply"](
+      edgeAlign,
+      this.transformationMatrix
+    );
+  };
   _moveForward(){
     let worldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4TranslationComponent"](
       this.transformationMatrix
     );
     let nextWorldPos = worldPos;
+    const edgeCollisionData = this.slope.positionIsBeyondEdge(nextWorldPos, this.currentSegmentNumber);
+    if(edgeCollisionData){
+      this._handleEdgeCollision(edgeCollisionData);
+      return;
+    }
     let worldMoveVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlane"](
       this._calculateWorldMoveVector(), this.surfacePlaneNormal);
     let transformationMatrixAfterMove = this._transformationMatrixAfterMove(worldMoveVector);
     nextWorldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4TranslationComponent"](
       transformationMatrixAfterMove);
-
-    if(this.currentSegmentNumber < slope.segmentMatrices.length -1 &&
+    if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
       slope.positionIsPastSegmentStart(nextWorldPos,
       this.currentSegmentNumber + 1)){
       ++this.currentSegmentNumber;
+      if(this.slope.notifyOfCharacterSegmentNumber(this.currentSegmentNumber)){
+        --this.currentSegmentNumber;
+      }
       let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
          this.currentSegmentNumber) || this.floorTriangle;
 
@@ -1217,8 +1274,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
   }
   _calculateWorldMoveVector(){
     return __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["multiplyVec4ByMatrix4"](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["inverse_mat4_rot_pos"](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4RotationComponent"](
-        this.transformationMatrix)),
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4RotationComponent"](
+        this.transformationMatrix),
        [0,this.speed,0,1]).slice(0,3);
   }
   _transformationMatrixAfterMove(worldMoveVector){
@@ -1238,13 +1295,15 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game_object_mesh__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__ = __webpack_require__(1);
-const SLOPE_WIDTH = 15;
+const SEGMENT_WIDTH = 27;
 const SEGMENT_LENGTH = 10;
 const EDGE_LOOP_RESOLUTION = 5;
+const SLOPE_BUFFER_AMOUNT = 50;
+const BACK_BUFFER_ANOUNT = 10;
 
 
 
-class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */]{
+class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["b" /* default */]{
 
   constructor(transformationMatrix = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["identityMatrix4"]){
     super(undefined);
@@ -1252,7 +1311,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       faces: [],
       vertices: []
     });
-
+    this.bufferedSegments = 0;
     const firstLoop = this.createEdgeLoop();
     let unpackedVertices;
     for(let i = 0; i< firstLoop.length; i+=3){
@@ -1267,19 +1326,30 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     this.segmentRotation = [0,0,0];
     this.segmentPosition = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyVec4ByMatrix4"](transformationMatrix,
       [0,SEGMENT_LENGTH,0,1]).slice(0,3);
+    for(let i = 0; i < SLOPE_BUFFER_AMOUNT + BACK_BUFFER_ANOUNT ; ++i ){
+      this.generateSegment();
+    }
   }
 
   createEdgeLoop(){
     const vertices = [];
     for(let i = 0; i <= EDGE_LOOP_RESOLUTION; ++i){
-      vertices.push(SLOPE_WIDTH/ EDGE_LOOP_RESOLUTION * i, 0, 0);
+      vertices.push(SEGMENT_WIDTH/ EDGE_LOOP_RESOLUTION * i - SEGMENT_WIDTH/2, 0, 0);
     }
     return vertices;
   }
-
+  notifyOfCharacterSegmentNumber(idx){
+    if(this.bufferedSegments < BACK_BUFFER_ANOUNT){
+      ++this.bufferedSegments;
+      return false;
+    }
+    this.generateSegment();
+    this.deleteSegment();
+    return true;
+  }
   generateNewSegmentRotation(){
-    this.segmentRotation[0] -= 0.01;
-    //this.segmentRotation[1] += 0.3;
+    //this.segmentRotation[0] -= 0.01;
+    this.segmentRotation[2] += 0.1;
     //this.segmentRotation[2] += 0.3;
   }
 
@@ -1313,7 +1383,41 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       }
     }
   }
+  _positionIsBeyondEdge(pos, segmentNumber, toggleLeft){
+    const xOffset = toggleLeft? -SEGMENT_WIDTH/2 : SEGMENT_WIDTH/2;
+    const currentSegPoint = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyVec4ByMatrix4"](
+      this.segmentMatrices[segmentNumber],
+      [xOffset, 0, 0, 1]
 
+    );
+    const nextSegPoint = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyVec4ByMatrix4"](
+      this.segmentMatrices[segmentNumber + 1],
+      [xOffset, 0, 0, 1]
+    );
+    let vec0, vec1;
+    if(toggleLeft){
+      vec0 = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["subtractVectors"](nextSegPoint, currentSegPoint);
+      vec1 = [0,0,1];
+    }
+    else{
+      vec1 = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["subtractVectors"](nextSegPoint, currentSegPoint);
+      vec0 = [0,0,1];
+    }
+    const edgeNormal = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["vectorCross"](vec0, vec1);
+    const posOffset = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["subtractVectors"](pos, currentSegPoint);
+    if(__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["vectorDot"](posOffset, edgeNormal) < 0){
+      let edgeVector =  toggleLeft? vec0: vec1;
+      return{normal: edgeNormal, vector: edgeVector, pos0: currentSegPoint,
+        pos1: nextSegPoint};
+    }
+    return false;
+  }
+  positionIsBeyondEdge(pos, segmentNumber){
+    return (
+      this._positionIsBeyondEdge(pos, segmentNumber, true) ||
+      this._positionIsBeyondEdge(pos, segmentNumber, false)
+    )
+  }
   generateSegment(){
     const pos = this.segmentPosition;
     this.generateNewSegmentRotation();
@@ -1387,7 +1491,6 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     }
     this.mesh.setDirty();
   }
-
   deleteSegment(){
     //values per vertex is 3
     for(let i = 0 ; i < (EDGE_LOOP_RESOLUTION + 1) *3; ++i ){
@@ -1395,13 +1498,51 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     }
     //values per face is 3, there are two faces per segment
     for(let i = 0; i < EDGE_LOOP_RESOLUTION * 6; ++i ){
-      this.mesh.faces.shift();
+      this.mesh.faces.pop();
     }
     this.segmentMatrices.shift();
     this.mesh.setDirty();
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Slope;
+
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+const keyDown = character => e=>{
+  switch(e.key){
+    case "a":
+      character.input.left = true;
+      break;
+    case "d":
+      character.input.right = true;
+      break;
+    case "s":
+      character.input.back = true;
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = keyDown;
+
+
+const keyUp = character => e => {
+  switch(e.key){
+    case "a":
+      character.input.left = false;
+      break;
+    case "d":
+      character.input.right = false;
+      break;
+    case "s":
+      character.input.back = false;
+      break;
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = keyUp;
 
 
 

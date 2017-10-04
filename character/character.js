@@ -1,18 +1,20 @@
 import GameObject from "../game_object/game_object";
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 16;
 import * as MathUtils from "../utils/math_utils";
-
+import {UPDATE_INTERVAL} from "../game_object/game_object";
 export default class Character extends GameObject{
   constructor(mesh, boundingBox, slope, transformationMatrix = MathUtils.identityMatrix4){
     super(mesh, transformationMatrix);
     this.mesh = mesh;
     this.boundingBox = boundingBox;
-    this.speed = 2;
+    this.speed = 0.2;
     this.fallSpeed = 0;
     this.slope = slope;
     this.currentSegmentNumber = 0;
+    this.input = {left: false, right: false, back: false}
   }
   update(){
+    this._handleConrols();
     this._getSurfaceData();
     const distanceFromSurface = MathUtils.vectorSquareMag(MathUtils.subtractVectors
         (MathUtils.mat4TranslationComponent(
@@ -25,22 +27,71 @@ export default class Character extends GameObject{
     }
     this._moveForward();
   }
+  _steer(direction){
+    const zRot = MathUtils.zRotationMatrix(direction * 1/UPDATE_INTERVAL );
+    this.transformationMatrix = MathUtils.mat_4_multiply(
+      zRot,
+      this.transformationMatrix,
 
+    );
+  }
+  _convertLocalRotMatToWorldTransform(localRot){
+    return MathUtils.mat_4_multipl
+    y(
+      localRot,
+      MathUtils.mat4RotationComponent(this.transformationMatrix)
+    );
+  }
+  _handleConrols(){
+    if(this.input.left ? !this.input.right : this.input.right){
+      if(this.input.right){
+        this._steer(-1);
+      }
+      else{
+        this._steer(1);
+      }
+    }
+  }
+  _handleEdgeCollision(collisionData){
+    this.transformationMatrix = MathUtils.mat_4_multiply(
+      MathUtils.translationMatrix(0, -this.speed, 0),
+      this.transformationMatrix
+    );
+    const edgeAlign =
+      MathUtils.axisToVec(
+        MathUtils.multiplyVec4ByMatrix4(
+          MathUtils.mat4RotationComponent(this.transformationMatrix),
+          [0,1,0,1]
+      ),
+      collisionData.vector
+    );
+    this.transformationMatrix = MathUtils.mat_4_multiply(
+      edgeAlign,
+      this.transformationMatrix
+    );
+  };
   _moveForward(){
     let worldPos = MathUtils.mat4TranslationComponent(
       this.transformationMatrix
     );
     let nextWorldPos = worldPos;
+    const edgeCollisionData = this.slope.positionIsBeyondEdge(nextWorldPos, this.currentSegmentNumber);
+    if(edgeCollisionData){
+      this._handleEdgeCollision(edgeCollisionData);
+      return;
+    }
     let worldMoveVector = MathUtils.projectVectorOntoPlane(
       this._calculateWorldMoveVector(), this.surfacePlaneNormal);
     let transformationMatrixAfterMove = this._transformationMatrixAfterMove(worldMoveVector);
     nextWorldPos = MathUtils.mat4TranslationComponent(
       transformationMatrixAfterMove);
-
-    if(this.currentSegmentNumber < slope.segmentMatrices.length -1 &&
+    if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
       slope.positionIsPastSegmentStart(nextWorldPos,
       this.currentSegmentNumber + 1)){
       ++this.currentSegmentNumber;
+      if(this.slope.notifyOfCharacterSegmentNumber(this.currentSegmentNumber)){
+        --this.currentSegmentNumber;
+      }
       let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
          this.currentSegmentNumber) || this.floorTriangle;
 
@@ -88,8 +139,8 @@ export default class Character extends GameObject{
   }
   _calculateWorldMoveVector(){
     return MathUtils.multiplyVec4ByMatrix4(
-      MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
-        this.transformationMatrix)),
+      MathUtils.mat4RotationComponent(
+        this.transformationMatrix),
        [0,this.speed,0,1]).slice(0,3);
   }
   _transformationMatrixAfterMove(worldMoveVector){
