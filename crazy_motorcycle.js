@@ -3,21 +3,40 @@ import * as WebGLUtils from "./utils/webgl_utils";
 import monkeyData from "./untitled.js";
 import boxManMesh from "./boxMan.js";
 import GameObject from "./game_object/game_object";
+import Character from "./character/character";
+import Slope from "./slope/slope";
+import Mesh from "./game_object/mesh";
 document.addEventListener("DOMContentLoaded", main);
 function main(){
+  const slope = new Slope(MathUtils.translationMatrix(-3.2,-3,-4));
+  window.slope = slope;
   const rasterizer = new WebGLUtils.ObjectsRasterizer();
   boxManMesh.skinned = true;
   boxManMesh.textured = true;
-  boxManMesh.buffers = rasterizer.sendMeshToGPU(boxManMesh);
-  const boxMan = new GameObject(boxManMesh);
+  const boxMan = new Character(new Mesh(boxManMesh), undefined, slope);
   boxMan.playAnimation("rest");
   rasterizer.objects.boxMan = boxMan;
+  window.boxMan = boxMan;
   window.MathUtils = MathUtils;
   window.requestAnimationFrame(rasterizer.drawObjects.bind(rasterizer));
 //  window.requestAnimationFrame(
 //    () => rasterizer.draw(boxMan));
+
+  window.rasterizer = rasterizer;
+  slope.generateSegment();
+
+  //slope.mesh.buffers = rasterizer.sendMeshToGPU(slope.mesh);
   window.addEventListener('keydown', handleKeyDown(rasterizer));
-//  rasterizer.position = [0,-6,0];
+  rasterizer.position[1] -= 2;
+  rasterizer.position[0] += 0.3;
+  rasterizer.rotation[0] -= 0.4;
+  rasterizer.position[2] += 0.7;
+  rasterizer.objects.slope = slope;
+  window.setInterval( () => {
+    slope.generateSegment();
+  }, 80);
+  rasterizer.position = [0,-6,0];
+
 }
 
 

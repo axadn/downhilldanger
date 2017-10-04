@@ -133,3 +133,138 @@ export const translate_mat4 = (mat, x =0, y=0, z=0)=>{
       mat, translationMatrix(x,y,z)
     );
 }
+
+export const pointIsAbovePlane = (pos, vertex0, vertex1, vertex2)=>{
+   // the normal to the plane
+
+  const offsetVector = subtractVectors(pos, vertex1);
+  // a vector from a point on the plane to the point we are checking
+
+  return vectorDot(offsetVector, planeNormal(vertex0,
+  vertex1, vertex2)) > 0;
+}
+
+export const addVectors = (vector1, vector2)=>{
+  const newVector = [];
+  for(let i = 0; i< vector1.length; ++i){
+    newVector.push(vector1[i] + vector2[i]);
+  };
+  return newVector;
+}
+
+export const vectorCross = (vector1, vector2)=>([
+  vector1[1] * vector2[2] - vector1[2] * vector2[1],
+  vector1[2] * vector2[0] - vector1[0] * vector2[2],
+  vector1[0] * vector2[1] - vector1[1] * vector2[0]
+]);
+
+export const subtractVectors = (vector1, vector2)=>{
+  const newVector = [];
+  for(let i = 0; i < vector1.length; ++i){
+    newVector.push(vector1[i] - vector2[i]);
+  }
+  return newVector;
+}
+
+export const vectorDot = (vector1, vector2) =>{
+  return vector1[0] * vector2[0] + vector1[1] * vector2[1] +
+  vector1[2] * vector2[2];
+}
+
+/* indices
+0  1  2  3
+4  5  6  7
+8  9  10 11
+12 13 14 15
+
+*/
+export const mat4TranslationComponent = (mat) =>{
+  return[
+    mat[12],
+    mat[13],
+    mat[14]
+  ];
+};
+export const mat4RotationComponent = (mat) =>(
+    [
+      mat[0], mat[1], mat[2], 0,
+      mat[4], mat[5], mat[6], 0,
+      mat[8], mat[9], mat[10],0,
+      0,      0,     0,       1
+    ]
+);
+
+export const vectorSquareMag = vector => {
+  let sum = 0;
+  for(let i = 0; i < vector.length; ++i){
+    sum += vector[i] * vector[i];
+  }
+  return sum;
+};
+
+export const projectVector = (vector, onto)=>{
+  const dotProduct = vectorDot(vector, onto);
+  return scaleVector(onto, dotProduct/ vectorSquareMag(onto));
+};
+
+export const projectVectorOntoPlane = (vector, planeNormal)=>{
+  return subtractVectors(vector, projectVector(vector, planeNormal));
+};
+
+export const planeNormal = (t0, t1, t2) =>{
+  let vectorA = subtractVectors(t1, t2);
+  let vectorB = subtractVectors(t1, t0);
+  return vectorCross(vectorA, vectorB);
+};
+
+export const triangleContainsPoint =  (p, p0, p1, p2) =>{
+  const n = planeNormal(p0,p1,p2);
+  return(
+  vectorDot(
+    vectorCross(subtractVectors(p1, p0), subtractVectors(p, p0)),
+    n) >= 0 &&
+    vectorDot(
+      vectorCross(subtractVectors(p2, p1), subtractVectors(p, p1)),
+      n) >= 0 &&
+      vectorDot(
+        vectorCross(subtractVectors(p0, p2), subtractVectors(p, p2)),
+        n) >= 0);
+
+};
+
+export const scaleVector = (vec, scale)=>{
+  const newVec = [];
+  for(let i = 0; i < vec.length; ++i){
+    newVec.push(vec[i] *scale);
+  }
+  return newVec;
+};
+
+export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
+  const result = [];
+  for(let i = 0; i < 4; ++i){
+    let colResult = 0;
+    for(let j = 0; j < 4; ++j){
+      colResult += matrix[j * 4 + i] * vec[j];
+    }
+    result.push(colResult);
+  }
+  return result;
+};
+
+/**
+triangle configuration :
+t2
+
+          t1
+
+
+t0
+*/
+export const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
+  const normal = vectorCross(subtractVectors(t1, t2),
+  subtractVectors(t1, t0));
+  const diffVector = subtractVectors(origin, t0);
+  const magnitude = -1 * vectorDot(diffVector, normal) / vectorDot(direction, normal);
+  return addVectors(origin, scaleVector(direction, magnitude));
+};

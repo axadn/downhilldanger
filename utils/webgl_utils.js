@@ -1,7 +1,6 @@
 import * as MathUtils from "./math_utils";
 
 export class ObjectsRasterizer{
-
   constructor(scale= 0.5, swapYZ = true){
     const canvas = document.querySelector("#glCanvas");
     this.gl = canvas.getContext("webgl");
@@ -18,7 +17,7 @@ export class ObjectsRasterizer{
       this.perspectiveMatrix = MathUtils.mat_4_multiply(MathUtils.swapYZMatrix, this.perspectiveMatrix)
     }
     this.compileDefaultShaders();
-    this.gl.enable(this.gl.CULL_FACE);
+  //this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
     this.rotation = [0,0,0];
     this.position = [0,0,0];
@@ -132,6 +131,7 @@ export class ObjectsRasterizer{
     const facesBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, facesBuffer);
     this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.faces), this.gl.STATIC_DRAW);
+    mesh.setClean();
     return {verticesBuffer, facesBuffer};
   }
 
@@ -150,8 +150,6 @@ export class ObjectsRasterizer{
     const program = this.determineProgram(obj.mesh.skinned,
         obj.mesh.textured, obj.mesh.colored);
     this.gl.useProgram(program);
-    const viewMatrixUniformLocation = this.gl.getUniformLocation(program, "view_matrix");
-    this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, this.viewMatrix);
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, obj.mesh.buffers.verticesBuffer);
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, obj.mesh.buffers.facesBuffer);
 
@@ -162,7 +160,6 @@ export class ObjectsRasterizer{
     this.gl.vertexAttribPointer(posAttrIndex, 3, this.gl.FLOAT, false, strideLength, offset);
     this.gl.enableVertexAttribArray(posAttrIndex);
     offset += 12;
-    debugger;
     if(obj.mesh.skinned){
       const weightsAttrIndex = this.gl.getAttribLocation(program, "a_weights");
       const boneIndicesIndex = this.gl.getAttribLocation(program, "a_bone_indices");
@@ -227,6 +224,9 @@ export class ObjectsRasterizer{
       this.gl.enableVertexAttribArray(colorsAttrIndex);
       offset += 4;
     }
+    let viewMatrix = MathUtils.mat_4_multiply(obj.transformationMatrix, this.viewMatrix);
+    const viewMatrixUniformLocation = this.gl.getUniformLocation(program, "view_matrix");
+    this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
 
     this.gl.drawElements(this.gl.TRIANGLES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
   }
@@ -256,6 +256,9 @@ export class ObjectsRasterizer{
     let obj;
     for(let i = 0; i < objKeys.length; ++i){
       obj = this.objects[objKeys[i]];
+      if(obj.mesh.dirty || !obj.mesh.buffers){
+        obj.mesh.buffers = this.sendMeshToGPU(obj.mesh);
+      }
       if(obj.mesh.skinned && obj.shouldUpdate(timestamp)){
           obj.updateFrame();
       }
