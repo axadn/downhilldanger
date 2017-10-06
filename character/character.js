@@ -1,5 +1,5 @@
 import GameObject from "../game_object/game_object";
-const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 16;
+const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 0.4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
 const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
@@ -138,10 +138,10 @@ export default class Character extends GameObject{
       )
      );
 
-    //  this.transformationMatrix = MathUtils.mat_4_multiply(
-    //    planeAlign,
-    //    this.transformationMatrix
-    //  );
+      this.transformationMatrix = MathUtils.mat_4_multiply(
+        planeAlign,
+        this.transformationMatrix
+      );
 
     const posAfterSurfaceAlign = MathUtils.mat4TranslationComponent(
         this.transformationMatrix

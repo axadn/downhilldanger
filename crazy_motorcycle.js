@@ -14,13 +14,11 @@ function main(){
   window.slope = slope;
 
   //boxManMesh.skinned = true;
-  //boxMan.colored = true;
+  boxManMesh.colored = true;
   //boxManMesh.textured = true;
   const boxMan = new Character(new Mesh(boxManMesh), undefined, slope);
   //boxMan.playAnimation("rest");
   rasterizer.objects.boxMan = boxMan;
-  window.boxMan = boxMan;
-  window.MathUtils = MathUtils;
   window.requestAnimationFrame(rasterizer.drawObjects.bind(rasterizer));
 //  window.requestAnimationFrame(
 //    () => rasterizer.draw(boxMan));
