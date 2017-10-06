@@ -1,7 +1,7 @@
 import * as MathUtils from "../utils/math_utils";
 export default class Mesh {
   constructor({vertices, faces, bones, colors, uvs, boneWeights, boneIndices, animations, bindPose,
-    colored, skinned, textured}){
+    colored, skinned, textured, rasterizer, textureBuffer, img_src}){
     this.vertices = vertices;
     this.colored = colored;
     this.textured = textured;
@@ -13,6 +13,16 @@ export default class Mesh {
     this.boneWeights = boneWeights;
     this.boneIndices = boneIndices;
     this.animations = animations;
+    this.img_src = img_src;
+    if(textureBuffer){
+        this.texture = textureBuffer;
+      this.textured = true;
+
+    }
+    else if (textured && img_src){
+      this.texture = rasterizer.bufferTexture(img_src);
+    }
+
   }
   inverseBindVertices(){
   }

@@ -278,16 +278,17 @@ export const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
 
 //https://stackoverflow.com/questions/193918/what-is-the-easiest-way-to-align-the-z-axis-with-a-vector
 export const axisToVec = (axis,vec)=>{
-  const vec1 = vectorNormalize(vec);
-  const dot =vectorDot(axis,vec1)
-  if(Math.abs(dot) > 1){
+  const vec1 = vectorNormalize(vec.slice(0,3));
+  const axis1 = vectorNormalize(axis.slice(0,3));
+  const dot =vectorDot(axis1,vec1)
+  if(Math.abs(dot) <0.005 || Math.abs(dot) > 1){
     return identityMatrix4;
   }
   const angle = Math.acos(dot);
-  if(Math.abs(angle) < 0.001){
+  if(Math.abs(angle) < 0.005){
     return identityMatrix4;
   }
-  const rotAxis = vectorNormalize(vectorCross(vec1, axis));
+  const rotAxis = vectorNormalize(vectorCross(vec1, axis1));
   return axisAngleToMatrix(rotAxis, angle);
 };
 

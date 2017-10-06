@@ -30,7 +30,9 @@ export class ObjectsRasterizer{
     this.defaultProgram = this.compileByID("default-vertex-shader", "default-fragment-shader");
     this.coloredProgram = this.compileByID("colored-vertex-shader", "colored-fragment-shader");
     this.skinnedTexturedProgram = this.compileByID("skinned-textured-vertex-shader",
-     "skinned-textured-fragment-shader");
+     "textured-fragment-shader");
+     this.texturedProgram = this.compileByID("textured-vertex-shader",
+      "textured-fragment-shader");
   }
   compileByID(vertexId, fragmentId){
     const vertexShaderSource = document.getElementById(vertexId).text;
@@ -41,7 +43,7 @@ export class ObjectsRasterizer{
   }
   calculateStrideLength(skinned, textured, colored){
     let strideLength = skinned ?  20: 12;
-    if(textured) strideLength += 4;
+    if(textured) strideLength += 8;
     else if (colored) strideLength += 4;
     return strideLength;
   }
@@ -87,10 +89,10 @@ export class ObjectsRasterizer{
         }
       }
       if(mesh.textured){
-        for(let i = 0; i < 2; ++ i){
-          dataView.setUint16(offset, mesh.uvs[uvIdx++], littleEndian);
-            offset += 2;
-        }
+          dataView.setFloat32(offset,  mesh.uvs[uvIdx++], littleEndian);
+            offset += 4;
+          dataView.setFloat32(offset, -1*mesh.uvs[uvIdx++], littleEndian);
+            offset += 4;
       }
       else if(mesh.colored){
         for(let i = 0; i < 3; ++i){
@@ -141,7 +143,24 @@ export class ObjectsRasterizer{
     this.gl.deleteBuffer(verticesBuffer);
     this.gl.deleteBuffer(facesBuffer);
   }
-
+  removeBufferFromGPU(buffer){
+    this.gl.deleteBuffer(buffer);
+  };
+  bufferTexture(img_src){
+    const texture = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D,texture);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, 1, 1, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE,
+              new Uint8Array([0, 0, 255, 255]));
+    const img = new Image();
+    img.src = img_src;
+    img.crossOrigin = "";
+    img.addEventListener("load", ()=>{
+      this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+      this.gl.generateMipmap(this.gl.TEXTURE_2D);
+    });
+    return texture;
+  }
   adjustToCanvas(){
     this.gl.canvas.width = this.gl.canvas.clientWidth;
     this.gl.canvas.height = this.gl.canvas.clientHeight;
@@ -192,8 +211,9 @@ export class ObjectsRasterizer{
         let unBound = [];
         for(let i = 0; i < boneTransforms.length; ++i){
           unBound = unBound.concat(MathUtils.mat_4_multiply(
-            MathUtils.inverse_mat4_rot_pos(obj.mesh.bones[i].bindPose),
-            boneTransforms[i]));
+            boneTransforms[i],
+            MathUtils.inverse_mat4_rot_pos(obj.mesh.bones[i].bindPose)
+            ));
         }
         //for(let i = 0; i < boneTransforms.length; ++i){
         //  inverselyBound = inverselyBound.concat(
@@ -208,17 +228,12 @@ export class ObjectsRasterizer{
 
     if(obj.mesh.textured){
       const uvsAttrIndex = this.gl.getAttribLocation(program, "a_uvs");
-      this.gl.vertexAttribPointer(uvsAttrIndex, 2, this.gl.UNSIGNED_SHORT, true, strideLength, offset);
+      this.gl.vertexAttribPointer(uvsAttrIndex, 2, this.gl.FLOAT, false, strideLength, offset);
       this.gl.enableVertexAttribArray(uvsAttrIndex);
-      offset += 2;
-
-      var texture = this.gl.createTexture();
-      this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+      offset += 8;
+      this.gl.bindTexture(this.gl.TEXTURE_2D, obj.mesh.texture);
 
       // Fill the texture with a 1x1 blue pixel. TODO: Use actual image textures
-
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, 1, 1, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE,
-                new Uint8Array([0, 0, 255, 255]));
     }
     else if(obj.mesh.colored){
       const colorsAttrIndex = this.gl.getAttribLocation(program, "vColor");
@@ -230,26 +245,66 @@ export class ObjectsRasterizer{
     const viewMatrixUniformLocation = this.gl.getUniformLocation(program, "view_matrix");
     this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
 
-    this.gl.drawElements(this.gl.LINES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
+    this.gl.drawElements(this.gl.TRIANGLES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
   }
 
   calculateViewMatrix(){
-    let cameraMatrix =  MathUtils.swapYZMatrix;
+    //let cameraMatrix =  MathUtils.swapYZMatrix;
+    let cameraMatrix;
     if(this.cameraTarget){
-      cameraMatrix = MathUtils.mat_4_multiply(
-        cameraMatrix, this.cameraTarget.transformationMatrix);
-        cameraMatrix = MathUtils.mat_4_multiply(
-        MathUtils.xRotationMatrix(0.5, 0, 0),
-          cameraMatrix
-        );
-      cameraMatrix = MathUtils.mat_4_multiply(
-      MathUtils.translationMatrix(0, 0, -8),
-        cameraMatrix
-      );
+
+        cameraMatrix = this.cameraTarget.transformationMatrix;
+
+
+
+
+
+         cameraMatrix = MathUtils.mat_4_multiply(
+         MathUtils.translationMatrix(0, -18, 8),
+            cameraMatrix);
+
+
+            const planeAlign = MathUtils.axisToVec(
+                [0,0,1,1],
+             MathUtils.multiplyVec4ByMatrix4(
+               MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
+                 cameraMatrix
+               )),
+               [0,0,1,1]
+             )
+            );
+
+          cameraMatrix = MathUtils.mat_4_multiply(
+            planeAlign,
+            cameraMatrix
+          );
+
+
+      //
+      //
+      //
+      //
+      // //
+      //   // cameraMatrix = MathUtils.mat_4_multiply( //align z to up
+      //   //   MathUtils.axisToVec(
+      //   //     MathUtils.multiplyVec4ByMatrix4(
+      //   //       MathUtils.mat4RotationComponent(cameraMatrix),
+      //   //       [0,0,1,1]
+      //   //     ).slice(0,3),
+      //   //     [0,0,1]
+      //   //   ),
+      //   //   cameraMatrix
+      //   // );
+      //
+      //   cameraMatrix = MathUtils.mat_4_multiply(
+      //   MathUtils.xRotationMatrix(-0.6),
+      //      cameraMatrix
+      //   );
+
 
     }
     else{
-      cameraMatrix = MathUtils.swapYZMatrix;
+    //  cameraMatrix = MathUtils.swapYZMatrix;
     }
 
     //cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.zRotationMatrix(this.rotation[2]));
@@ -260,6 +315,7 @@ export class ObjectsRasterizer{
     //viewMatrix = MathUtils.inverse_mat4_rot_pos(cameraMatrix);
     //cameraMatrix = MathUtils.mat_4_multiply(MathUtils.simple_perspective_matrix, viewMatrix);
     let viewMatrix = MathUtils.inverse_mat4_rot_pos(cameraMatrix);
+    viewMatrix = MathUtils.mat_4_multiply(viewMatrix, MathUtils.swapYZMatrix)
     viewMatrix = MathUtils.mat_4_multiply(viewMatrix, MathUtils.simple_perspective_matrix);
     return viewMatrix;
   }
@@ -267,7 +323,7 @@ export class ObjectsRasterizer{
   drawObjects(timestamp){
 
     this.adjustToCanvas();
-    this.gl.clearColor(0, 0, 0, 1);
+    this.gl.clearColor(0.8, 0.8, 0.81, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     this.viewMatrix = this.calculateViewMatrix();
 

@@ -9,13 +9,15 @@ import Slope from "./slope/slope";
 import Mesh from "./game_object/mesh";
 document.addEventListener("DOMContentLoaded", main);
 function main(){
-  const slope = new Slope(MathUtils.translationMatrix(0,-3,-4));
-  window.slope = slope;
   const rasterizer = new WebGLUtils.ObjectsRasterizer();
-  boxManMesh.skinned = true;
-  boxManMesh.textured = true;
+  const slope = new Slope(MathUtils.translationMatrix(0,-3,-4), rasterizer, "assets/snow.jpg");
+  window.slope = slope;
+
+  //boxManMesh.skinned = true;
+  //boxMan.colored = true;
+  //boxManMesh.textured = true;
   const boxMan = new Character(new Mesh(boxManMesh), undefined, slope);
-  boxMan.playAnimation("rest");
+  //boxMan.playAnimation("rest");
   rasterizer.objects.boxMan = boxMan;
   window.boxMan = boxMan;
   window.MathUtils = MathUtils;
@@ -40,8 +42,6 @@ function main(){
   window.addEventListener("keyup", Input.keyUp(boxMan));
 
 }
-
-
 const handleKeyDown = rasterizer => e => {
   switch(e.key){
     case "ArrowUp":
