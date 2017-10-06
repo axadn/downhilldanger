@@ -16,8 +16,8 @@ The game does not currently utilize a back end. Testing on a local machine with 
 requires setting up a server due to the browser treating loading an image from a local file path as a cross-origin request.
 
 ### Challenges
-Currently, the rotation and position for all objects and all segments of the slope are stored as 4X4 transformation matrices. I have provided some math utilities to assist in combining and manipulating transformations. It can often be confusing chaining together multiple transformations in sequence. I have
-come up with some basic guidlines, howver, implementing this project.
+Currently, the rotation and position for all objects and all segments of the slope are stored as 4X4 transformation matrices. I have provided some math utilities to assist in combining and manipulating transformations, vector functions such as projection, dot and cross product for computing boundaries. It can often be confusing chaining together multiple transformations in sequence. I have
+come up with some basic guidelines, however, implementing this project.
 It helps to recall that a transformation matrix maps each component x, y, z, and w to a function of all 4 inputs x, y, z, and w.
 - Therefore, to apply a transformation to a matrix in global space can be thought of as inputing the old matrix into a local coordinate system specified by the second matrix in the product( oldMatrix X transformMatrix )
 - Applying a transformation to a matrix in local space can be thought of as the opposite, inputting the transformation into a local space specified by the original matrix ( transformMatrix X oldMatrix)
