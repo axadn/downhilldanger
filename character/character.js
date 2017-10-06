@@ -25,7 +25,6 @@ export default class Character extends GameObject{
         (MathUtils.mat4TranslationComponent(
           this.transformationMatrix),this.surfacePoint));
     if(isNaN(distanceFromSurface)){
-      debugger;
     }
     if(distanceFromSurface > SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
       this._fall();
@@ -67,30 +66,6 @@ export default class Character extends GameObject{
     }
   }
   _handleEdgeCollision(collisionData){
-
-
-    // const edgeAlign =
-    //   MathUtils.axisToVec(
-    //     MathUtils.multiplyVec4ByMatrix4(
-    //       MathUtils.mat4RotationComponent(this.transformationMatrix),
-    //       [0,1,0,1]
-    //   ),
-    //   collisionData.vector
-    // );
-    // this.transformationMatrix = MathUtils.mat_4_multiply(
-    //   edgeAlign,
-    //   this.transformationMatrix
-    // );
-    // const paddingRotation =  collisionData.toggleLeft? - EDGE_COLLISION_PADDING_ROTATION :
-    //   EDGE_COLLISION_PADDING_ROTATION;
-    // this.transformationMatrix = MathUtils.mat_4_multiply(
-    //   MathUtils.zRotationMatrix(paddingRotation),
-    //   this.transformationMatrix
-    // );
-    // this.transformationMatrix = MathUtils.mat_4_multiply(
-    //   MathUtils.translationMatrix(0, this.speed, 0),
-    //   this.transformationMatrix
-    // );
     let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
     this.speed *= EDGE_COLLISION_DAMP_FACTOR;
     pushBackVector = MathUtils.scaleVector(pushBackVector, this.speed*10);
@@ -100,15 +75,27 @@ export default class Character extends GameObject{
     );
 
   };
+  _handleTreeCollision(collisionData){
+    this.speed *= -0.4;
+    this.transformationMatrix = MathUtils.mat_4_multiply(
+      this.transformationMatrix,
+      MathUtils.translationMatrix(0, -2, 0)
+    );
+
+  }
   _moveForward(){
     let worldPos = MathUtils.mat4TranslationComponent(
       this.transformationMatrix
     );
     let nextWorldPos = worldPos;
     const edgeCollisionData = this.slope.positionIsBeyondEdge(nextWorldPos, this.currentSegmentNumber);
+    const obstacleCollisionData = this.slope.positionCollidesWithObstacle(nextWorldPos, this.currentSegmentNumber);
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
       return;
+    }
+    else if(obstacleCollisionData){
+      this._handleTreeCollision(obstacleCollisionData);
     }
     let worldMoveVector = MathUtils.projectVectorOntoPlane(
       this._calculateWorldMoveVector(), this.surfacePlaneNormal);

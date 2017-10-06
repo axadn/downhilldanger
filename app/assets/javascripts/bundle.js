@@ -1341,7 +1341,6 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
         (__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4TranslationComponent"](
           this.transformationMatrix),this.surfacePoint));
     if(isNaN(distanceFromSurface)){
-      debugger;
     }
     if(distanceFromSurface > SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
       this._fall();
@@ -1383,30 +1382,6 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _handleEdgeCollision(collisionData){
-
-
-    // const edgeAlign =
-    //   MathUtils.axisToVec(
-    //     MathUtils.multiplyVec4ByMatrix4(
-    //       MathUtils.mat4RotationComponent(this.transformationMatrix),
-    //       [0,1,0,1]
-    //   ),
-    //   collisionData.vector
-    // );
-    // this.transformationMatrix = MathUtils.mat_4_multiply(
-    //   edgeAlign,
-    //   this.transformationMatrix
-    // );
-    // const paddingRotation =  collisionData.toggleLeft? - EDGE_COLLISION_PADDING_ROTATION :
-    //   EDGE_COLLISION_PADDING_ROTATION;
-    // this.transformationMatrix = MathUtils.mat_4_multiply(
-    //   MathUtils.zRotationMatrix(paddingRotation),
-    //   this.transformationMatrix
-    // );
-    // this.transformationMatrix = MathUtils.mat_4_multiply(
-    //   MathUtils.translationMatrix(0, this.speed, 0),
-    //   this.transformationMatrix
-    // );
     let pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorNormalize"](collisionData.normal);
     this.speed *= EDGE_COLLISION_DAMP_FACTOR;
     pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](pushBackVector, this.speed*10);
@@ -1416,15 +1391,27 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     );
 
   };
+  _handleTreeCollision(collisionData){
+    this.speed *= -0.4;
+    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat_4_multiply"](
+      this.transformationMatrix,
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["translationMatrix"](0, -2, 0)
+    );
+
+  }
   _moveForward(){
     let worldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4TranslationComponent"](
       this.transformationMatrix
     );
     let nextWorldPos = worldPos;
     const edgeCollisionData = this.slope.positionIsBeyondEdge(nextWorldPos, this.currentSegmentNumber);
+    const obstacleCollisionData = this.slope.positionCollidesWithObstacle(nextWorldPos, this.currentSegmentNumber);
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
       return;
+    }
+    else if(obstacleCollisionData){
+      this._handleTreeCollision(obstacleCollisionData);
     }
     let worldMoveVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlane"](
       this._calculateWorldMoveVector(), this.surfacePlaneNormal);
@@ -1552,8 +1539,15 @@ const SHARP_TURN = 0.35;
 const GRADUAL_TURN = 0.14;
 const TILES_PER_SEGMENT = 1;
 const TREES_PER_SEGMENT = 3;
+const TREE_COLLIDER = "TREE_COLLIDER";
+const TREE_COLLIDER_HEIGHT = 20;
+const TREE_COLLIDER_WIDTH = 5;
+const TREE_COLLIDER_DEPTH = 5;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
+const TREE_PROBABILITY_LENGTHWISE = 0.5;
+const TREE_MAX_DENSITY_WIDTHWISE = 4;
+const BOX_COLLIDER = "BOX_COLLIDER";
 
 
 
@@ -1581,7 +1575,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     this.segmentRotation = [-0.2,0,0];
     this.segmentPosition = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["multiplyVec4ByMatrix4"](transformationMatrix,
       [0,SEGMENT_LENGTH,0,1]).slice(0,3);
-
+      this.obstacles = [];
     //this.segmentRotation[0] = 0;
     this._setupTreeMesh();
     const firstLoop = this.createEdgeLoop();
@@ -1599,7 +1593,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
       this.generateSegment();
     }
     this._addUvsSegment();
-    this.obstacles = [];
+
   }
   _setupTreeMesh(){
     this.sideGeometry = [];
@@ -1659,17 +1653,40 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
       }
     }
   }
-  _addObstaclesSegment(){
-    if(Math.random() < TREE_DENSITY_LENGTHWISE){
+  _addObstacleSegment(){
+    const obstacleSegment =[];
+    const transformationMatrix =
+    __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["mat_4_multiply"](
+      __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["translationMatrix"](0, -SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
+      this.segmentMatrices[this.segmentMatrices.length -1]);
+    if(Math.random() < TREE_PROBABILITY_LENGTHWISE){
         const segment = 0;
-        const widthWiseCount = Math.floor(Math.random()*3);
+        const widthWiseCount = 1; //Math.floor(Math.random()*
+        //  TREE_MAX_DENSITY_WIDTHWISE);
+        let id, gameObject, treeTransformation;
         for(let i = 0; i < widthWiseCount; ++i){
-          
+          treeTransformation = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["mat_4_multiply"](
+            __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["translationMatrix"]((Math.random() * 0.8 + 0.1) * SEGMENT_WIDTH -SEGMENT_WIDTH/2,
+             Math.random()* SEGMENT_LENGTH, 0),
+             transformationMatrix
+          );
+          gameObject = new __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /* default */](this.treeMesh, treeTransformation);
+          id = `treeObstacle${this.treesCreatedSinceStart}`;
+          gameObject.id = id;
+          gameObject.collider = {type: BOX_COLLIDER, dimensions:[
+            TREE_COLLIDER_WIDTH, TREE_COLLIDER_HEIGHT, TREE_COLLIDER_DEPTH]};
+          obstacleSegment.push(gameObject);
+          this.rasterizer.objects[id] = gameObject;
+          ++this.treesCreatedSinceStart;
         }
     }
+    this.obstacles.push(obstacleSegment);
   }
-  _deleteObstaclesSegment(){
-
+  _deleteObstacleSegment(){
+    const deletedSegment = this.obstacles.shift();
+    for(let i = 0; i< deletedSegment.length; ++i){
+      delete this.rasterizer.objects[deletedSegment[i].id];
+    }
   }
   createEdgeLoop(){
     const vertices = [];
@@ -1737,6 +1754,31 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
          pos, __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["mat4TranslationComponent"](this.segmentMatrices[segmentNumber]));
     const result = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["vectorDot"](offsetVector, segmentStartNormal);
     return result < 0;
+  }
+
+  positionCollidesWithObstacle(pos, segment_number){
+    let transformedPosition;
+    let obstacle;
+    let dimensions;
+    for(let i =0; i < this.obstacles[segment_number].length; ++i){
+      obstacle = this.obstacles[segment_number][i];
+      transformedPosition = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["multiplyVec4ByMatrix4"](
+        __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["inverse_mat4_rot_pos"](
+            obstacle.transformationMatrix
+        ),
+        pos.concat(1)
+      );
+      dimensions = obstacle.collider.dimensions;
+      if(transformedPosition[0] > -dimensions[0]/2 &&
+       transformedPosition[0] < dimensions[0]/2 &&
+       transformedPosition[1] > -dimensions[1]/2 &&
+        transformedPosition[1] < dimensions[1]/2 &&
+        transformedPosition[2] >= -0.01 &&
+         transformedPosition[2] < dimensions[2]){
+           return true;
+         }
+    }
+    return false;
   }
 
   segmentLocalCoords(segment_number, pos){
@@ -1845,6 +1887,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
      }
     this._addSegment(transformedSegment);
     this._addSideGeometrySegment();
+    this._addObstacleSegment();
     //this.segmentPosition =
     //  MathUtils.mat4TranslationComponent(segmentMatrix);
     this.segmentMatrices.push(transformationMatrix);
@@ -1890,6 +1933,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     this.segmentMatrices.shift();
     this._deleteUvsSegment();
     this._deleteSideGeometrySegment();
+    this._deleteObstacleSegment();
     this.mesh.setDirty();
   }
 }
@@ -1903,9 +1947,9 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
 
 "use strict";
 /* harmony default export */ __webpack_exports__["a"] = ({
-    "vertices": [1.557284, -4.881069, 1.220433, -2.305502, -4.881067, 1.220433, 0.265122, -1.595123, 15.595764, 5.357604, 3.060327, 2.000748, 1.557284, -4.881069, 1.220433, 0.265122, -1.595123, 15.595764, -2.305502, -4.881067, 1.220433, -5.014175, 2.409782, 3.088122, 0.265122, -1.595123, 15.595764, -0.217849, -0.647796, 18.588009, 0.149692, 0.434673, 18.588009, 0.149692, 0.434673, -2.595972, 0.149692, 0.434673, 18.588009, 0.517232, -0.647796, 18.588009, 0.517232, -0.647796, -2.595972, -0.217849, -0.647796, 18.588009, 0.517232, -0.647796, 18.588009, 0.149692, 0.434673, 18.588009, -0.217849, -0.647796, -2.595972, 0.517232, -0.647796, -2.595972, 0.517232, -0.647796, 18.588009, 1.835783, 2.397462, 16.168344, 1.178417, -2.402114, 16.409208, 0.074321, -0.154875, 22.801958, 1.178417, -2.402114, 16.409208, -1.606885, -2.66519, 16.403688, 0.074321, -0.154875, 22.801958, 1.557284, -4.881069, 9.418711, -2.552244, -6.14147, 10.179499, -1.606885, -2.66519, 16.403688, 3.756239, 2.69887, 10.140981, 1.557284, -4.881069, 9.418711, 1.178417, -2.402114, 16.409208, -5.047791, 2.294961, 10.932926, -2.981071, 2.698907, 16.168344, -1.606885, -2.66519, 16.403688, -1.606885, -2.66519, 16.403688, -2.981071, 2.698907, 16.168344, 0.074321, -0.154875, 22.801958, -0.217849, -0.647796, -2.595972, 0.149692, 0.434673, -2.595972, 0.517232, -0.647796, -2.595972, -0.217849, -0.647796, -2.595972, -0.217849, -0.647796, 18.588009, 0.149692, 0.434673, -2.595972, 0.149692, 0.434673, -2.595972, 0.149692, 0.434673, 18.588009, 0.517232, -0.647796, -2.595972, -0.217849, -0.647796, 18.588009, -0.217849, -0.647796, -2.595972, 0.517232, -0.647796, 18.588009, 1.178417, -2.402114, 16.409208, 1.557284, -4.881069, 9.418711, -1.606885, -2.66519, 16.403688, 1.835783, 2.397462, 16.168344, 3.756239, 2.69887, 10.140981, 1.178417, -2.402114, 16.409208, -2.552244, -6.14147, 10.179499, -5.047791, 2.294961, 10.932926, -1.606885, -2.66519, 16.403688],
+    "vertices": [2.345939, -5.839525, 1.220433, -3.174587, -5.839523, 1.220433, 0.499237, -1.770323, 15.595764, 7.77719, 3.994827, 2.000748, 2.345939, -5.839525, 1.220433, 0.499237, -1.770323, 15.595764, -3.174587, -5.839523, 1.220433, -7.045706, 3.189215, 3.088122, 0.499237, -1.770323, 15.595764, -0.857804, -0.973635, 18.588009, 0.149692, 1.086353, 18.588009, 0.149692, 1.086353, -2.595972, 0.149692, 1.086353, 18.588009, 1.157186, -0.973636, 18.588009, 1.157186, -0.973636, -2.595972, -0.857804, -0.973635, 18.588009, 1.157186, -0.973636, 18.588009, 0.149692, 1.086353, 18.588009, -0.857803, -0.973636, -2.595972, 1.157186, -0.973636, -2.595972, 1.157186, -0.973636, 18.588009, 2.743958, 3.173958, 16.168344, 1.804478, -2.769673, 16.409208, 0.226553, 0.013231, 22.801958, 1.804478, -2.769673, 16.409208, -2.176155, -3.095458, 16.403688, 0.226553, 0.013231, 22.801958, 2.345939, -5.839525, 9.418711, -3.52722, -7.400364, 10.179499, -2.176155, -3.095458, 16.403688, 5.48859, 3.547212, 10.140981, 2.345939, -5.839525, 9.418711, 1.804478, -2.769673, 16.409208, -7.093747, 3.047025, 10.932926, -4.140082, 3.547257, 16.168344, -2.176155, -3.095458, 16.403688, -2.176155, -3.095458, 16.403688, -4.140082, 3.547257, 16.168344, 0.226553, 0.013231, 22.801958, -0.857803, -0.973636, -2.595972, 0.149692, 1.086353, -2.595972, 1.157186, -0.973636, -2.595972, -0.857803, -0.973636, -2.595972, -0.857804, -0.973635, 18.588009, 0.149692, 1.086353, -2.595972, 0.149692, 1.086353, -2.595972, 0.149692, 1.086353, 18.588009, 1.157186, -0.973636, -2.595972, -0.857804, -0.973635, 18.588009, -0.857803, -0.973636, -2.595972, 1.157186, -0.973636, 18.588009, 1.804478, -2.769673, 16.409208, 2.345939, -5.839525, 9.418711, -2.176155, -3.095458, 16.403688, 2.743958, 3.173958, 16.168344, 5.48859, 3.547212, 10.140981, 1.804478, -2.769673, 16.409208, -3.52722, -7.400364, 10.179499, -7.093747, 3.047025, 10.932926, -2.176155, -3.095458, 16.403688],
 
-    "normals": [-0.483688, 0.842769, -0.236122, 0.480911, 0.832118, -0.276193, -0.043703, 0.92346, -0.381115, -0.880398, 0.438948, -0.179449, -0.483688, 0.842769, -0.236122, -0.043703, 0.92346, -0.381115, 0.480911, 0.832118, -0.276193, 0.885617, 0.39256, -0.248085, -0.043703, 0.92346, -0.381115, -0.672292, -0.481735, 0.562059, 0.0, 0.839137, 0.54387, 0.0, 0.839137, -0.54387, 0.0, 0.839137, 0.54387, 0.672292, -0.481735, 0.562059, 0.672292, -0.481735, -0.562059, -0.672292, -0.481735, 0.562059, 0.672292, -0.481735, 0.562059, 0.0, 0.839137, 0.54387, -0.672292, -0.481735, -0.562059, 0.672292, -0.481735, -0.562059, 0.672292, -0.481735, 0.562059, -0.957732, 0.117985, -0.262307, -0.65627, 0.673482, -0.340129, -0.019562, 0.762871, -0.646229, -0.65627, 0.673482, -0.340129, 0.522965, 0.73104, -0.438185, -0.019562, 0.762871, -0.646229, -0.646443, 0.688803, -0.328013, 0.248054, 0.829218, -0.500809, 0.522965, 0.73104, -0.438185, -0.951964, 0.222114, -0.21073, -0.646443, 0.688803, -0.328013, -0.65627, 0.673482, -0.340129, 0.905881, 0.258431, -0.335429, 0.909146, 0.217292, -0.355266, 0.522965, 0.73104, -0.438185, 0.522965, 0.73104, -0.438185, 0.909146, 0.217292, -0.355266, -0.019562, 0.762871, -0.646229, -0.672292, -0.481735, -0.562059, 0.0, 0.839137, -0.54387, 0.672292, -0.481735, -0.562059, -0.672292, -0.481735, -0.562059, -0.672292, -0.481735, 0.562059, 0.0, 0.839137, -0.54387, 0.0, 0.839137, -0.54387, 0.0, 0.839137, 0.54387, 0.672292, -0.481735, -0.562059, -0.672292, -0.481735, 0.562059, -0.672292, -0.481735, -0.562059, 0.672292, -0.481735, 0.562059, -0.65627, 0.673482, -0.340129, -0.646443, 0.688803, -0.328013, 0.522965, 0.73104, -0.438185, -0.957732, 0.117985, -0.262307, -0.951964, 0.222114, -0.21073, -0.65627, 0.673482, -0.340129, 0.248054, 0.829218, -0.500809, 0.905881, 0.258431, -0.335429, 0.522965, 0.73104, -0.438185],
+    "normals": [-0.458754, 0.837764, -0.29606, 0.467299, 0.812128, -0.349315, -0.050081, 0.890957, -0.451247, -0.840358, 0.483535, -0.244819, -0.458754, 0.837764, -0.29606, -0.050081, 0.890957, -0.451247, 0.467299, 0.812128, -0.349315, 0.838557, 0.428999, -0.335734, -0.050081, 0.890957, -0.451247, -0.704459, -0.43965, 0.557115, 0.0, 0.834925, 0.55031, 0.0, 0.834925, -0.55031, 0.0, 0.834925, 0.55031, 0.704459, -0.43965, 0.557115, 0.704459, -0.43965, -0.557115, -0.704459, -0.43965, 0.557115, 0.704459, -0.43965, 0.557115, 0.0, 0.834925, 0.55031, -0.704459, -0.43965, -0.557115, 0.704459, -0.43965, -0.557115, 0.704459, -0.43965, 0.557115, -0.922575, 0.131108, -0.362835, -0.623249, 0.659566, -0.420087, -0.05768, 0.691977, -0.719565, -0.623249, 0.659566, -0.420087, 0.479781, 0.693899, -0.536912, -0.05768, 0.691977, -0.719565, -0.585345, 0.70098, -0.407361, 0.25895, 0.767174, -0.58681, 0.479781, 0.693899, -0.536912, -0.92288, 0.237373, -0.303201, -0.585345, 0.70098, -0.407361, -0.623249, 0.659566, -0.420087, 0.847774, 0.274667, -0.453658, 0.848231, 0.233924, -0.475112, 0.479781, 0.693899, -0.536912, 0.479781, 0.693899, -0.536912, 0.848231, 0.233924, -0.475112, -0.05768, 0.691977, -0.719565, -0.704459, -0.43965, -0.557115, 0.0, 0.834925, -0.55031, 0.704459, -0.43965, -0.557115, -0.704459, -0.43965, -0.557115, -0.704459, -0.43965, 0.557115, 0.0, 0.834925, -0.55031, 0.0, 0.834925, -0.55031, 0.0, 0.834925, 0.55031, 0.704459, -0.43965, -0.557115, -0.704459, -0.43965, 0.557115, -0.704459, -0.43965, -0.557115, 0.704459, -0.43965, 0.557115, -0.623249, 0.659566, -0.420087, -0.585345, 0.70098, -0.407361, 0.479781, 0.693899, -0.536912, -0.922575, 0.131108, -0.362835, -0.92288, 0.237373, -0.303201, -0.623249, 0.659566, -0.420087, 0.25895, 0.767174, -0.58681, 0.847774, 0.274667, -0.453658, 0.479781, 0.693899, -0.536912],
 
     "colors": [],
 

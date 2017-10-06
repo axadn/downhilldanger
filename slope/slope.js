@@ -8,8 +8,15 @@ const SHARP_TURN = 0.35;
 const GRADUAL_TURN = 0.14;
 const TILES_PER_SEGMENT = 1;
 const TREES_PER_SEGMENT = 3;
+const TREE_COLLIDER = "TREE_COLLIDER";
+const TREE_COLLIDER_HEIGHT = 20;
+const TREE_COLLIDER_WIDTH = 5;
+const TREE_COLLIDER_DEPTH = 5;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
+const TREE_PROBABILITY_LENGTHWISE = 0.5;
+const TREE_MAX_DENSITY_WIDTHWISE = 4;
+const BOX_COLLIDER = "BOX_COLLIDER";
 
 import treeMesh from "../tree.js";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
@@ -37,7 +44,7 @@ export default class Slope extends GameObject{
     this.segmentRotation = [-0.2,0,0];
     this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix,
       [0,SEGMENT_LENGTH,0,1]).slice(0,3);
-
+      this.obstacles = [];
     //this.segmentRotation[0] = 0;
     this._setupTreeMesh();
     const firstLoop = this.createEdgeLoop();
@@ -55,7 +62,7 @@ export default class Slope extends GameObject{
       this.generateSegment();
     }
     this._addUvsSegment();
-    this.obstacles = [];
+
   }
   _setupTreeMesh(){
     this.sideGeometry = [];
@@ -115,17 +122,40 @@ export default class Slope extends GameObject{
       }
     }
   }
-  _addObstaclesSegment(){
-    if(Math.random() < TREE_DENSITY_LENGTHWISE){
+  _addObstacleSegment(){
+    const obstacleSegment =[];
+    const transformationMatrix =
+    MathUtils.mat_4_multiply(
+      MathUtils.translationMatrix(0, -SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
+      this.segmentMatrices[this.segmentMatrices.length -1]);
+    if(Math.random() < TREE_PROBABILITY_LENGTHWISE){
         const segment = 0;
-        const widthWiseCount = Math.floor(Math.random()*3);
+        const widthWiseCount = 1; //Math.floor(Math.random()*
+        //  TREE_MAX_DENSITY_WIDTHWISE);
+        let id, gameObject, treeTransformation;
         for(let i = 0; i < widthWiseCount; ++i){
-          
+          treeTransformation = MathUtils.mat_4_multiply(
+            MathUtils.translationMatrix((Math.random() * 0.8 + 0.1) * SEGMENT_WIDTH -SEGMENT_WIDTH/2,
+             Math.random()* SEGMENT_LENGTH, 0),
+             transformationMatrix
+          );
+          gameObject = new GameObject(this.treeMesh, treeTransformation);
+          id = `treeObstacle${this.treesCreatedSinceStart}`;
+          gameObject.id = id;
+          gameObject.collider = {type: BOX_COLLIDER, dimensions:[
+            TREE_COLLIDER_WIDTH, TREE_COLLIDER_HEIGHT, TREE_COLLIDER_DEPTH]};
+          obstacleSegment.push(gameObject);
+          this.rasterizer.objects[id] = gameObject;
+          ++this.treesCreatedSinceStart;
         }
     }
+    this.obstacles.push(obstacleSegment);
   }
-  _deleteObstaclesSegment(){
-
+  _deleteObstacleSegment(){
+    const deletedSegment = this.obstacles.shift();
+    for(let i = 0; i< deletedSegment.length; ++i){
+      delete this.rasterizer.objects[deletedSegment[i].id];
+    }
   }
   createEdgeLoop(){
     const vertices = [];
@@ -193,6 +223,31 @@ export default class Slope extends GameObject{
          pos, MathUtils.mat4TranslationComponent(this.segmentMatrices[segmentNumber]));
     const result = MathUtils.vectorDot(offsetVector, segmentStartNormal);
     return result < 0;
+  }
+
+  positionCollidesWithObstacle(pos, segment_number){
+    let transformedPosition;
+    let obstacle;
+    let dimensions;
+    for(let i =0; i < this.obstacles[segment_number].length; ++i){
+      obstacle = this.obstacles[segment_number][i];
+      transformedPosition = MathUtils.multiplyVec4ByMatrix4(
+        MathUtils.inverse_mat4_rot_pos(
+            obstacle.transformationMatrix
+        ),
+        pos.concat(1)
+      );
+      dimensions = obstacle.collider.dimensions;
+      if(transformedPosition[0] > -dimensions[0]/2 &&
+       transformedPosition[0] < dimensions[0]/2 &&
+       transformedPosition[1] > -dimensions[1]/2 &&
+        transformedPosition[1] < dimensions[1]/2 &&
+        transformedPosition[2] >= -0.01 &&
+         transformedPosition[2] < dimensions[2]){
+           return true;
+         }
+    }
+    return false;
   }
 
   segmentLocalCoords(segment_number, pos){
@@ -301,6 +356,7 @@ export default class Slope extends GameObject{
      }
     this._addSegment(transformedSegment);
     this._addSideGeometrySegment();
+    this._addObstacleSegment();
     //this.segmentPosition =
     //  MathUtils.mat4TranslationComponent(segmentMatrix);
     this.segmentMatrices.push(transformationMatrix);
@@ -346,6 +402,7 @@ export default class Slope extends GameObject{
     this.segmentMatrices.shift();
     this._deleteUvsSegment();
     this._deleteSideGeometrySegment();
+    this._deleteObstacleSegment();
     this.mesh.setDirty();
   }
 }
