@@ -1465,9 +1465,10 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tree_js__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__game_object_mesh__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__balloon__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__game_object_mesh__ = __webpack_require__(2);
 const SEGMENT_WIDTH = 70;
 const SEGMENT_LENGTH = 40;
 const EDGE_LOOP_RESOLUTION = 5;
@@ -1486,6 +1487,10 @@ const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
 const TREE_PROBABILITY_LENGTHWISE = 0.5;
 const TREE_MAX_DENSITY_WIDTHWISE = 4;
+const BALLOON_PROBABILITY_LENGTHWISE = 0.22;
+const BALLOON_DENSITY_WIDTHWISE = 2;
+const BALLOON_FLOAT_HEIGHT = 6;
+const BALLON_COLLIDER_SQRD_RADIUS = 1;
 const BOX_COLLIDER = "BOX_COLLIDER";
 
 
@@ -1493,12 +1498,13 @@ const BOX_COLLIDER = "BOX_COLLIDER";
 
 
 
-class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /* default */]{
 
-  constructor(transformationMatrix = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["b" /* identityMatrix4 */], rasterizer, img_src = "snow.jpg"){
+class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */]{
+
+  constructor(transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["b" /* identityMatrix4 */], rasterizer, img_src = "snow.jpg"){
     super(undefined);
     this.transformationMatrix = transformationMatrix;
-    this.mesh = new __WEBPACK_IMPORTED_MODULE_3__game_object_mesh__["a" /* default */]({
+    this.mesh = new __WEBPACK_IMPORTED_MODULE_4__game_object_mesh__["a" /* default */]({
       faces: [],
       vertices: [],
       textured: true,
@@ -1512,16 +1518,19 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     this.uvH = 0;
     this.segmentMatrices = [transformationMatrix];
     this.segmentRotation = [-0.2,0,0];
-    this.segmentPosition = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](transformationMatrix,
+    this.segmentPosition = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](transformationMatrix,
       [0,SEGMENT_LENGTH,0,1]).slice(0,3);
-      this.obstacles = [];
+    this.obstacles = [];
+    this.balloons = [];
+    this.balloonsCreatedSinceStart = 0;
     //this.segmentRotation[0] = 0;
     this._setupTreeMesh();
+    this._setupBalloonMesh();
     const firstLoop = this.createEdgeLoop();
     let unpackedVertices;
 
     for(let i = 0; i< firstLoop.length; i+=3){
-      unpackedVertices = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+      unpackedVertices = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
         transformationMatrix,
       firstLoop.slice(i,i+3).concat(1)).slice(0,3);
       for(let j = 0; j< unpackedVertices.length; ++j){
@@ -1540,8 +1549,13 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     this.treesCreatedSinceStart = 0;
     __WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */].textureBuffer = this.rasterizer.bufferTexture("assets/tree.png");
     __WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */].textured = true;
-    this.treeMesh= new __WEBPACK_IMPORTED_MODULE_3__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */]);
+    this.treeMesh= new __WEBPACK_IMPORTED_MODULE_4__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */]);
     this.treeMesh.buffers = this.rasterizer.sendMeshToGPU(this.treeMesh);
+  }
+  _setupBalloonMesh(){
+    this.balloonMesh = new __WEBPACK_IMPORTED_MODULE_4__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_1__balloon__["a" /* default */]);
+    this.balloonMesh.colored = true;
+    this.balloonMesh.buffers = this.rasterizer.sendMeshToGPU(this.balloonMesh);
   }
   _addUvsSegment(){
     for(let i = 0; i <= EDGE_LOOP_RESOLUTION; ++i){
@@ -1563,17 +1577,17 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
       let leftRightToggle = -1;
       for(let i = 0; i < 2; ++i){
         let transformationMatrix = this.segmentMatrices[this.segmentMatrices.length -1];
-        transformationMatrix = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
-          __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["p" /* translationMatrix */](leftRightToggle * SEGMENT_WIDTH/2, 0, 0),
+        transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["f" /* mat_4_multiply */](
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["p" /* translationMatrix */](leftRightToggle * SEGMENT_WIDTH/2, 0, 0),
           transformationMatrix
         );
         let treeObject;
         for(let i = 0; i < TREES_PER_SEGMENT; ++i){
           transformationMatrix =
-          __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
-            __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["p" /* translationMatrix */](0, SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["f" /* mat_4_multiply */](
+            __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["p" /* translationMatrix */](0, SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
             transformationMatrix );
-          treeObject = new __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /* default */](this.treeMesh,transformationMatrix);
+          treeObject = new __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */](this.treeMesh,transformationMatrix);
           treeObject.id = `tree${this.treesCreatedSinceStart}`;
           this.rasterizer.objects[treeObject.id] = treeObject;
           ++this.treesCreatedSinceStart;
@@ -1595,8 +1609,8 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
   _addObstacleSegment(){
     const obstacleSegment =[];
     const transformationMatrix =
-    __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
-      __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["p" /* translationMatrix */](0, -SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
+    __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["f" /* mat_4_multiply */](
+      __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["p" /* translationMatrix */](0, -SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
       this.segmentMatrices[this.segmentMatrices.length -1]);
     if(Math.random() < TREE_PROBABILITY_LENGTHWISE){
         const segment = 0;
@@ -1604,12 +1618,12 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
         //  TREE_MAX_DENSITY_WIDTHWISE);
         let id, gameObject, treeTransformation;
         for(let i = 0; i < widthWiseCount; ++i){
-          treeTransformation = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
-            __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["p" /* translationMatrix */]((Math.random() * 0.8 + 0.1) * SEGMENT_WIDTH -SEGMENT_WIDTH/2,
+          treeTransformation = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["f" /* mat_4_multiply */](
+            __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["p" /* translationMatrix */]((Math.random() * 0.8 + 0.1) * SEGMENT_WIDTH -SEGMENT_WIDTH/2,
              Math.random()* SEGMENT_LENGTH, 0),
              transformationMatrix
           );
-          gameObject = new __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /* default */](this.treeMesh, treeTransformation);
+          gameObject = new __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */](this.treeMesh, treeTransformation);
           id = `treeObstacle${this.treesCreatedSinceStart}`;
           gameObject.id = id;
           gameObject.collider = {type: BOX_COLLIDER, dimensions:[
@@ -1621,9 +1635,36 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     }
     this.obstacles.push(obstacleSegment);
   }
+  _addBalloonsSegment(){
+    const balloonSegment = [];
+    let transformationMatrix, newBalloon, id;
+    if(Math.random() < BALLOON_PROBABILITY_LENGTHWISE){
+      for(let i = 0; i <= Math.floor(Math.random() * BALLOON_DENSITY_WIDTHWISE); ++ i){
+        transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["f" /* mat_4_multiply */](
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["p" /* translationMatrix */](Math.random() * SEGMENT_WIDTH - SEGMENT_WIDTH/2,
+           SEGMENT_LENGTH/2, BALLOON_FLOAT_HEIGHT),
+          this.segmentMatrices[this.segmentMatrices.length - 1]
+        );
+        debugger;
+        newBalloon = new __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */](this.balloonMesh, transformationMatrix);
+        id = `balloon${this.balloonsCreatedSinceStart}`;
+        newBalloon.id = id;
+        balloonSegment.push(newBalloon);
+        this.rasterizer.objects[id] = newBalloon;
+        ++this.balloonsCreatedSinceStart;
+      }
+    }
+    this.balloons.push(balloonSegment);
+  }
   _deleteObstacleSegment(){
     const deletedSegment = this.obstacles.shift();
     for(let i = 0; i< deletedSegment.length; ++i){
+      delete this.rasterizer.objects[deletedSegment[i].id];
+    }
+  }
+  _deleteBallonSegment(){
+    const deletedSegment = this.balloons.shift();
+    for(let i = 0; i < deletedSegment.length; ++i){
       delete this.rasterizer.objects[deletedSegment[i].id];
     }
   }
@@ -1644,7 +1685,6 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     return true;
   }
   generateNewSegmentRotation(){
-
     let randomTurn = Math.random();
     if (randomTurn < 0.05 * TURN_TYPE_SWITCH_FREQUENCY ){
       randomTurn = Math.random();
@@ -1684,14 +1724,14 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
   }
 
   positionIsPastSegmentStart(pos, segmentNumber){
-    const segmentStartLine = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
-      __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["d" /* mat4RotationComponent */](this.segmentMatrices[segmentNumber]),
+    const segmentStartLine = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["d" /* mat4RotationComponent */](this.segmentMatrices[segmentNumber]),
         [-1,0,0,1]);
-    const segmentStartNormal = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["r" /* vectorCross */]([0,0,1],
+    const segmentStartNormal = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["r" /* vectorCross */]([0,0,1],
        segmentStartLine);
-    const offsetVector = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["n" /* subtractVectors */](
-         pos, __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["e" /* mat4TranslationComponent */](this.segmentMatrices[segmentNumber]));
-    const result = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["s" /* vectorDot */](offsetVector, segmentStartNormal);
+    const offsetVector = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["n" /* subtractVectors */](
+         pos, __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["e" /* mat4TranslationComponent */](this.segmentMatrices[segmentNumber]));
+    const result = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["s" /* vectorDot */](offsetVector, segmentStartNormal);
     return result < 0;
   }
 
@@ -1701,8 +1741,8 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     let dimensions;
     for(let i =0; i < this.obstacles[segment_number].length; ++i){
       obstacle = this.obstacles[segment_number][i];
-      transformedPosition = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
-        __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["c" /* inverse_mat4_rot_pos */](
+      transformedPosition = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+        __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["c" /* inverse_mat4_rot_pos */](
             obstacle.transformationMatrix
         ),
         pos.concat(1)
@@ -1720,20 +1760,34 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     return false;
   }
 
+  positionCollidesWithBalloon(pos, segment_number){
+    const balloons = this.balloons[segment_number];
+    let balloonPos;
+    for(let i = 0; i < ballons.length; ++i){
+      balloonPos = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["e" /* mat4TranslationComponent */](balloons[i].transformationMatrix);
+      if(vectorSquareMag(
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["n" /* subtractVectors */](pos, balloonPos)
+        ) <=  BALLON_COLLIDER_SQRD_RADIUS){
+            return balloons[i];
+      }
+    }
+    return false;
+  }
+
   segmentLocalCoords(segment_number, pos){
     return
-          __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](object.position.concat(1),
-            __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["c" /* inverse_mat4_rot_pos */](
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](object.position.concat(1),
+            __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["c" /* inverse_mat4_rot_pos */](
               this.matrices[nextSegmentNumber]));
   }
 
   getSurroundingTriangle(pos, segmentNumber){
     const startIdx = 6 * EDGE_LOOP_RESOLUTION * segmentNumber;
     const vertex = this.mesh.packedVertex.bind(this.mesh);
-    const inverseSegmentTransform = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["c" /* inverse_mat4_rot_pos */](
+    const inverseSegmentTransform = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["c" /* inverse_mat4_rot_pos */](
       this.segmentMatrices[segmentNumber]
     );
-    const transformedPosition = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+    const transformedPosition = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
       inverseSegmentTransform,
       pos.concat(1)
     );
@@ -1742,12 +1796,12 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
       transformedTriangle = []
       for(let j = 0; j < 3; ++j){
         transformedTriangle.push(
-          __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
             inverseSegmentTransform,
           vertex(this.mesh.faces[i+j]).concat(1))
         );
       }
-      if(__WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["q" /* triangleContainsPoint */](transformedPosition, transformedTriangle[0],
+      if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["q" /* triangleContainsPoint */](transformedPosition, transformedTriangle[0],
         transformedTriangle[1],transformedTriangle[2])){
           return [vertex(this.mesh.faces[i]),
             vertex(this.mesh.faces[i + 1]), vertex(this.mesh.faces[i + 2])];
@@ -1756,27 +1810,27 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
   }
   _positionIsBeyondEdge(pos, segmentNumber, toggleLeft){
     const xOffset = toggleLeft? -SEGMENT_WIDTH/2 : SEGMENT_WIDTH/2;
-    const currentSegPoint = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+    const currentSegPoint = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
       this.segmentMatrices[segmentNumber],
       [xOffset, 0, 0, 1]
 
     );
-    const nextSegPoint = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+    const nextSegPoint = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
       this.segmentMatrices[segmentNumber + 1],
       [xOffset, 0, 0, 1]
     );
     let vec0, vec1;
     if(toggleLeft){
-      vec0 = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["n" /* subtractVectors */](nextSegPoint, currentSegPoint);
+      vec0 = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["n" /* subtractVectors */](nextSegPoint, currentSegPoint);
       vec1 = [0,0,1];
     }
     else{
-      vec1 = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["n" /* subtractVectors */](nextSegPoint, currentSegPoint);
+      vec1 = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["n" /* subtractVectors */](nextSegPoint, currentSegPoint);
       vec0 = [0,0,1];
     }
-    const edgeNormal = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["r" /* vectorCross */](vec0, vec1);
-    const posOffset = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["n" /* subtractVectors */](pos, currentSegPoint);
-    if(__WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["s" /* vectorDot */](posOffset, edgeNormal) < 0){
+    const edgeNormal = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["r" /* vectorCross */](vec0, vec1);
+    const posOffset = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["n" /* subtractVectors */](pos, currentSegPoint);
+    if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["s" /* vectorDot */](posOffset, edgeNormal) < 0){
       let edgeVector =  toggleLeft? vec0: vec1;
       return{normal: edgeNormal, vector: edgeVector, pos0: currentSegPoint,
         pos1: nextSegPoint, toggleLeft};
@@ -1793,24 +1847,24 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     const pos = this.segmentPosition;
     this.generateNewSegmentRotation();
 
-    let transformationMatrix = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["p" /* translationMatrix */](
+    let transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["p" /* translationMatrix */](
       pos[0], pos[1], pos[2]
     );
-    let xRot = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["w" /* xRotationMatrix */](this.segmentRotation[0]);
-    let yRot = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["x" /* yRotationMatrix */](this.segmentRotation[1]);
-    let zRot = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["y" /* zRotationMatrix */](this.segmentRotation[2]);
-    transformationMatrix = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
+    let xRot = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["w" /* xRotationMatrix */](this.segmentRotation[0]);
+    let yRot = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["x" /* yRotationMatrix */](this.segmentRotation[1]);
+    let zRot = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["y" /* zRotationMatrix */](this.segmentRotation[2]);
+    transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["f" /* mat_4_multiply */](
       yRot,
-      __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
+      __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["f" /* mat_4_multiply */](
         xRot,
-        __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
+        __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["f" /* mat_4_multiply */](
           zRot,
           transformationMatrix
         )
       )
     );
-    this.segmentPosition = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](transformationMatrix, [0, SEGMENT_LENGTH,
-    0,1]);
+    this.segmentPosition = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](transformationMatrix,
+       [0, SEGMENT_LENGTH, 0,1]);
 
      let newSegment = this.createEdgeLoop();
     // let transformedSegment = MathUtils.addVectors(newSegment, this.segmentPosition);
@@ -1819,7 +1873,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
      for(let i = 0; i < newSegment.length; i +=3){
        transformedPos = newSegment.slice(i, i+3);
        transformedPos.push(1);
-       transformedPos =  __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](transformationMatrix,transformedPos);
+       transformedPos =  __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](transformationMatrix,transformedPos);
        for(let i = 0; i < 3; ++i){
          transformedSegment.push(transformedPos[i]);
        }
@@ -1827,6 +1881,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     this._addSegment(transformedSegment);
     this._addSideGeometrySegment();
     this._addObstacleSegment();
+    this._addBalloonsSegment();
     //this.segmentPosition =
     //  MathUtils.mat4TranslationComponent(segmentMatrix);
     this.segmentMatrices.push(transformationMatrix);
@@ -1873,6 +1928,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     this._deleteUvsSegment();
     this._deleteSideGeometrySegment();
     this._deleteObstacleSegment();
+    this._deleteBallonSegment();
     this.mesh.setDirty();
   }
 }
@@ -1895,6 +1951,33 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     "uvs": [0.478762, 0.015432, 0.731847, 0.015432, 0.478762, 0.993737, 0.225678, 0.015432, 0.478762, 0.015432, 0.225678, 0.993737, 0.731847, 0.015432, 0.984932, 0.015432, 0.731847, 0.993737, 0.15441, 0.171148, 0.15441, -0.011232, 0.15441, -0.011232, 0.009955, -0.011232, 0.009955, 0.171148, 0.009955, 0.171148, 0.15441, 0.171148, 0.009955, 0.171148, 0.15441, -0.011232, 0.15441, 0.171148, 0.009955, 0.171148, 0.009955, 0.171148, 0.225678, 0.504585, 0.478762, 0.504584, 0.225678, 0.993737, 0.478762, 0.504584, 0.731847, 0.504585, 0.478762, 0.993737, 0.478762, 0.015432, 0.731847, 0.015432, 0.731847, 0.504585, 0.225678, 0.015432, 0.478762, 0.015432, 0.478762, 0.504584, 0.984932, 0.015432, 0.984932, 0.504585, 0.731847, 0.504585, 0.731847, 0.504585, 0.984932, 0.504585, 0.731847, 0.993737, 0.15441, 0.171148, 0.009955, -0.011232, 0.009955, 0.171148, 0.15441, 0.171148, 0.15441, 0.171148, 0.15441, -0.011232, 0.009955, -0.011232, 0.009955, -0.011232, 0.009955, 0.171148, 0.15441, 0.171148, 0.15441, 0.171148, 0.009955, 0.171148, 0.478762, 0.504584, 0.478762, 0.015432, 0.731847, 0.504585, 0.225678, 0.504585, 0.225678, 0.015432, 0.478762, 0.504584, 0.731847, 0.015432, 0.984932, 0.015432, 0.731847, 0.504585],
 
     "faces": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59],
+
+    "bones": [],
+
+    "boneWeights": [],
+
+    "boneIndices": [],
+
+    "animations": {}
+});
+
+
+/***/ }),
+/* 11 */,
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = ({
+    "vertices": [-2.072248, 1.505576, -0.832262, -0.791528, 2.436073, -0.832262, -0.489191, 1.505576, -2.17889, -2.072248, 1.505576, 0.832262, -1.280719, 0.930497, 2.17889, -0.489191, 1.505576, 2.17889, -2.072248, 1.505576, 0.832262, -0.791528, 2.436074, 0.832262, -0.791528, 2.436073, -0.832262, -0.489191, 1.505576, -2.17889, -0.791528, 2.436073, -0.832262, 0.791528, 2.436073, -0.832262, -0.489191, 1.505576, 2.17889, 0.489192, 1.505576, 2.17889, 0.791529, 2.436074, 0.832262, -0.791528, 2.436074, 0.832262, 0.791529, 2.436074, 0.832262, 0.791528, 2.436073, -0.832262, 0.489192, 1.505576, -2.17889, 0.791528, 2.436073, -0.832262, 2.072248, 1.505576, -0.832262, 0.489192, 1.505576, 2.17889, 1.28072, 0.930497, 2.17889, 2.072248, 1.505576, 0.832262, 0.791528, 2.436073, -0.832262, 0.791529, 2.436074, 0.832262, 2.072248, 1.505576, 0.832262, 1.28072, 0.930497, -2.17889, 2.072248, 1.505576, -0.832262, 2.561439, 0.0, -0.832262, 1.28072, 0.930497, 2.17889, 1.583057, -0.0, 2.17889, 2.56144, 0.0, 0.832262, 2.072248, 1.505576, 0.832262, 2.56144, 0.0, 0.832262, 2.561439, 0.0, -0.832262, 1.240287, -0.150705, -2.729312, 2.561439, 0.0, -0.832262, 2.072248, -1.505576, -0.832262, 1.583057, -0.0, 2.17889, 1.28072, -0.930497, 2.17889, 2.072248, -1.505576, 0.832262, 2.56144, 0.0, 0.832262, 2.072248, -1.505576, 0.832262, 2.072248, -1.505576, -0.832262, 1.003413, -0.879727, -2.729312, 2.072248, -1.505576, -0.832262, 0.791529, -2.436073, -0.832262, 1.28072, -0.930497, 2.17889, 0.489192, -1.505576, 2.17889, 0.791529, -2.436073, 0.832262, 2.072248, -1.505576, 0.832262, 0.791529, -2.436073, 0.832262, 0.791529, -2.436073, -0.832262, 0.38327, -1.330288, -2.729312, 0.791529, -2.436073, -0.832262, -0.791528, -2.436073, -0.832262, 0.489192, -1.505576, 2.17889, -0.489191, -1.505576, 2.17889, -0.791528, -2.436073, 0.832262, 0.791529, -2.436073, 0.832262, -0.791528, -2.436073, 0.832262, -0.791528, -2.436073, -0.832262, -0.791528, -2.436073, -0.832262, -2.072247, -1.505576, -0.832262, -1.003413, -0.879728, -2.729312, -0.489191, -1.505576, 2.17889, -1.280719, -0.930497, 2.17889, -2.072247, -1.505576, 0.832262, -0.791528, -2.436073, 0.832262, -2.072247, -1.505576, 0.832262, -2.072247, -1.505576, -0.832262, 0.0, -0.150705, -3.299341, -1.240287, -0.150705, -2.729312, -1.280719, 0.930497, -2.17889, -2.561439, 0.0, -0.832262, -2.561439, -0.0, 0.832262, -2.072248, 1.505576, 0.832262, -1.583056, 0.0, 2.17889, 0.0, -0.0, 2.693256, -1.280719, 0.930497, 2.17889, -2.561439, 0.0, -0.832262, -2.072248, 1.505576, -0.832262, -1.280719, 0.930497, -2.17889, -1.583056, 0.0, 2.17889, -1.280719, 0.930497, 2.17889, -2.072248, 1.505576, 0.832262, 0.0, -0.150705, -3.299341, -1.280719, 0.930497, -2.17889, -0.489191, 1.505576, -2.17889, -1.280719, 0.930497, 2.17889, 0.0, -0.0, 2.693256, -0.489191, 1.505576, 2.17889, 0.0, -0.150705, -3.299341, -0.489191, 1.505576, -2.17889, 0.489192, 1.505576, -2.17889, -0.489191, 1.505576, 2.17889, 0.0, -0.0, 2.693256, 0.489192, 1.505576, 2.17889, 0.0, -0.150705, -3.299341, 0.489192, 1.505576, -2.17889, 1.28072, 0.930497, -2.17889, 0.489192, 1.505576, 2.17889, 0.0, -0.0, 2.693256, 1.28072, 0.930497, 2.17889, 0.0, -0.150705, -3.299341, 1.28072, 0.930497, -2.17889, 1.240287, -0.150705, -2.729312, 1.28072, 0.930497, 2.17889, 0.0, -0.0, 2.693256, 1.583057, -0.0, 2.17889, 0.0, -0.150705, -3.299341, 1.240287, -0.150705, -2.729312, 1.003413, -0.879727, -2.729312, 1.583057, -0.0, 2.17889, 0.0, -0.0, 2.693256, 1.28072, -0.930497, 2.17889, 0.0, -0.150705, -3.299341, 1.003413, -0.879727, -2.729312, 0.38327, -1.330288, -2.729312, 1.28072, -0.930497, 2.17889, 0.0, -0.0, 2.693256, 0.489192, -1.505576, 2.17889, 0.0, -0.150705, -3.299341, 0.38327, -1.330288, -2.729312, -0.383269, -1.330288, -2.729312, 0.489192, -1.505576, 2.17889, 0.0, -0.0, 2.693256, -0.489191, -1.505576, 2.17889, 0.0, -0.150705, -3.299341, -0.383269, -1.330288, -2.729312, -1.003413, -0.879728, -2.729312, -0.489191, -1.505576, 2.17889, 0.0, -0.0, 2.693256, -1.280719, -0.930497, 2.17889, -2.072247, -1.505576, -0.832262, -2.561439, 0.0, -0.832262, -1.240287, -0.150705, -2.729312, -1.280719, -0.930497, 2.17889, -1.583056, 0.0, 2.17889, -2.561439, -0.0, 0.832262, 0.0, -0.150705, -3.299341, -1.003413, -0.879728, -2.729312, -1.240287, -0.150705, -2.729312, -2.072247, -1.505576, -0.832262, -2.072247, -1.505576, 0.832262, -2.561439, -0.0, 0.832262, -1.280719, -0.930497, 2.17889, 0.0, -0.0, 2.693256, -1.583056, 0.0, 2.17889, 0.057702, 0.443236, -4.228172, 0.393527, -0.383082, -4.381704, -0.601891, -0.248365, -4.31964, 0.393527, -0.383082, -4.381704, 0.057702, 0.443236, -4.228172, 0.0, -0.150705, -3.299341, -0.601891, -0.248365, -4.31964, 0.393527, -0.383082, -4.381704, 0.0, -0.150705, -3.299341, -0.601891, -0.248365, -4.31964, 0.0, -0.150705, -3.299341, 0.057702, 0.443236, -4.228172, -1.280719, 0.930497, -2.17889, -2.072248, 1.505576, -0.832262, -0.489191, 1.505576, -2.17889, -0.791528, 2.436074, 0.832262, -2.072248, 1.505576, 0.832262, -0.489191, 1.505576, 2.17889, -2.072248, 1.505576, -0.832262, -2.072248, 1.505576, 0.832262, -0.791528, 2.436073, -0.832262, 0.489192, 1.505576, -2.17889, -0.489191, 1.505576, -2.17889, 0.791528, 2.436073, -0.832262, -0.791528, 2.436074, 0.832262, -0.489191, 1.505576, 2.17889, 0.791529, 2.436074, 0.832262, -0.791528, 2.436073, -0.832262, -0.791528, 2.436074, 0.832262, 0.791528, 2.436073, -0.832262, 1.28072, 0.930497, -2.17889, 0.489192, 1.505576, -2.17889, 2.072248, 1.505576, -0.832262, 0.791529, 2.436074, 0.832262, 0.489192, 1.505576, 2.17889, 2.072248, 1.505576, 0.832262, 2.072248, 1.505576, -0.832262, 0.791528, 2.436073, -0.832262, 2.072248, 1.505576, 0.832262, 1.240287, -0.150705, -2.729312, 1.28072, 0.930497, -2.17889, 2.561439, 0.0, -0.832262, 2.072248, 1.505576, 0.832262, 1.28072, 0.930497, 2.17889, 2.56144, 0.0, 0.832262, 2.072248, 1.505576, -0.832262, 2.072248, 1.505576, 0.832262, 2.561439, 0.0, -0.832262, 1.003413, -0.879727, -2.729312, 1.240287, -0.150705, -2.729312, 2.072248, -1.505576, -0.832262, 2.56144, 0.0, 0.832262, 1.583057, -0.0, 2.17889, 2.072248, -1.505576, 0.832262, 2.561439, 0.0, -0.832262, 2.56144, 0.0, 0.832262, 2.072248, -1.505576, -0.832262, 0.38327, -1.330288, -2.729312, 1.003413, -0.879727, -2.729312, 0.791529, -2.436073, -0.832262, 2.072248, -1.505576, 0.832262, 1.28072, -0.930497, 2.17889, 0.791529, -2.436073, 0.832262, 2.072248, -1.505576, -0.832262, 2.072248, -1.505576, 0.832262, 0.791529, -2.436073, -0.832262, -0.383269, -1.330288, -2.729312, 0.38327, -1.330288, -2.729312, -0.791528, -2.436073, -0.832262, 0.791529, -2.436073, 0.832262, 0.489192, -1.505576, 2.17889, -0.791528, -2.436073, 0.832262, 0.791529, -2.436073, -0.832262, 0.791529, -2.436073, 0.832262, -0.791528, -2.436073, -0.832262, -0.383269, -1.330288, -2.729312, -0.791528, -2.436073, -0.832262, -1.003413, -0.879728, -2.729312, -0.791528, -2.436073, 0.832262, -0.489191, -1.505576, 2.17889, -2.072247, -1.505576, 0.832262, -0.791528, -2.436073, -0.832262, -0.791528, -2.436073, 0.832262, -2.072247, -1.505576, -0.832262, -2.072248, 1.505576, -0.832262, -2.561439, 0.0, -0.832262, -2.072248, 1.505576, 0.832262, -1.240287, -0.150705, -2.729312, -2.561439, 0.0, -0.832262, -1.280719, 0.930497, -2.17889, -2.561439, -0.0, 0.832262, -1.583056, 0.0, 2.17889, -2.072248, 1.505576, 0.832262, -1.003413, -0.879728, -2.729312, -2.072247, -1.505576, -0.832262, -1.240287, -0.150705, -2.729312, -2.072247, -1.505576, 0.832262, -1.280719, -0.930497, 2.17889, -2.561439, -0.0, 0.832262, -2.561439, 0.0, -0.832262, -2.072247, -1.505576, -0.832262, -2.561439, -0.0, 0.832262],
+
+    "normals": [-0.773614, 0.562059, -0.292459, -0.29548, 0.909452, -0.292459, -0.217444, 0.672048, -0.707816, -0.773614, 0.562059, 0.292459, -0.505814, 0.367473, 0.780419, -0.193182, 0.594623, 0.780419, -0.773614, 0.562059, 0.292459, -0.29548, 0.909452, 0.292459, -0.29548, 0.909452, -0.292459, -0.217444, 0.672048, -0.707816, -0.29548, 0.909452, -0.292459, 0.29548, 0.909452, -0.292459, -0.193182, 0.594623, 0.780419, 0.193182, 0.594623, 0.780419, 0.29548, 0.909452, 0.292459, -0.29548, 0.909452, 0.292459, 0.29548, 0.909452, 0.292459, 0.29548, 0.909452, -0.292459, 0.217444, 0.672048, -0.707816, 0.29548, 0.909452, -0.292459, 0.773614, 0.562059, -0.292459, 0.193182, 0.594623, 0.780419, 0.505814, 0.367473, 0.780419, 0.773614, 0.562059, 0.292459, 0.29548, 0.909452, -0.292459, 0.29548, 0.909452, 0.292459, 0.773614, 0.562059, 0.292459, 0.573962, 0.453322, -0.681906, 0.773614, 0.562059, -0.292459, 0.958647, 0.004791, -0.284524, 0.505814, 0.367473, 0.780419, 0.625202, 0.0, 0.780419, 0.956267, 0.0, 0.292459, 0.773614, 0.562059, 0.292459, 0.956267, 0.0, 0.292459, 0.958647, 0.004791, -0.284524, 0.638356, 0.067324, -0.766747, 0.958647, 0.004791, -0.284524, 0.781152, -0.562822, -0.270119, 0.625202, 0.0, 0.780419, 0.505814, -0.367473, 0.780419, 0.773614, -0.562059, 0.292459, 0.956267, 0.0, 0.292459, 0.773614, -0.562059, 0.292459, 0.781152, -0.562822, -0.270119, 0.549333, -0.406812, -0.72985, 0.781152, -0.562822, -0.270119, 0.299722, -0.9176, -0.260994, 0.505814, -0.367473, 0.780419, 0.193182, -0.594623, 0.780419, 0.29548, -0.909452, 0.292459, 0.773614, -0.562059, 0.292459, 0.29548, -0.909452, 0.292459, 0.299722, -0.9176, -0.260994, 0.211371, -0.658406, -0.722343, 0.299722, -0.9176, -0.260994, -0.299722, -0.9176, -0.260994, 0.193182, -0.594623, 0.780419, -0.193182, -0.594623, 0.780419, -0.29548, -0.909452, 0.292459, 0.29548, -0.909452, 0.292459, -0.29548, -0.909452, 0.292459, -0.299722, -0.9176, -0.260994, -0.299722, -0.9176, -0.260994, -0.781152, -0.562822, -0.270119, -0.549333, -0.406812, -0.72985, -0.193182, -0.594623, 0.780419, -0.505814, -0.367473, 0.780419, -0.773614, -0.562059, 0.292459, -0.29548, -0.909452, 0.292459, -0.773614, -0.562059, 0.292459, -0.781152, -0.562822, -0.270119, 0.007508, 0.086612, -0.996185, -0.638356, 0.067324, -0.766747, -0.573962, 0.453322, -0.681906, -0.958647, 0.004791, -0.284524, -0.956267, 0.0, 0.292459, -0.773614, 0.562059, 0.292459, -0.625202, 0.0, 0.780419, 0.0, 0.0, 1.0, -0.505814, 0.367473, 0.780419, -0.958647, 0.004791, -0.284524, -0.773614, 0.562059, -0.292459, -0.573962, 0.453322, -0.681906, -0.625202, 0.0, 0.780419, -0.505814, 0.367473, 0.780419, -0.773614, 0.562059, 0.292459, 0.007508, 0.086612, -0.996185, -0.573962, 0.453322, -0.681906, -0.217444, 0.672048, -0.707816, -0.505814, 0.367473, 0.780419, 0.0, 0.0, 1.0, -0.193182, 0.594623, 0.780419, 0.007508, 0.086612, -0.996185, -0.217444, 0.672048, -0.707816, 0.217444, 0.672048, -0.707816, -0.193182, 0.594623, 0.780419, 0.0, 0.0, 1.0, 0.193182, 0.594623, 0.780419, 0.007508, 0.086612, -0.996185, 0.217444, 0.672048, -0.707816, 0.573962, 0.453322, -0.681906, 0.193182, 0.594623, 0.780419, 0.0, 0.0, 1.0, 0.505814, 0.367473, 0.780419, 0.007508, 0.086612, -0.996185, 0.573962, 0.453322, -0.681906, 0.638356, 0.067324, -0.766747, 0.505814, 0.367473, 0.780419, 0.0, 0.0, 1.0, 0.625202, 0.0, 0.780419, 0.007508, 0.086612, -0.996185, 0.638356, 0.067324, -0.766747, 0.549333, -0.406812, -0.72985, 0.625202, 0.0, 0.780419, 0.0, 0.0, 1.0, 0.505814, -0.367473, 0.780419, 0.007508, 0.086612, -0.996185, 0.549333, -0.406812, -0.72985, 0.211371, -0.658406, -0.722343, 0.505814, -0.367473, 0.780419, 0.0, 0.0, 1.0, 0.193182, -0.594623, 0.780419, 0.007508, 0.086612, -0.996185, 0.211371, -0.658406, -0.722343, -0.211371, -0.658406, -0.722343, 0.193182, -0.594623, 0.780419, 0.0, 0.0, 1.0, -0.193182, -0.594623, 0.780419, 0.007508, 0.086612, -0.996185, -0.211371, -0.658406, -0.722343, -0.549333, -0.406812, -0.72985, -0.193182, -0.594623, 0.780419, 0.0, 0.0, 1.0, -0.505814, -0.367473, 0.780419, -0.781152, -0.562822, -0.270119, -0.958647, 0.004791, -0.284524, -0.638356, 0.067324, -0.766747, -0.505814, -0.367473, 0.780419, -0.625202, 0.0, 0.780419, -0.956267, 0.0, 0.292459, 0.007508, 0.086612, -0.996185, -0.549333, -0.406812, -0.72985, -0.638356, 0.067324, -0.766747, -0.781152, -0.562822, -0.270119, -0.773614, -0.562059, 0.292459, -0.956267, 0.0, 0.292459, -0.505814, -0.367473, 0.780419, 0.0, 0.0, 1.0, -0.625202, 0.0, 0.780419, 0.160131, 0.9523, -0.259651, 0.706992, -0.51561, -0.483993, -0.889126, -0.268899, -0.370281, 0.706992, -0.51561, -0.483993, 0.160131, 0.9523, -0.259651, 0.007508, 0.086612, -0.996185, -0.889126, -0.268899, -0.370281, 0.706992, -0.51561, -0.483993, 0.007508, 0.086612, -0.996185, -0.889126, -0.268899, -0.370281, 0.007508, 0.086612, -0.996185, 0.160131, 0.9523, -0.259651, -0.573962, 0.453322, -0.681906, -0.773614, 0.562059, -0.292459, -0.217444, 0.672048, -0.707816, -0.29548, 0.909452, 0.292459, -0.773614, 0.562059, 0.292459, -0.193182, 0.594623, 0.780419, -0.773614, 0.562059, -0.292459, -0.773614, 0.562059, 0.292459, -0.29548, 0.909452, -0.292459, 0.217444, 0.672048, -0.707816, -0.217444, 0.672048, -0.707816, 0.29548, 0.909452, -0.292459, -0.29548, 0.909452, 0.292459, -0.193182, 0.594623, 0.780419, 0.29548, 0.909452, 0.292459, -0.29548, 0.909452, -0.292459, -0.29548, 0.909452, 0.292459, 0.29548, 0.909452, -0.292459, 0.573962, 0.453322, -0.681906, 0.217444, 0.672048, -0.707816, 0.773614, 0.562059, -0.292459, 0.29548, 0.909452, 0.292459, 0.193182, 0.594623, 0.780419, 0.773614, 0.562059, 0.292459, 0.773614, 0.562059, -0.292459, 0.29548, 0.909452, -0.292459, 0.773614, 0.562059, 0.292459, 0.638356, 0.067324, -0.766747, 0.573962, 0.453322, -0.681906, 0.958647, 0.004791, -0.284524, 0.773614, 0.562059, 0.292459, 0.505814, 0.367473, 0.780419, 0.956267, 0.0, 0.292459, 0.773614, 0.562059, -0.292459, 0.773614, 0.562059, 0.292459, 0.958647, 0.004791, -0.284524, 0.549333, -0.406812, -0.72985, 0.638356, 0.067324, -0.766747, 0.781152, -0.562822, -0.270119, 0.956267, 0.0, 0.292459, 0.625202, 0.0, 0.780419, 0.773614, -0.562059, 0.292459, 0.958647, 0.004791, -0.284524, 0.956267, 0.0, 0.292459, 0.781152, -0.562822, -0.270119, 0.211371, -0.658406, -0.722343, 0.549333, -0.406812, -0.72985, 0.299722, -0.9176, -0.260994, 0.773614, -0.562059, 0.292459, 0.505814, -0.367473, 0.780419, 0.29548, -0.909452, 0.292459, 0.781152, -0.562822, -0.270119, 0.773614, -0.562059, 0.292459, 0.299722, -0.9176, -0.260994, -0.211371, -0.658406, -0.722343, 0.211371, -0.658406, -0.722343, -0.299722, -0.9176, -0.260994, 0.29548, -0.909452, 0.292459, 0.193182, -0.594623, 0.780419, -0.29548, -0.909452, 0.292459, 0.299722, -0.9176, -0.260994, 0.29548, -0.909452, 0.292459, -0.299722, -0.9176, -0.260994, -0.211371, -0.658406, -0.722343, -0.299722, -0.9176, -0.260994, -0.549333, -0.406812, -0.72985, -0.29548, -0.909452, 0.292459, -0.193182, -0.594623, 0.780419, -0.773614, -0.562059, 0.292459, -0.299722, -0.9176, -0.260994, -0.29548, -0.909452, 0.292459, -0.781152, -0.562822, -0.270119, -0.773614, 0.562059, -0.292459, -0.958647, 0.004791, -0.284524, -0.773614, 0.562059, 0.292459, -0.638356, 0.067324, -0.766747, -0.958647, 0.004791, -0.284524, -0.573962, 0.453322, -0.681906, -0.956267, 0.0, 0.292459, -0.625202, 0.0, 0.780419, -0.773614, 0.562059, 0.292459, -0.549333, -0.406812, -0.72985, -0.781152, -0.562822, -0.270119, -0.638356, 0.067324, -0.766747, -0.773614, -0.562059, 0.292459, -0.505814, -0.367473, 0.780419, -0.956267, 0.0, 0.292459, -0.958647, 0.004791, -0.284524, -0.781152, -0.562822, -0.270119, -0.956267, 0.0, 0.292459],
+
+    "colors": [0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.933333, 0.623529, 0.690196, 0.678431, 0.141176, 0.141176, 0.690196, 0.152941, 0.156863, 0.933333, 0.623529, 0.690196, 0.913725, 0.007843, 0.062745, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.690196, 0.152941, 0.156863, 0.756863, 0.184314, 0.223529, 0.913725, 0.007843, 0.062745, 0.913725, 0.007843, 0.062745, 0.913725, 0.007843, 0.062745, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.756863, 0.184314, 0.223529, 0.682353, 0.145098, 0.14902, 0.921569, 0.003922, 0.062745, 0.678431, 0.141176, 0.141176, 0.913725, 0.007843, 0.062745, 0.921569, 0.003922, 0.062745, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.682353, 0.145098, 0.14902, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.921569, 0.003922, 0.062745, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.686275, 0.113725, 0.156863, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.929412, 0.0, 0.058824, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.92549, 0.0, 0.058824, 0.929412, 0.0, 0.058824, 0.92549, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.964706, 0.384314, 0.411765, 0.92549, 0.0, 0.058824, 0.964706, 0.384314, 0.411765, 0.678431, 0.141176, 0.141176, 0.698039, 0.156863, 0.164706, 0.678431, 0.141176, 0.141176, 0.815686, 0.152941, 0.227451, 0.678431, 0.141176, 0.141176, 0.682353, 0.145098, 0.145098, 0.894118, 0.047059, 0.094118, 0.964706, 0.384314, 0.411765, 0.894118, 0.047059, 0.094118, 0.678431, 0.141176, 0.141176, 0.541176, 0.07451, 0.121569, 0.85098, 0.152941, 0.247059, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.933333, 0.623529, 0.690196, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.933333, 0.623529, 0.690196, 0.560784, 0.082353, 0.121569, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.690196, 0.152941, 0.156863, 0.560784, 0.082353, 0.121569, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.690196, 0.152941, 0.156863, 0.243137, 0.0, 0.015686, 0.756863, 0.184314, 0.223529, 0.560784, 0.082353, 0.121569, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.756863, 0.184314, 0.223529, 0.243137, 0.0, 0.015686, 0.682353, 0.145098, 0.14902, 0.560784, 0.082353, 0.121569, 0.678431, 0.141176, 0.141176, 0.796078, 0.14902, 0.211765, 0.682353, 0.145098, 0.14902, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.541176, 0.07451, 0.121569, 0.690196, 0.098039, 0.164706, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.541176, 0.07451, 0.121569, 0.65098, 0.086275, 0.145098, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.541176, 0.07451, 0.121569, 0.65098, 0.086275, 0.145098, 0.85098, 0.152941, 0.247059, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.541176, 0.07451, 0.121569, 0.772549, 0.14902, 0.196078, 0.815686, 0.152941, 0.227451, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.682353, 0.145098, 0.145098, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.85098, 0.152941, 0.247059, 0.682353, 0.145098, 0.145098, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.541176, 0.07451, 0.121569, 0.815686, 0.152941, 0.227451, 0.85098, 0.152941, 0.247059, 0.678431, 0.141176, 0.141176, 0.890196, 0.027451, 0.07451, 0.929412, 0.0, 0.058824, 0.682353, 0.145098, 0.145098, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.239216, 0.0, 0.015686, 0.239216, 0.0, 0.015686, 0.239216, 0.0, 0.015686, 0.239216, 0.0, 0.015686, 0.239216, 0.0, 0.015686, 0.560784, 0.082353, 0.121569, 0.513726, 0.070588, 0.109804, 0.239216, 0.0, 0.015686, 0.541176, 0.07451, 0.121569, 0.239216, 0.0, 0.015686, 0.560784, 0.082353, 0.121569, 0.25098, 0.003922, 0.019608, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.913725, 0.007843, 0.062745, 0.933333, 0.623529, 0.690196, 0.690196, 0.152941, 0.156863, 0.678431, 0.141176, 0.141176, 0.933333, 0.623529, 0.690196, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.913725, 0.007843, 0.062745, 0.690196, 0.152941, 0.156863, 0.913725, 0.007843, 0.062745, 0.678431, 0.141176, 0.141176, 0.913725, 0.007843, 0.062745, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.913725, 0.007843, 0.062745, 0.756863, 0.184314, 0.223529, 0.921569, 0.003922, 0.062745, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.921569, 0.003922, 0.062745, 0.686275, 0.113725, 0.156863, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.921569, 0.003922, 0.062745, 0.682353, 0.145098, 0.14902, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.921569, 0.003922, 0.062745, 0.678431, 0.141176, 0.141176, 0.654902, 0.098039, 0.145098, 0.686275, 0.113725, 0.156863, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.65098, 0.086275, 0.145098, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.92549, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.85098, 0.152941, 0.247059, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.92549, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.964706, 0.384314, 0.411765, 0.678431, 0.141176, 0.141176, 0.92549, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.772549, 0.14902, 0.196078, 0.698039, 0.156863, 0.164706, 0.815686, 0.152941, 0.227451, 0.964706, 0.384314, 0.411765, 0.678431, 0.141176, 0.141176, 0.894118, 0.047059, 0.094118, 0.678431, 0.141176, 0.141176, 0.964706, 0.384314, 0.411765, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.933333, 0.623529, 0.690196, 0.85098, 0.152941, 0.247059, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.933333, 0.623529, 0.690196, 0.815686, 0.152941, 0.227451, 0.678431, 0.141176, 0.141176, 0.85098, 0.152941, 0.247059, 0.890196, 0.027451, 0.07451, 0.682353, 0.145098, 0.145098, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824],
+
+    "uvs": [],
+
+    "faces": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251],
 
     "bones": [],
 

@@ -16,9 +16,14 @@ const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
 const TREE_PROBABILITY_LENGTHWISE = 0.5;
 const TREE_MAX_DENSITY_WIDTHWISE = 4;
+const BALLOON_PROBABILITY_LENGTHWISE = 0.22;
+const BALLOON_DENSITY_WIDTHWISE = 2;
+const BALLOON_FLOAT_HEIGHT = 6;
+const BALLON_COLLIDER_SQRD_RADIUS = 1;
 const BOX_COLLIDER = "BOX_COLLIDER";
 
 import treeMesh from "../tree.js";
+import balloonMesh from "../balloon";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
 import * as MathUtils from "../utils/math_utils";
 import Mesh from "../game_object/mesh";
@@ -44,9 +49,12 @@ export default class Slope extends GameObject{
     this.segmentRotation = [-0.2,0,0];
     this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix,
       [0,SEGMENT_LENGTH,0,1]).slice(0,3);
-      this.obstacles = [];
+    this.obstacles = [];
+    this.balloons = [];
+    this.balloonsCreatedSinceStart = 0;
     //this.segmentRotation[0] = 0;
     this._setupTreeMesh();
+    this._setupBalloonMesh();
     const firstLoop = this.createEdgeLoop();
     let unpackedVertices;
 
@@ -72,6 +80,11 @@ export default class Slope extends GameObject{
     treeMesh.textured = true;
     this.treeMesh= new Mesh(treeMesh);
     this.treeMesh.buffers = this.rasterizer.sendMeshToGPU(this.treeMesh);
+  }
+  _setupBalloonMesh(){
+    this.balloonMesh = new Mesh(balloonMesh);
+    this.balloonMesh.colored = true;
+    this.balloonMesh.buffers = this.rasterizer.sendMeshToGPU(this.balloonMesh);
   }
   _addUvsSegment(){
     for(let i = 0; i <= EDGE_LOOP_RESOLUTION; ++i){
@@ -151,9 +164,36 @@ export default class Slope extends GameObject{
     }
     this.obstacles.push(obstacleSegment);
   }
+  _addBalloonsSegment(){
+    const balloonSegment = [];
+    let transformationMatrix, newBalloon, id;
+    if(Math.random() < BALLOON_PROBABILITY_LENGTHWISE){
+      for(let i = 0; i <= Math.floor(Math.random() * BALLOON_DENSITY_WIDTHWISE); ++ i){
+        transformationMatrix = MathUtils.mat_4_multiply(
+          MathUtils.translationMatrix(Math.random() * SEGMENT_WIDTH - SEGMENT_WIDTH/2,
+           SEGMENT_LENGTH/2, BALLOON_FLOAT_HEIGHT),
+          this.segmentMatrices[this.segmentMatrices.length - 1]
+        );
+        debugger;
+        newBalloon = new GameObject(this.balloonMesh, transformationMatrix);
+        id = `balloon${this.balloonsCreatedSinceStart}`;
+        newBalloon.id = id;
+        balloonSegment.push(newBalloon);
+        this.rasterizer.objects[id] = newBalloon;
+        ++this.balloonsCreatedSinceStart;
+      }
+    }
+    this.balloons.push(balloonSegment);
+  }
   _deleteObstacleSegment(){
     const deletedSegment = this.obstacles.shift();
     for(let i = 0; i< deletedSegment.length; ++i){
+      delete this.rasterizer.objects[deletedSegment[i].id];
+    }
+  }
+  _deleteBallonSegment(){
+    const deletedSegment = this.balloons.shift();
+    for(let i = 0; i < deletedSegment.length; ++i){
       delete this.rasterizer.objects[deletedSegment[i].id];
     }
   }
@@ -174,7 +214,6 @@ export default class Slope extends GameObject{
     return true;
   }
   generateNewSegmentRotation(){
-
     let randomTurn = Math.random();
     if (randomTurn < 0.05 * TURN_TYPE_SWITCH_FREQUENCY ){
       randomTurn = Math.random();
@@ -246,6 +285,20 @@ export default class Slope extends GameObject{
          transformedPosition[2] < dimensions[2]){
            return true;
          }
+    }
+    return false;
+  }
+
+  positionCollidesWithBalloon(pos, segment_number){
+    const balloons = this.balloons[segment_number];
+    let balloonPos;
+    for(let i = 0; i < ballons.length; ++i){
+      balloonPos = MathUtils.mat4TranslationComponent(balloons[i].transformationMatrix);
+      if(vectorSquareMag(
+          MathUtils.subtractVectors(pos, balloonPos)
+        ) <=  BALLON_COLLIDER_SQRD_RADIUS){
+            return balloons[i];
+      }
     }
     return false;
   }
@@ -339,8 +392,8 @@ export default class Slope extends GameObject{
         )
       )
     );
-    this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix, [0, SEGMENT_LENGTH,
-    0,1]);
+    this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix,
+       [0, SEGMENT_LENGTH, 0,1]);
 
      let newSegment = this.createEdgeLoop();
     // let transformedSegment = MathUtils.addVectors(newSegment, this.segmentPosition);
@@ -357,6 +410,7 @@ export default class Slope extends GameObject{
     this._addSegment(transformedSegment);
     this._addSideGeometrySegment();
     this._addObstacleSegment();
+    this._addBalloonsSegment();
     //this.segmentPosition =
     //  MathUtils.mat4TranslationComponent(segmentMatrix);
     this.segmentMatrices.push(transformationMatrix);
@@ -403,6 +457,7 @@ export default class Slope extends GameObject{
     this._deleteUvsSegment();
     this._deleteSideGeometrySegment();
     this._deleteObstacleSegment();
+    this._deleteBallonSegment();
     this.mesh.setDirty();
   }
 }
