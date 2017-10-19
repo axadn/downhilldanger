@@ -1,6 +1,7 @@
 ## Downhill Hazard
-Downhill Hazard is a 3D browser game built from scratch using vanilla JavaScript.
-https://axadn.github.io/downhill-hazard/
+
+[Downhill Hazard](https://axadn.github.io/downhill-hazard/) is a 3D browser game built from scratch using vanilla JavaScript.
+
 
 ### Features and Overview
 Users control a character in 3rd person to navigate down a slope on a snowboard.
