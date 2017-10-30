@@ -1260,6 +1260,8 @@ const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
 const ACCELERATION = 0.02;
 const STEER_SPEED = 0.07;
+const DRAG = 0.1;
+const SNOWBOARD_FRICTION = [0.187,0,0.187,1];
 
 
 class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["a" /* default */]{
@@ -1272,6 +1274,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.slope = slope;
     this.currentSegmentNumber = 0;
     this.input = {left: false, right: false, back: false}
+    this.velocity = [0,0,0,0];
+    this.friction = SNOWBOARD_FRICTION;
   }
   update(){
     this._handleConrols();
@@ -1281,20 +1285,46 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
           this.transformationMatrix),this.surfacePoint));
     if(isNaN(distanceFromSurface)){
     }
+    let localVelocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* inverse_mat4_rot_pos */](
+        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* mat4RotationComponent */](this.transformationMatrix)),
+      this.velocity
+    );
     if(distanceFromSurface > SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
       this._fall();
     }
     else{
       this.fallSpeed = 0;
-      this._accelerate();
+      this._accelerate(localVelocity);
+      this._applyFriction(localVelocity);
     }
+    this._applyDrag(localVelocity);
+    debugger
+    this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* mat4RotationComponent */](this.transformationMatrix),
+      localVelocity
+    )
     this._moveForward();
   }
-  _accelerate(){
-    this.speed += ACCELERATION;
-    if(this.speed > MAX_SPEED){
-      this.speed = MAX_SPEED;
+  _applyDrag(localVelocity){
+    for(let i = 0; i < localVelocity.length; ++i){
+      this.velocity[i] -= this.velocity[i] * DRAG;
     }
+  }
+  _applyFriction(localVelocity){
+    let signFlip;
+    for(let i = 0; i < localVelocity.length; ++i){
+      if (Math.abs(localVelocity[i]) < Math.abs(this.friction[i])){
+        localVelocity[i] = 0;
+      }
+      else{
+        signFlip = localVelocity[i] < 0 ? -1 : 1;
+        localVelocity[i] -= this.friction[i] * signFlip;
+      }
+    }
+  }
+  _accelerate(localVelocity){
+    localVelocity[1] += ACCELERATION;
   }
   _steer(direction){
     const zRot = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["y" /* zRotationMatrix */](direction * STEER_SPEED);
@@ -1353,7 +1383,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       this._handleTreeCollision(obstacleCollisionData);
     }
     let worldMoveVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["j" /* projectVectorOntoPlane */](
-      this._calculateWorldMoveVector(), this.surfacePlaneNormal);
+      this.velocity, this.surfacePlaneNormal);
     let transformationMatrixAfterMove = this._transformationMatrixAfterMove(worldMoveVector);
     nextWorldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* mat4TranslationComponent */](
       transformationMatrixAfterMove);
@@ -1444,12 +1474,6 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* translationMatrix */](0,0, -1 * this.fallSpeed));
       this.fallSpeed = this.fallSpeed + 0.02;
   }
-  _calculateWorldMoveVector(){
-    return __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* mat4RotationComponent */](
-        this.transformationMatrix),
-       [0,this.speed,0,1]).slice(0,3);
-  }
   _transformationMatrixAfterMove(worldMoveVector){
     return __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](this.transformationMatrix,
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* translationMatrix */](worldMoveVector[0], worldMoveVector[1], worldMoveVector[2]));
@@ -1465,14 +1489,14 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tree_js__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__balloon__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__balloon__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__game_object_mesh__ = __webpack_require__(2);
 const SEGMENT_WIDTH = 70;
 const SEGMENT_LENGTH = 40;
 const EDGE_LOOP_RESOLUTION = 5;
-const SLOPE_BUFFER_AMOUNT = 10;
+const SLOPE_BUFFER_AMOUNT = 30;
 const BACK_BUFFER_ANOUNT = 10;
 const TURN_TYPE_SWITCH_FREQUENCY = 3;
 const SHARP_TURN = 0.35;
@@ -1582,10 +1606,10 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
           transformationMatrix
         );
         let treeObject;
-        for(let i = 0; i < TREES_PER_SEGMENT; ++i){
+        for(let i = 0; i < 1; ++i){
           transformationMatrix =
           __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["f" /* mat_4_multiply */](
-            __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["p" /* translationMatrix */](0, SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
+            __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["p" /* translationMatrix */](0, 0, 0,1),
             transformationMatrix );
           treeObject = new __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */](this.treeMesh,transformationMatrix);
           treeObject.id = `tree${this.treesCreatedSinceStart}`;
@@ -1645,7 +1669,6 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
            SEGMENT_LENGTH/2, BALLOON_FLOAT_HEIGHT),
           this.segmentMatrices[this.segmentMatrices.length - 1]
         );
-        debugger;
         newBalloon = new __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */](this.balloonMesh, transformationMatrix);
         id = `balloon${this.balloonsCreatedSinceStart}`;
         newBalloon.id = id;
@@ -1963,8 +1986,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
 
 
 /***/ }),
-/* 11 */,
-/* 12 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

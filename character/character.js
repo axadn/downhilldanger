@@ -5,6 +5,8 @@ const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
 const ACCELERATION = 0.02;
 const STEER_SPEED = 0.07;
+const DRAG = 0.1;
+const SNOWBOARD_FRICTION = [0.187,0,0.187,1];
 import * as MathUtils from "../utils/math_utils";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
 export default class Character extends GameObject{
@@ -17,6 +19,8 @@ export default class Character extends GameObject{
     this.slope = slope;
     this.currentSegmentNumber = 0;
     this.input = {left: false, right: false, back: false}
+    this.velocity = [0,0,0,0];
+    this.friction = SNOWBOARD_FRICTION;
   }
   update(){
     this._handleConrols();
@@ -26,20 +30,46 @@ export default class Character extends GameObject{
           this.transformationMatrix),this.surfacePoint));
     if(isNaN(distanceFromSurface)){
     }
+    let localVelocity = MathUtils.multiplyVec4ByMatrix4(
+      MathUtils.inverse_mat4_rot_pos(
+        MathUtils.mat4RotationComponent(this.transformationMatrix)),
+      this.velocity
+    );
     if(distanceFromSurface > SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
       this._fall();
     }
     else{
       this.fallSpeed = 0;
-      this._accelerate();
+      this._accelerate(localVelocity);
+      this._applyFriction(localVelocity);
     }
+    this._applyDrag(localVelocity);
+    debugger
+    this.velocity = MathUtils.multiplyVec4ByMatrix4(
+      MathUtils.mat4RotationComponent(this.transformationMatrix),
+      localVelocity
+    )
     this._moveForward();
   }
-  _accelerate(){
-    this.speed += ACCELERATION;
-    if(this.speed > MAX_SPEED){
-      this.speed = MAX_SPEED;
+  _applyDrag(localVelocity){
+    for(let i = 0; i < localVelocity.length; ++i){
+      this.velocity[i] -= this.velocity[i] * DRAG;
     }
+  }
+  _applyFriction(localVelocity){
+    let signFlip;
+    for(let i = 0; i < localVelocity.length; ++i){
+      if (Math.abs(localVelocity[i]) < Math.abs(this.friction[i])){
+        localVelocity[i] = 0;
+      }
+      else{
+        signFlip = localVelocity[i] < 0 ? -1 : 1;
+        localVelocity[i] -= this.friction[i] * signFlip;
+      }
+    }
+  }
+  _accelerate(localVelocity){
+    localVelocity[1] += ACCELERATION;
   }
   _steer(direction){
     const zRot = MathUtils.zRotationMatrix(direction * STEER_SPEED);
@@ -98,7 +128,7 @@ export default class Character extends GameObject{
       this._handleTreeCollision(obstacleCollisionData);
     }
     let worldMoveVector = MathUtils.projectVectorOntoPlane(
-      this._calculateWorldMoveVector(), this.surfacePlaneNormal);
+      this.velocity, this.surfacePlaneNormal);
     let transformationMatrixAfterMove = this._transformationMatrixAfterMove(worldMoveVector);
     nextWorldPos = MathUtils.mat4TranslationComponent(
       transformationMatrixAfterMove);
@@ -188,12 +218,6 @@ export default class Character extends GameObject{
     this.transformationMatrix = MathUtils.mat_4_multiply(this.transformationMatrix,
       MathUtils.translationMatrix(0,0, -1 * this.fallSpeed));
       this.fallSpeed = this.fallSpeed + 0.02;
-  }
-  _calculateWorldMoveVector(){
-    return MathUtils.multiplyVec4ByMatrix4(
-      MathUtils.mat4RotationComponent(
-        this.transformationMatrix),
-       [0,this.speed,0,1]).slice(0,3);
   }
   _transformationMatrixAfterMove(worldMoveVector){
     return MathUtils.mat_4_multiply(this.transformationMatrix,

@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "main": "crazy_motorcycle",
-  "dependencies": {},
+  "dependencies": {
+    "webpack": "^3.8.1"
+  },
   "devDependencies": {}
 }

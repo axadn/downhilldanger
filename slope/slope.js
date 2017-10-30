@@ -1,7 +1,7 @@
 const SEGMENT_WIDTH = 70;
 const SEGMENT_LENGTH = 40;
 const EDGE_LOOP_RESOLUTION = 5;
-const SLOPE_BUFFER_AMOUNT = 10;
+const SLOPE_BUFFER_AMOUNT = 30;
 const BACK_BUFFER_ANOUNT = 10;
 const TURN_TYPE_SWITCH_FREQUENCY = 3;
 const SHARP_TURN = 0.35;
@@ -111,10 +111,10 @@ export default class Slope extends GameObject{
           transformationMatrix
         );
         let treeObject;
-        for(let i = 0; i < TREES_PER_SEGMENT; ++i){
+        for(let i = 0; i < 1; ++i){
           transformationMatrix =
           MathUtils.mat_4_multiply(
-            MathUtils.translationMatrix(0, SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
+            MathUtils.translationMatrix(0, 0, 0,1),
             transformationMatrix );
           treeObject = new GameObject(this.treeMesh,transformationMatrix);
           treeObject.id = `tree${this.treesCreatedSinceStart}`;
@@ -174,7 +174,6 @@ export default class Slope extends GameObject{
            SEGMENT_LENGTH/2, BALLOON_FLOAT_HEIGHT),
           this.segmentMatrices[this.segmentMatrices.length - 1]
         );
-        debugger;
         newBalloon = new GameObject(this.balloonMesh, transformationMatrix);
         id = `balloon${this.balloonsCreatedSinceStart}`;
         newBalloon.id = id;
