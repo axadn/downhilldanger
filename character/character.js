@@ -103,7 +103,7 @@ export default class Character extends GameObject{
         this.restitution
     ).concat([0]);
     let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
-    pushBackVector = MathUtils.scaleVector(pushBackVector, this.speed*10);
+    pushBackVector = MathUtils.scaleVector(pushBackVector, this.speed*30);
     this.transformationMatrix = MathUtils.mat_4_multiply(this.transformationMatrix,
       MathUtils.translationMatrix(pushBackVector[0], pushBackVector[1],
       pushBackVector[2])
@@ -128,6 +128,7 @@ export default class Character extends GameObject{
 
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
+      return;
     }
     else if(obstacleCollisionData){
       this._handleTreeCollision(obstacleCollisionData);

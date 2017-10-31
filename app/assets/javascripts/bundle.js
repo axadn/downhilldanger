@@ -1370,7 +1370,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
         this.restitution
     ).concat([0]);
     let pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["u" /* vectorNormalize */](collisionData.normal);
-    pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["m" /* scaleVector */](pushBackVector, this.speed*10);
+    pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["m" /* scaleVector */](pushBackVector, this.speed*30);
     this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["g" /* mat_4_multiply */](this.transformationMatrix,
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["q" /* translationMatrix */](pushBackVector[0], pushBackVector[1],
       pushBackVector[2])
@@ -1395,6 +1395,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
+      return;
     }
     else if(obstacleCollisionData){
       this._handleTreeCollision(obstacleCollisionData);
