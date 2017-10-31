@@ -306,5 +306,15 @@ export const axisAngleToMatrix = (axis, angle) =>{
     t*x*z-y*s, t*y*z+x*s, t*z*z+c, 0,
     0,         0,         0,       1
   ]);
+};
 
+export const bounceVectorOffPlane = (vector, planeNormal) =>{
+  planeNormal = vectorNormalize(planeNormal);
+  return addVectors(
+    scaleVector(
+      planeNormal,
+      -2 * vectorDot(vector, planeNormal)
+    ),
+    vector
+  );
 };

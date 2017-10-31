@@ -6,6 +6,7 @@ const EDGE_COLLISION_PADDING_ROTATION = 0.5;
 const ACCELERATION = 0.02;
 const STEER_SPEED = 0.07;
 const DRAG = 0.1;
+const SNOWBOARD_RESTITUTION = 0.8;
 const SNOWBOARD_FRICTION = [0.187,0,0.187,1];
 import * as MathUtils from "../utils/math_utils";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
@@ -21,6 +22,7 @@ export default class Character extends GameObject{
     this.input = {left: false, right: false, back: false}
     this.velocity = [0,0,0,0];
     this.friction = SNOWBOARD_FRICTION;
+    this.restitution = SNOWBOARD_RESTITUTION;
   }
   update(){
     this._handleConrols();
@@ -44,7 +46,6 @@ export default class Character extends GameObject{
       this._applyFriction(localVelocity);
     }
     this._applyDrag(localVelocity);
-    debugger
     this.velocity = MathUtils.multiplyVec4ByMatrix4(
       MathUtils.mat4RotationComponent(this.transformationMatrix),
       localVelocity
@@ -96,8 +97,12 @@ export default class Character extends GameObject{
     }
   }
   _handleEdgeCollision(collisionData){
+    this.velocity = MathUtils.scaleVector(
+        MathUtils.bounceVectorOffPlane(this.velocity,
+          collisionData.normal),
+        this.restitution
+    ).concat([0]);
     let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
-    this.speed *= EDGE_COLLISION_DAMP_FACTOR;
     pushBackVector = MathUtils.scaleVector(pushBackVector, this.speed*10);
     this.transformationMatrix = MathUtils.mat_4_multiply(this.transformationMatrix,
       MathUtils.translationMatrix(pushBackVector[0], pushBackVector[1],
@@ -120,9 +125,9 @@ export default class Character extends GameObject{
     let nextWorldPos = worldPos;
     const edgeCollisionData = this.slope.positionIsBeyondEdge(nextWorldPos, this.currentSegmentNumber);
     const obstacleCollisionData = this.slope.positionCollidesWithObstacle(nextWorldPos, this.currentSegmentNumber);
+
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
-      return;
     }
     else if(obstacleCollisionData){
       this._handleTreeCollision(obstacleCollisionData);
@@ -153,6 +158,7 @@ export default class Character extends GameObject{
           MathUtils.translationMatrix(worldMoveVector[0], worldMoveVector[1], worldMoveVector[2])
         );
       }
+
     }
       this.transformationMatrix = transformationMatrixAfterMove;
 
@@ -185,7 +191,8 @@ export default class Character extends GameObject{
       this.transformationMatrix,
       MathUtils.translationMatrix(surfaceOffset[0],
         surfaceOffset[1], surfaceOffset[2])
-    )
+    );
+    console.log(this.transformationMatrix);
   }
 
   _getSurfaceData(){
