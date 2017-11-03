@@ -5,6 +5,7 @@ const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
 const ACCELERATION = 0.02;
 const STEER_SPEED = 0.07;
+const ANGULAR_DRAG = 0.15;
 const DRAG = 0.1;
 const SNOWBOARD_RESTITUTION = 0.8;
 const SNOWBOARD_FRICTION = [0.187,0,0.187,1];
@@ -21,11 +22,13 @@ export default class Character extends GameObject{
     this.currentSegmentNumber = 0;
     this.input = {left: false, right: false, back: false}
     this.velocity = [0,0,0,0];
+    this.angularVelocityAxis = [0,0,1,0];
+    this.angularVelocityAngle = 0;
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
   }
   update(){
-    this._handleConrols();
+    this._handleControls();
     this._getSurfaceData();
     const distanceFromSurface = MathUtils.vectorSquareMag(MathUtils.subtractVectors
         (MathUtils.mat4TranslationComponent(
@@ -46,16 +49,36 @@ export default class Character extends GameObject{
       this._applyFriction(localVelocity);
     }
     this._applyDrag(localVelocity);
+    this._applyAngularDrag();
     this.velocity = MathUtils.multiplyVec4ByMatrix4(
       MathUtils.mat4RotationComponent(this.transformationMatrix),
       localVelocity
     )
+    this._applyAngularVelocity();
     this._moveForward();
+  }
+  addAngularVelocity(axis, angle){
+    const transformationMatrix =  MathUtils.axisAngleToMatrix(this.angularVelocityAxis,
+      this.angularVelocityAngle);
+    this.angularVelocityAxis = MathUtils.multiplyVec4ByMatrix4(transformationMatrix,
+      axis
+    );
+    this.angularVelocityAngle = angle;
   }
   _applyDrag(localVelocity){
     for(let i = 0; i < localVelocity.length; ++i){
       this.velocity[i] -= this.velocity[i] * DRAG;
     }
+  }
+  _applyAngularVelocity(){
+    const transformationMatrix = MathUtils.axisAngleToMatrix(
+      this.angularVelocityAxis, this.angularVelocityAngle);
+    this.transformationMatrix = MathUtils.mat_4_multiply(
+      transformationMatrix, this.transformationMatrix
+    );
+  }
+  _applyAngularDrag(){
+    this.angularVelocityAngle -= this.angularVelocityAngle * ANGULAR_DRAG;
   }
   _applyFriction(localVelocity){
     let signFlip;
@@ -86,7 +109,7 @@ export default class Character extends GameObject{
       MathUtils.mat4RotationComponent(this.transformationMatrix)
     );
   }
-  _handleConrols(){
+  _handleControls(){
     if(this.input.left ? !this.input.right : this.input.right){
       if(this.input.right){
         this._steer(-1);
@@ -103,7 +126,7 @@ export default class Character extends GameObject{
         this.restitution
     ).concat([0]);
     let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
-    pushBackVector = MathUtils.scaleVector(pushBackVector, this.speed*30);
+    pushBackVector = MathUtils.scaleVector(pushBackVector, 2);
     this.transformationMatrix = MathUtils.mat_4_multiply(this.transformationMatrix,
       MathUtils.translationMatrix(pushBackVector[0], pushBackVector[1],
       pushBackVector[2])
@@ -193,7 +216,6 @@ export default class Character extends GameObject{
       MathUtils.translationMatrix(surfaceOffset[0],
         surfaceOffset[1], surfaceOffset[2])
     );
-    console.log(this.transformationMatrix);
   }
 
   _getSurfaceData(){
