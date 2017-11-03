@@ -120,6 +120,7 @@ export default class Character extends GameObject{
     }
   }
   _handleEdgeCollision(collisionData){
+    debugger;
     this.velocity = MathUtils.scaleVector(
         MathUtils.bounceVectorOffPlane(this.velocity,
           collisionData.normal),
@@ -134,7 +135,10 @@ export default class Character extends GameObject{
 
   };
   _handleTreeCollision(collisionData){
-    this.speed *= -0.4;
+    this.velocity = MathUtils.scaleVector(
+      this.velocity,
+      -1 * this.restitution
+    );
     this.transformationMatrix = MathUtils.mat_4_multiply(
       this.transformationMatrix,
       MathUtils.translationMatrix(0, -2, 0)

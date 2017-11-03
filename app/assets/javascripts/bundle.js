@@ -1393,6 +1393,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _handleEdgeCollision(collisionData){
+    debugger;
     this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* scaleVector */](
         __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* bounceVectorOffPlane */](this.velocity,
           collisionData.normal),
@@ -1407,7 +1408,10 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 
   };
   _handleTreeCollision(collisionData){
-    this.speed *= -0.4;
+    this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* scaleVector */](
+      this.velocity,
+      -1 * this.restitution
+    );
     this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["h" /* mat_4_multiply */](
       this.transformationMatrix,
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["r" /* translationMatrix */](0, -2, 0)
