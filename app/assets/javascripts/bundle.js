@@ -1544,7 +1544,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__balloon__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__game_object_mesh__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__ = __webpack_require__(2);
 const SEGMENT_WIDTH = 70;
 const SEGMENT_LENGTH = 40;
 const EDGE_LOOP_RESOLUTION = 5;
@@ -1575,12 +1576,13 @@ const BOX_COLLIDER = "BOX_COLLIDER";
 
 
 
+
 class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */]{
 
   constructor(transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["d" /* identityMatrix4 */], rasterizer, img_src = "snow.jpg"){
     super(undefined);
     this.transformationMatrix = transformationMatrix;
-    this.mesh = new __WEBPACK_IMPORTED_MODULE_4__game_object_mesh__["a" /* default */]({
+    this.mesh = new __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__["a" /* default */]({
       faces: [],
       vertices: [],
       textured: true,
@@ -1625,11 +1627,11 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     this.treesCreatedSinceStart = 0;
     __WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */].textureBuffer = this.rasterizer.bufferTexture("assets/tree.png");
     __WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */].textured = true;
-    this.treeMesh= new __WEBPACK_IMPORTED_MODULE_4__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */]);
+    this.treeMesh= new __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */]);
     this.treeMesh.buffers = this.rasterizer.sendMeshToGPU(this.treeMesh);
   }
   _setupBalloonMesh(){
-    this.balloonMesh = new __WEBPACK_IMPORTED_MODULE_4__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_1__balloon__["a" /* default */]);
+    this.balloonMesh = new __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_1__balloon__["a" /* default */]);
     this.balloonMesh.colored = true;
     this.balloonMesh.buffers = this.rasterizer.sendMeshToGPU(this.balloonMesh);
   }
@@ -1883,6 +1885,31 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       }
     }
   }
+
+  _boxIsBeyondEdge(boxMatrix, boxDimensions, segmentNumber, toggleLeft){
+    const checkPoints = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["a" /* boxColliderToPoints */](boxMatrix, boxDimensions);
+    let pointBeyondEdge = false;
+    for(let i =0; i <checkPoints.length; ++i){
+      pointBeyondEdge = _positionIsBeyondEdge(checkPoints[i], segmentNumber,
+        toggleLeft);
+      if(pointBeyondEdge){
+        return pointBeyondEdge;
+      }
+    }
+  }
+  boxIsBeyondEdge(boxMatrix, boxDimensions, segmentNumber){
+    return(
+      this._boxIsBeyondEdge(boxMatrix, boxDimensions, true) ||
+      this._boxIsBeyondEdge(boxMatrix, boxDimensions, false)
+    );
+  }
+
+  positionIsBeyondEdge(pos, segmentNumber){
+    return (
+      this._positionIsBeyondEdge(pos, segmentNumber, true) ||
+      this._positionIsBeyondEdge(pos, segmentNumber, false)
+    );
+  }
   _positionIsBeyondEdge(pos, segmentNumber, toggleLeft){
     const xOffset = toggleLeft? -SEGMENT_WIDTH/2 : SEGMENT_WIDTH/2;
     const currentSegPoint = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["i" /* multiplyVec4ByMatrix4 */](
@@ -1907,17 +1934,13 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     const posOffset = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["p" /* subtractVectors */](pos, currentSegPoint);
     if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["u" /* vectorDot */](posOffset, edgeNormal) < 0){
       let edgeVector =  toggleLeft? vec0: vec1;
-      return{normal: edgeNormal, vector: edgeVector, pos0: currentSegPoint,
-        pos1: nextSegPoint, toggleLeft};
+      return{normal: edgeNormal, colliderPoint: pos,
+         vector: edgeVector, edgePoint0: currentSegPoint,
+        edgePoint1: nextSegPoint, toggleLeft};
     }
     return false;
   }
-  positionIsBeyondEdge(pos, segmentNumber){
-    return (
-      this._positionIsBeyondEdge(pos, segmentNumber, true) ||
-      this._positionIsBeyondEdge(pos, segmentNumber, false)
-    );
-  }
+
   generateSegment(){
     const pos = this.segmentPosition;
     this.generateNewSegmentRotation();
@@ -2061,6 +2084,70 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
 
     "animations": {}
 });
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__math_utils__ = __webpack_require__(0);
+
+
+const boxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1) =>{
+  let worldCoordsPoints, transformedPoint, currentPointCollides, temp;
+  let collidingVertices = [];
+  for(let boxOrderSwitch = 0; boxOrderSwitch <= 1; ++boxOrderSwitch){
+    worldCoordsPoints = boxColliderToPoints(matrix0, dimensions0);
+    for(let i = 0; i < worldCoordsPoints.length; ++i){
+      currentPointCollides = true;
+      transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["i" /* multiplyVec4ByMatrix4 */](
+        __WEBPACK_IMPORTED_MODULE_0__math_utils__["e" /* inverse_mat4_rot_pos */](matrix1),
+        worldCoordsPoints[i]
+      );
+      for(let j = 0; j < 3; ++j){
+        if(transformedPoint[j] > dimensions1[j] ||
+           transformedPoint[j] < -1* dimensions1[j]){
+             currentPointCollides = false;
+        }
+      }
+      if(currentPointCollides){
+        collidingVertices.push(worldCoordsPoint);
+      }
+    }
+    temp = matrix0;
+    matrix0 = matrix1;
+    matrix1 = temp;
+    temp = dimensions0;
+    dimensions0 = dimensions1;
+    dimensions1 = temp;
+  }
+  if(collidingVertices.length > 0){
+    return collidingVertices;
+  }
+}
+/* unused harmony export boxIntersectsBox */
+
+
+const boxColliderToPoints = (matrix, dimensions) =>{
+  const points = [];
+  for(let xDirection = -1; x <= 1; x+= 2){
+    for(let yDirection = -1; y<= 1; y+= 2){
+      for(let zDirection = -1; z<= 1; z+= 2){
+        points.push(
+          __WEBPACK_IMPORTED_MODULE_0__math_utils__["i" /* multiplyVec4ByMatrix4 */](
+            matrix, [dimensions[0] * xDirection,
+            dimensions[1] * yDirection,
+            dimensions[2] * zDirection]
+          )
+        );
+      }
+    }
+  }
+  return points;
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = boxColliderToPoints;
+
 
 
 /***/ })

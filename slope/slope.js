@@ -26,6 +26,7 @@ import treeMesh from "../tree.js";
 import balloonMesh from "../balloon";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
 import * as MathUtils from "../utils/math_utils";
+import * as CollisionUtils from "../utils/collision_utils";
 import Mesh from "../game_object/mesh";
 import GameObject from "../game_object/game_object";
 export default class Slope extends GameObject{
@@ -336,6 +337,31 @@ export default class Slope extends GameObject{
       }
     }
   }
+
+  _boxIsBeyondEdge(boxMatrix, boxDimensions, segmentNumber, toggleLeft){
+    const checkPoints = CollisionUtils.boxColliderToPoints(boxMatrix, boxDimensions);
+    let pointBeyondEdge = false;
+    for(let i =0; i <checkPoints.length; ++i){
+      pointBeyondEdge = _positionIsBeyondEdge(checkPoints[i], segmentNumber,
+        toggleLeft);
+      if(pointBeyondEdge){
+        return pointBeyondEdge;
+      }
+    }
+  }
+  boxIsBeyondEdge(boxMatrix, boxDimensions, segmentNumber){
+    return(
+      this._boxIsBeyondEdge(boxMatrix, boxDimensions, true) ||
+      this._boxIsBeyondEdge(boxMatrix, boxDimensions, false)
+    );
+  }
+
+  positionIsBeyondEdge(pos, segmentNumber){
+    return (
+      this._positionIsBeyondEdge(pos, segmentNumber, true) ||
+      this._positionIsBeyondEdge(pos, segmentNumber, false)
+    );
+  }
   _positionIsBeyondEdge(pos, segmentNumber, toggleLeft){
     const xOffset = toggleLeft? -SEGMENT_WIDTH/2 : SEGMENT_WIDTH/2;
     const currentSegPoint = MathUtils.multiplyVec4ByMatrix4(
@@ -360,17 +386,13 @@ export default class Slope extends GameObject{
     const posOffset = MathUtils.subtractVectors(pos, currentSegPoint);
     if(MathUtils.vectorDot(posOffset, edgeNormal) < 0){
       let edgeVector =  toggleLeft? vec0: vec1;
-      return{normal: edgeNormal, vector: edgeVector, pos0: currentSegPoint,
-        pos1: nextSegPoint, toggleLeft};
+      return{normal: edgeNormal, colliderPoint: pos,
+         vector: edgeVector, edgePoint0: currentSegPoint,
+        edgePoint1: nextSegPoint, toggleLeft};
     }
     return false;
   }
-  positionIsBeyondEdge(pos, segmentNumber){
-    return (
-      this._positionIsBeyondEdge(pos, segmentNumber, true) ||
-      this._positionIsBeyondEdge(pos, segmentNumber, false)
-    );
-  }
+
   generateSegment(){
     const pos = this.segmentPosition;
     this.generateNewSegmentRotation();
