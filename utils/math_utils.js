@@ -282,7 +282,7 @@ export const axisToVec = (axis,vec)=>{
   if(Math.abs(angle) < 0.005){
     return identityMatrix4;
   }
-  const rotAxis = vectorNormalize(vectorCross(vec, axis));
+  const rotAxis = vectorCross(vec, axis);
   return axisAngleToMatrix(rotAxis, angle);
 };
 export const angleBetweenVectors = (to, from)=>{
@@ -296,6 +296,7 @@ export const angleBetweenVectors = (to, from)=>{
 }
 
 export const axisAngleToMatrix = (axis, angle) =>{
+  axis = vectorNormalize(axis);
   const x = axis[0];
   const y = axis[1];
   const z = axis[2];

@@ -5,7 +5,7 @@ const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
 const ACCELERATION = 0.02;
 const STEER_SPEED = 0.07;
-const ANGULAR_DRAG = 0.15;
+const ANGULAR_DRAG = 0.08;
 const DRAG = 0.1;
 const SNOWBOARD_RESTITUTION = 0.8;
 const SNOWBOARD_FRICTION = [0.187,0,0.187,1];
@@ -26,7 +26,7 @@ export default class Character extends GameObject{
     this.angularVelocityAngle = 0;
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
-    this.boxDimensions = [2,4,3];
+    this.boxDimensions = [0.5,5,0.5];
   }
   update(){
     this._handleControls();
@@ -62,8 +62,9 @@ export default class Character extends GameObject{
     const transformationMatrix =  MathUtils.axisAngleToMatrix(this.angularVelocityAxis,
       this.angularVelocityAngle);
     this.angularVelocityAxis = MathUtils.multiplyVec4ByMatrix4(transformationMatrix,
-      axis
+      axis.concat([0])
     );
+    //this.angularVelocityAxis = [0,0,1, 0];
     this.angularVelocityAngle = angle;
   }
   _applyDrag(localVelocity){
@@ -132,7 +133,21 @@ export default class Character extends GameObject{
       MathUtils.translationMatrix(pushBackVector[0], pushBackVector[1],
       pushBackVector[2])
     );
-
+    const collisionOffsetVector = MathUtils.subtractVectors(
+      collisionData.colliderPoint.slice(0,3),
+      MathUtils.mat4TranslationComponent(this.transformationMatrix)
+    );
+    let addAngularVelocAngle = MathUtils.angleBetweenVectors(
+      MathUtils.scaleVector(collisionData.normal, -1),
+      collisionOffsetVector
+    );
+    addAngularVelocAngle /= 25;
+    addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
+    const addAngularVelocAxis = MathUtils.vectorCross(
+      collisionData.normal,
+      collisionOffsetVector
+    );
+    this.addAngularVelocity(addAngularVelocAxis, addAngularVelocAngle);
   };
   _handleTreeCollision(collisionData){
     this.velocity = MathUtils.scaleVector(
