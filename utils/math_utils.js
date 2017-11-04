@@ -276,7 +276,6 @@ export const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
   return addVectors(origin, scaleVector(direction, magnitude));
 };
 
-//https://stackoverflow.com/questions/193918/what-is-the-easiest-way-to-align-the-z-axis-with-a-vector
 export const axisToVec = (axis,vec)=>{
   const angle = angleBetweenVectors(axis.slice(0,3), vec.slice(0,3));
   if(Math.abs(angle) < 0.005){

@@ -185,37 +185,48 @@ export default class Character extends GameObject{
       let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
          this.currentSegmentNumber) || this.floorTriangle;
 
-      if(!MathUtils.pointIsAbovePlane(nextWorldPos, triangleAfterMove[0],
-        triangleAfterMove[1], triangleAfterMove[2])){
-
-        nextWorldPos = MathUtils.vectorTriangleIntersection(worldPos, worldMoveVector,
-            triangleAfterMove[0], triangleAfterMove[1], triangleAfterMove[2]);
-
-        worldMoveVector = MathUtils.subtractVectors(nextWorldPos, worldPos);
-        transformationMatrixAfterMove = MathUtils.mat_4_multiply(this.transformationMatrix,
-          MathUtils.translationMatrix(worldMoveVector[0], worldMoveVector[1], worldMoveVector[2])
-        );
-      }
+      // if(!MathUtils.pointIsAbovePlane(nextWorldPos, triangleAfterMove[0],
+      //   triangleAfterMove[1], triangleAfterMove[2])){
+      //
+      //   nextWorldPos = MathUtils.vectorTriangleIntersection(worldPos, worldMoveVector,
+      //       triangleAfterMove[0], triangleAfterMove[1], triangleAfterMove[2]);
+      //
+      //   worldMoveVector = MathUtils.subtractVectors(nextWorldPos, worldPos);
+      //   transformationMatrixAfterMove = MathUtils.mat_4_multiply(this.transformationMatrix,
+      //     MathUtils.translationMatrix(worldMoveVector[0], worldMoveVector[1], worldMoveVector[2])
+      //   );
+      // }
 
     }
       this.transformationMatrix = transformationMatrixAfterMove;
 
     this._getSurfaceData();
 
-     const planeAlign = MathUtils.axisToVec(
-         [0,0,1,1],
-      MathUtils.multiplyVec4ByMatrix4(
+    //  const planeAlign = MathUtils.axisToVec(
+    //      [0,0,1,1],
+    //   MathUtils.multiplyVec4ByMatrix4(
+    //     MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
+    //       this.transformationMatrix
+    //     )),
+    //     this.surfacePlaneNormal.concat(1)
+    //   )
+    //  );
+
+    const surfaceNormalLocal = MathUtils.multiplyVec4ByMatrix4(
         MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
           this.transformationMatrix
         )),
         this.surfacePlaneNormal.concat(1)
-      )
-     );
-
-      this.transformationMatrix = MathUtils.mat_4_multiply(
-        planeAlign,
-        this.transformationMatrix
-      );
+    );
+    debugger;
+    const planeAlignAxis = MathUtils.vectorCross(
+      surfaceNormalLocal.slice(0,3), [0,0,1]);
+    const planeAlignAngle = MathUtils.angleBetweenVectors([0,0,1],
+      surfaceNormalLocal.slice(0,3));
+      this.addAngularVelocity(planeAlignAxis, planeAlignAngle/5);
+    // const planeAlign = MathUtils.axisAngleToMatrix(planeAlignAxis, planeAlignAngle);
+    // this.transformationMatrix = MathUtils.mat_4_multiply(
+    //   planeAlign,this.transformationMatrix);
 
     const posAfterSurfaceAlign = MathUtils.mat4TranslationComponent(
         this.transformationMatrix
