@@ -4,8 +4,8 @@ const EDGE_COLLISION_DAMP_FACTOR = 0.2;
 const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
 const ACCELERATION = 0.02;
-const STEER_SPEED = 0.07;
-const ANGULAR_DRAG = 0.08;
+const STEER_SPEED = 0.06;
+const ANGULAR_DRAG = 0.3;
 const DRAG = 0.1;
 const SNOWBOARD_RESTITUTION = 0.8;
 const SNOWBOARD_FRICTION = [0.187,0,0.187,1];
@@ -98,12 +98,7 @@ export default class Character extends GameObject{
     localVelocity[1] += ACCELERATION;
   }
   _steer(direction){
-    const zRot = MathUtils.zRotationMatrix(direction * STEER_SPEED);
-    this.transformationMatrix = MathUtils.mat_4_multiply(
-      zRot,
-      this.transformationMatrix,
-
-    );
+    this.addAngularVelocity([0,0,1], -1 * direction * STEER_SPEED );
   }
   _convertLocalRotMatToWorldTransform(localRot){
     return MathUtils.mat_4_multiply(
@@ -141,7 +136,7 @@ export default class Character extends GameObject{
       MathUtils.scaleVector(collisionData.normal, -1),
       collisionOffsetVector
     );
-    addAngularVelocAngle /= 25;
+    addAngularVelocAngle /= 5;
     addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
     const addAngularVelocAxis = MathUtils.vectorCross(
       collisionData.normal,

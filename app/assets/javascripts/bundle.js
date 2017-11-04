@@ -1278,8 +1278,8 @@ const EDGE_COLLISION_DAMP_FACTOR = 0.2;
 const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
 const ACCELERATION = 0.02;
-const STEER_SPEED = 0.07;
-const ANGULAR_DRAG = 0.08;
+const STEER_SPEED = 0.06;
+const ANGULAR_DRAG = 0.3;
 const DRAG = 0.1;
 const SNOWBOARD_RESTITUTION = 0.8;
 const SNOWBOARD_FRICTION = [0.187,0,0.187,1];
@@ -1372,12 +1372,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     localVelocity[1] += ACCELERATION;
   }
   _steer(direction){
-    const zRot = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["C" /* zRotationMatrix */](direction * STEER_SPEED);
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* mat_4_multiply */](
-      zRot,
-      this.transformationMatrix,
-
-    );
+    this.addAngularVelocity([0,0,1], -1 * direction * STEER_SPEED );
   }
   _convertLocalRotMatToWorldTransform(localRot){
     return __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* mat_4_multiply */](
@@ -1415,7 +1410,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["o" /* scaleVector */](collisionData.normal, -1),
       collisionOffsetVector
     );
-    addAngularVelocAngle /= 25;
+    addAngularVelocAngle /= 5;
     addAngularVelocAngle *= __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["w" /* vectorMag */](this.velocity);
     const addAngularVelocAxis = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["u" /* vectorCross */](
       collisionData.normal,
