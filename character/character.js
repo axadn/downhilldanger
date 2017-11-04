@@ -26,6 +26,7 @@ export default class Character extends GameObject{
     this.angularVelocityAngle = 0;
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
+    this.boxDimensions = [2,4,3];
   }
   update(){
     this._handleControls();
@@ -120,7 +121,6 @@ export default class Character extends GameObject{
     }
   }
   _handleEdgeCollision(collisionData){
-    debugger;
     this.velocity = MathUtils.scaleVector(
         MathUtils.bounceVectorOffPlane(this.velocity,
           collisionData.normal),
@@ -150,7 +150,7 @@ export default class Character extends GameObject{
       this.transformationMatrix
     );
     let nextWorldPos = worldPos;
-    const edgeCollisionData = this.slope.positionIsBeyondEdge(nextWorldPos, this.currentSegmentNumber);
+    const edgeCollisionData = this.slope.boxIsBeyondEdge(this.transformationMatrix, this.boxDimensions, this.currentSegmentNumber);
     const obstacleCollisionData = this.slope.positionCollidesWithObstacle(nextWorldPos, this.currentSegmentNumber);
 
     if(edgeCollisionData){

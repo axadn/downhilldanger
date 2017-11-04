@@ -35,14 +35,14 @@ export const boxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1) =>{
 
 export const boxColliderToPoints = (matrix, dimensions) =>{
   const points = [];
-  for(let xDirection = -1; x <= 1; x+= 2){
-    for(let yDirection = -1; y<= 1; y+= 2){
-      for(let zDirection = -1; z<= 1; z+= 2){
+  for(let xDirection = -1; xDirection <= 1; xDirection+= 2){
+    for(let yDirection = -1; yDirection<= 1; yDirection+= 2){
+      for(let zDirection = -1; zDirection<= 1; zDirection+= 2){
         points.push(
           MathUtils.multiplyVec4ByMatrix4(
             matrix, [dimensions[0] * xDirection,
             dimensions[1] * yDirection,
-            dimensions[2] * zDirection]
+            dimensions[2] * zDirection, 1]
           )
         );
       }

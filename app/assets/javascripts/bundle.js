@@ -1299,6 +1299,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.angularVelocityAngle = 0;
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
+    this.boxDimensions = [2,4,3];
   }
   update(){
     this._handleControls();
@@ -1393,7 +1394,6 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _handleEdgeCollision(collisionData){
-    debugger;
     this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* scaleVector */](
         __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* bounceVectorOffPlane */](this.velocity,
           collisionData.normal),
@@ -1423,7 +1423,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       this.transformationMatrix
     );
     let nextWorldPos = worldPos;
-    const edgeCollisionData = this.slope.positionIsBeyondEdge(nextWorldPos, this.currentSegmentNumber);
+    const edgeCollisionData = this.slope.boxIsBeyondEdge(this.transformationMatrix, this.boxDimensions, this.currentSegmentNumber);
     const obstacleCollisionData = this.slope.positionCollidesWithObstacle(nextWorldPos, this.currentSegmentNumber);
 
     if(edgeCollisionData){
@@ -1890,7 +1890,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     const checkPoints = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["a" /* boxColliderToPoints */](boxMatrix, boxDimensions);
     let pointBeyondEdge = false;
     for(let i =0; i <checkPoints.length; ++i){
-      pointBeyondEdge = _positionIsBeyondEdge(checkPoints[i], segmentNumber,
+      pointBeyondEdge = this._positionIsBeyondEdge(checkPoints[i], segmentNumber,
         toggleLeft);
       if(pointBeyondEdge){
         return pointBeyondEdge;
@@ -1899,8 +1899,8 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
   }
   boxIsBeyondEdge(boxMatrix, boxDimensions, segmentNumber){
     return(
-      this._boxIsBeyondEdge(boxMatrix, boxDimensions, true) ||
-      this._boxIsBeyondEdge(boxMatrix, boxDimensions, false)
+      this._boxIsBeyondEdge(boxMatrix, boxDimensions,segmentNumber, true) ||
+      this._boxIsBeyondEdge(boxMatrix, boxDimensions,segmentNumber, false)
     );
   }
 
@@ -2131,14 +2131,14 @@ const boxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1) =>{
 
 const boxColliderToPoints = (matrix, dimensions) =>{
   const points = [];
-  for(let xDirection = -1; x <= 1; x+= 2){
-    for(let yDirection = -1; y<= 1; y+= 2){
-      for(let zDirection = -1; z<= 1; z+= 2){
+  for(let xDirection = -1; xDirection <= 1; xDirection+= 2){
+    for(let yDirection = -1; yDirection<= 1; yDirection+= 2){
+      for(let zDirection = -1; zDirection<= 1; zDirection+= 2){
         points.push(
           __WEBPACK_IMPORTED_MODULE_0__math_utils__["i" /* multiplyVec4ByMatrix4 */](
             matrix, [dimensions[0] * xDirection,
             dimensions[1] * yDirection,
-            dimensions[2] * zDirection]
+            dimensions[2] * zDirection, 1]
           )
         );
       }

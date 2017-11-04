@@ -342,7 +342,7 @@ export default class Slope extends GameObject{
     const checkPoints = CollisionUtils.boxColliderToPoints(boxMatrix, boxDimensions);
     let pointBeyondEdge = false;
     for(let i =0; i <checkPoints.length; ++i){
-      pointBeyondEdge = _positionIsBeyondEdge(checkPoints[i], segmentNumber,
+      pointBeyondEdge = this._positionIsBeyondEdge(checkPoints[i], segmentNumber,
         toggleLeft);
       if(pointBeyondEdge){
         return pointBeyondEdge;
@@ -351,8 +351,8 @@ export default class Slope extends GameObject{
   }
   boxIsBeyondEdge(boxMatrix, boxDimensions, segmentNumber){
     return(
-      this._boxIsBeyondEdge(boxMatrix, boxDimensions, true) ||
-      this._boxIsBeyondEdge(boxMatrix, boxDimensions, false)
+      this._boxIsBeyondEdge(boxMatrix, boxDimensions,segmentNumber, true) ||
+      this._boxIsBeyondEdge(boxMatrix, boxDimensions,segmentNumber, false)
     );
   }
 
