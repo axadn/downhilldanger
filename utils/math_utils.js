@@ -252,6 +252,18 @@ export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   return result;
 };
 
+export const multiplyVecByMatrix3 = (matrix, vec) =>{
+  const result = [];
+  for(let i = 0; i < 3; ++i){
+    let colResult = 0;
+    for(let j = 0; i < 3; ++j){
+      colResult += matrix[j * 4 + i] * vec[j];
+    }
+    result.push(colResult);
+  }
+  return result;
+}
+
 /**
 triangle configuration :
 t2
@@ -284,15 +296,6 @@ export const axisToVec = (axis,vec)=>{
   const rotAxis = vectorCross(vec, axis);
   return axisAngleToMatrix(rotAxis, angle);
 };
-export const angleBetweenVectors = (to, from)=>{
-  to = vectorNormalize(to);
-  from = vectorNormalize(from);
-  const dot =vectorDot(to,from)
-  if(Math.abs(dot) <0.005 || Math.abs(dot) > 1){
-    return 0;
-  }
-  return Math.acos(dot);
-}
 
 export const axisAngleToMatrix = (axis, angle) =>{
   axis = vectorNormalize(axis);
@@ -321,3 +324,37 @@ export const bounceVectorOffPlane = (vector, planeNormal) =>{
     vector
   );
 };
+export const twoVectorsToQuaternion = (vec1, vec2) => {
+  const axis = vectorNormalize(vectorCross(vec1, vec2));
+  const angle = angleBetweenVectors(vec1, vec2);
+  const sinOverTwo = Math.sin(angle/2);
+  return [
+    axis[0] * sinOverTwo,
+    axis[1] * sinOverTwo,
+    axis[2] * sinOverTwo,
+    Math.cos(angle/2)
+  ];
+};
+
+export const angleBetweenVectors = (to, from)=>{
+  to = vectorNormalize(to);
+  from = vectorNormalize(from);
+  const dot =vectorDot(to,from)
+  if(Math.abs(dot) <0.005 || Math.abs(dot) > 1){
+    return 0;
+  }
+  return Math.acos(dot);
+}
+export const multiplyQuaternions = (q1, q2) => [
+  q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] - q1[3] * q2[3],
+  q1[0] * q2[1] + q1[1] * q2[0] + q1[2] * q2[3] - q1[3] * q2[2],
+  q1[0] * q2[2] - q1[1] * q1[3] + q1[2] * q2[0] + q1[3] * q2[1],
+  q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1] + q1[3] * q2[0]
+];
+
+export const quaternionToMatrix = (q) => [
+  1 - q[2]*q[2]*2 - q[3]*q[3]*2, q[1]*q[2]*2 - q[3]*q[0]*2, q[1]*q[3]*2 + q[2]*q[0]*2, 0,
+  q[1]*q[2]*2 + q[3]*q[0]*2, 1 - q[0]*q[0]*2 - q[3]*q[3]*2, q[2]*q[3]*2 - q[1]*q[0]*2, 0,
+  q[1]*q[3]*2 - q[2]*q[0]*2, q[2]*q[3]*2 + q[1]*q[0]*2, 1 - q[1]*q[1]*2 - q[2]*q[2]*2, 0,
+  0,                         0,                      0,                                1
+];
