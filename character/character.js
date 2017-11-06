@@ -1,10 +1,10 @@
 import GameObject from "../game_object/game_object";
-const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 0.4;
+const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 0;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
 const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
 const ACCELERATION = 0.02;
-const STEER_SPEED = 0.06;
+const STEER_SPEED = 0.09;
 const ANGULAR_DRAG = 0.3;
 const DRAG = 0.1;
 const SNOWBOARD_RESTITUTION = 0.8;
@@ -27,6 +27,7 @@ export default class Character extends GameObject{
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
+    this.angularVelocity = MathUtils.IdentityQuaternion;
   }
   update(){
     this._handleControls();
@@ -58,14 +59,8 @@ export default class Character extends GameObject{
     this._applyAngularVelocity();
     this._moveForward();
   }
-  addAngularVelocity(axis, angle){
-    const transformationMatrix =  MathUtils.axisAngleToMatrix(this.angularVelocityAxis,
-      this.angularVelocityAngle);
-    this.angularVelocityAxis = MathUtils.multiplyVec4ByMatrix4(transformationMatrix,
-      axis.concat([0])
-    );
-    //this.angularVelocityAxis = [0,0,1, 0];
-    this.angularVelocityAngle = angle;
+  addAngularVelocity(quat){
+    this.angularVelocity =  MathUtils.multiplyQuaternions(this.angularVelocity, quat);
   }
   _applyDrag(localVelocity){
     for(let i = 0; i < localVelocity.length; ++i){
@@ -73,14 +68,13 @@ export default class Character extends GameObject{
     }
   }
   _applyAngularVelocity(){
-    const transformationMatrix = MathUtils.axisAngleToMatrix(
-      this.angularVelocityAxis, this.angularVelocityAngle);
     this.transformationMatrix = MathUtils.mat_4_multiply(
-      transformationMatrix, this.transformationMatrix
+      MathUtils.quaternionToMatrix(this.angularVelocity),
+      this.transformationMatrix
     );
   }
   _applyAngularDrag(){
-    this.angularVelocityAngle -= this.angularVelocityAngle * ANGULAR_DRAG;
+    this.angularVelocity = MathUtils.scaleQuaternion(this.angularVelocity, 1 - ANGULAR_DRAG);
   }
   _applyFriction(localVelocity){
     let signFlip;
@@ -98,7 +92,10 @@ export default class Character extends GameObject{
     localVelocity[1] += ACCELERATION;
   }
   _steer(direction){
-    this.addAngularVelocity([0,0,1], -1 * direction * STEER_SPEED );
+    this.addAngularVelocity(
+      MathUtils.axisAngleToQuaternion([0,0,1],
+      -1 * direction * STEER_SPEED)
+    );
   }
   _convertLocalRotMatToWorldTransform(localRot){
     return MathUtils.mat_4_multiply(
@@ -106,6 +103,7 @@ export default class Character extends GameObject{
       MathUtils.mat4RotationComponent(this.transformationMatrix)
     );
   }
+
   _handleControls(){
     if(this.input.left ? !this.input.right : this.input.right){
       if(this.input.right){
@@ -136,13 +134,15 @@ export default class Character extends GameObject{
       MathUtils.scaleVector(collisionData.normal, -1),
       collisionOffsetVector
     );
-    addAngularVelocAngle /= 5;
+    addAngularVelocAngle /= 200;
     addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
     const addAngularVelocAxis = MathUtils.vectorCross(
       collisionData.normal,
       collisionOffsetVector
     );
-    this.addAngularVelocity(addAngularVelocAxis, addAngularVelocAngle);
+     this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+       addAngularVelocAxis, addAngularVelocAngle)
+     );
   };
   _handleTreeCollision(collisionData){
     this.velocity = MathUtils.scaleVector(
@@ -218,12 +218,12 @@ export default class Character extends GameObject{
         )),
         this.surfacePlaneNormal.concat(1)
     );
-    debugger;
     const planeAlignAxis = MathUtils.vectorCross(
       surfaceNormalLocal.slice(0,3), [0,0,1]);
     const planeAlignAngle = MathUtils.angleBetweenVectors([0,0,1],
       surfaceNormalLocal.slice(0,3));
-      this.addAngularVelocity(planeAlignAxis, planeAlignAngle/5);
+      this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+        planeAlignAxis, planeAlignAngle/50));
     // const planeAlign = MathUtils.axisAngleToMatrix(planeAlignAxis, planeAlignAngle);
     // this.transformationMatrix = MathUtils.mat_4_multiply(
     //   planeAlign,this.transformationMatrix);

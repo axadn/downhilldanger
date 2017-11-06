@@ -327,12 +327,19 @@ export const bounceVectorOffPlane = (vector, planeNormal) =>{
 export const twoVectorsToQuaternion = (vec1, vec2) => {
   const axis = vectorNormalize(vectorCross(vec1, vec2));
   const angle = angleBetweenVectors(vec1, vec2);
+  return axisAngleToQuaternion(axis, angle);
+};
+
+export const axisAngleToQuaternion = (axis, angle) => {
   const sinOverTwo = Math.sin(angle/2);
+  if(isNaN(sinOverTwo)){
+    debugger;
+  }
   return [
+    Math.cos(angle/2),
     axis[0] * sinOverTwo,
     axis[1] * sinOverTwo,
-    axis[2] * sinOverTwo,
-    Math.cos(angle/2)
+    axis[2] * sinOverTwo
   ];
 };
 
@@ -352,9 +359,24 @@ export const multiplyQuaternions = (q1, q2) => [
   q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1] + q1[3] * q2[0]
 ];
 
-export const quaternionToMatrix = (q) => [
+export const quaternionToMatrix = (q) =>{
+  q = vectorNormalize(q);
+  return [
   1 - q[2]*q[2]*2 - q[3]*q[3]*2, q[1]*q[2]*2 - q[3]*q[0]*2, q[1]*q[3]*2 + q[2]*q[0]*2, 0,
-  q[1]*q[2]*2 + q[3]*q[0]*2, 1 - q[0]*q[0]*2 - q[3]*q[3]*2, q[2]*q[3]*2 - q[1]*q[0]*2, 0,
+  q[1]*q[2]*2 + q[3]*q[0]*2, 1 - q[1]*q[1]*2 - q[3]*q[3]*2, q[2]*q[3]*2 - q[1]*q[0]*2, 0,
   q[1]*q[3]*2 - q[2]*q[0]*2, q[2]*q[3]*2 + q[1]*q[0]*2, 1 - q[1]*q[1]*2 - q[2]*q[2]*2, 0,
   0,                         0,                      0,                                1
 ];
+
+}
+export const IdentityQuaternion = [1,0,0,0];
+
+export const lerpQuaternions = (quat1, quat2, lerpAmount) =>{
+  let result = [];
+  for(let i = 0; i < 4; ++i){
+    result.push(quat1[i] * lerpAmount + quat2[i] * (1 - lerpAmount));
+  }
+  return result;
+}
+
+export const scaleQuaternion = (quat1, scale) => lerpQuaternions(IdentityQuaternion, quat1, scale);
