@@ -33,7 +33,7 @@ export default class Slope extends GameObject{
 
   constructor(transformationMatrix = MathUtils.identityMatrix4, rasterizer, img_src = "snow.jpg"){
     super(undefined);
-    this.transformationMatrix = transformationMatrix;
+    this._transformationMatrix = transformationMatrix.slice(0,16);
     this.mesh = new Mesh({
       faces: [],
       vertices: [],
@@ -272,7 +272,7 @@ export default class Slope extends GameObject{
       obstacle = this.obstacles[segment_number][i];
       transformedPosition = MathUtils.multiplyVec4ByMatrix4(
         MathUtils.inverse_mat4_rot_pos(
-            obstacle.transformationMatrix
+            obstacle.getTransformationMatrix()
         ),
         pos.concat(1)
       );

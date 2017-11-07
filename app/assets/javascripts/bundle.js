@@ -107,7 +107,7 @@ const scaleMatrix =(x,y,z) => ([
   0,0,z,0,
   0,0,0,1
 ]);
-/* harmony export (immutable) */ __webpack_exports__["p"] = scaleMatrix;
+/* harmony export (immutable) */ __webpack_exports__["o"] = scaleMatrix;
 
 
 
@@ -245,7 +245,7 @@ const addVectors = (vector1, vector2)=>{
   };
   return newVector;
 }
-/* unused harmony export addVectors */
+/* harmony export (immutable) */ __webpack_exports__["b"] = addVectors;
 
 
 const vectorCross = (vector1, vector2)=>([
@@ -355,7 +355,7 @@ const scaleVector = (vec, scale)=>{
   }
   return newVec;
 };
-/* harmony export (immutable) */ __webpack_exports__["r"] = scaleVector;
+/* harmony export (immutable) */ __webpack_exports__["q"] = scaleVector;
 
 
 const multiplyVec4ByMatrix4 = (matrix, vec) =>{
@@ -424,7 +424,7 @@ const axisToVec = (axis,vec)=>{
   const rotAxis = vectorCross(vec, axis);
   return axisAngleToMatrix(rotAxis, angle);
 };
-/* harmony export (immutable) */ __webpack_exports__["d"] = axisToVec;
+/* unused harmony export axisToVec */
 
 
 const axisAngleToMatrix = (axis, angle) =>{
@@ -478,7 +478,7 @@ const axisAngleToQuaternion = (axis, angle) => {
     axis[2] * sinOverTwo
   ];
 };
-/* harmony export (immutable) */ __webpack_exports__["c"] = axisAngleToQuaternion;
+/* harmony export (immutable) */ __webpack_exports__["d"] = axisAngleToQuaternion;
 
 
 const angleBetweenVectors = (to, from)=>{
@@ -490,7 +490,7 @@ const angleBetweenVectors = (to, from)=>{
   }
   return Math.acos(dot);
 }
-/* harmony export (immutable) */ __webpack_exports__["b"] = angleBetweenVectors;
+/* harmony export (immutable) */ __webpack_exports__["c"] = angleBetweenVectors;
 
 const multiplyQuaternions = (q1, q2) => [
   q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] - q1[3] * q2[3],
@@ -508,10 +508,29 @@ const quaternionToMatrix = (q) =>{
   q[1]*q[2]*2 + q[3]*q[0]*2, 1 - q[1]*q[1]*2 - q[3]*q[3]*2, q[2]*q[3]*2 - q[1]*q[0]*2, 0,
   q[1]*q[3]*2 - q[2]*q[0]*2, q[2]*q[3]*2 + q[1]*q[0]*2, 1 - q[1]*q[1]*2 - q[2]*q[2]*2, 0,
   0,                         0,                      0,                                1
-];
-
+  ];
 }
-/* harmony export (immutable) */ __webpack_exports__["o"] = quaternionToMatrix;
+/* unused harmony export quaternionToMatrix */
+
+/*
+0  1   2  3
+4  5   6  7
+8  9  10 11
+12 13  14 15
+*/
+const setMatrixRotInPlace = (mat, q) =>{
+  q = vectorNormalize(q);
+  mat[0] = 1 - q[2]*q[2]*2 - q[3]*q[3]*2;
+  mat[1] = q[1]*q[2]*2 - q[3]*q[0]*2;
+  mat[2] = q[1]*q[3]*2 + q[2]*q[0]*2;
+  mat[4] = q[1]*q[2]*2 + q[3]*q[0]*2;
+  mat[5] = 1 - q[1]*q[1]*2 - q[3]*q[3]*2;
+  mat[6] = q[2]*q[3]*2 - q[1]*q[0]*2;
+  mat[8] = q[1]*q[3]*2 - q[2]*q[0]*2;
+  mat[9] = q[2]*q[3]*2 + q[1]*q[0]*2;
+  mat[10] = 1 - q[1]*q[1]*2 - q[2]*q[2]*2;
+};
+/* harmony export (immutable) */ __webpack_exports__["r"] = setMatrixRotInPlace;
 
 const IdentityQuaternion = [1,0,0,0];
 /* harmony export (immutable) */ __webpack_exports__["a"] = IdentityQuaternion;
@@ -528,7 +547,7 @@ const lerpQuaternions = (quat1, quat2, lerpAmount) =>{
 
 
 const scaleQuaternion = (quat1, scale) => lerpQuaternions(IdentityQuaternion, quat1, scale);
-/* harmony export (immutable) */ __webpack_exports__["q"] = scaleQuaternion;
+/* harmony export (immutable) */ __webpack_exports__["p"] = scaleQuaternion;
 
 
 
@@ -548,11 +567,62 @@ const UPDATE_INTERVAL = 33;
 class GameObject {
   constructor(mesh, transformationMatrix = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["f" /* identityMatrix4 */]){
     this.mesh = mesh;
-    this.transformationMatrix = transformationMatrix;
+    this._transformationMatrix = transformationMatrix;
+    this._position = [0,0,0];
+    this._rotation = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["a" /* IdentityQuaternion */];
     setInterval(this.update.bind(this), UPDATE_INTERVAL);
   }
   update(timestamp){
 
+  }
+  transformPoint(point){
+    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["l" /* multiplyVec4ByMatrix4 */](
+      this._transformationMatrix, point.concat([1])).slice(0,3);
+
+  }
+  transformDirection(direction){
+    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["l" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["h" /* mat4RotationComponent */](this._transformationMatrix),
+       direction.concat([1])).slice(0,3);
+  }
+  inverseTransformPoint(point){
+    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["l" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["g" /* inverse_mat4_rot_pos */](this._transformationMatrix),
+      point.concat([1])
+    ).slice(0,3);
+  }
+  inverseTransformDirection(direction){
+    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["l" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["g" /* inverse_mat4_rot_pos */](
+        __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["h" /* mat4RotationComponent */](this._transformationMatrix)
+      ),
+      direction.concat([1])
+    ).slice(0,3);
+  }
+  /*
+   0  1   2  3
+   4  5   6  7
+   8  9  10 11
+  12 13  14 15
+  */
+  setPosition(position){
+    this._position = position;
+    this._transformationMatrix[12] = position[0];
+    this._transformationMatrix[13] = position[1];
+    this._transformationMatrix[14] = position[2];
+  }
+  getRotation(){
+    return this._rotation;
+  }
+  getPosition(){
+    return this._position;
+  }
+  setRotation(rotQuat){
+    this._rotation = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["A" /* vectorNormalize */](rotQuat);
+    __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["r" /* setMatrixRotInPlace */](this._transformationMatrix,this._rotation);
+  }
+  getTransformationMatrix(){
+    return this._transformationMatrix;
   }
   playAnimation(name, loop = true){
     this.isPlayingAnimation = true;
@@ -748,7 +818,7 @@ class ObjectsRasterizer{
     this.cameraDist = DEFAULT_CAMERA_DIST;
     this.viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["f" /* identityMatrix4 */];
     this.perspectiveMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["j" /* mat_4_multiply */](__WEBPACK_IMPORTED_MODULE_0__math_utils__["s" /* simple_perspective_matrix */],
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["p" /* scaleMatrix */](scale, scale, scale));
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["o" /* scaleMatrix */](scale, scale, scale));
     if(swapYZ){
       this.perspectiveMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["j" /* mat_4_multiply */](__WEBPACK_IMPORTED_MODULE_0__math_utils__["u" /* swapYZMatrix */], this.perspectiveMatrix)
     }
@@ -975,7 +1045,7 @@ class ObjectsRasterizer{
       this.gl.enableVertexAttribArray(colorsAttrIndex);
       offset += 4;
     }
-    let viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["j" /* mat_4_multiply */](obj.transformationMatrix, this.viewMatrix);
+    let viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["j" /* mat_4_multiply */](obj.getTransformationMatrix(), this.viewMatrix);
     const viewMatrixUniformLocation = this.gl.getUniformLocation(program, "view_matrix");
     this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
 
@@ -987,7 +1057,7 @@ class ObjectsRasterizer{
     let cameraMatrix;
     if(this.cameraTarget){
 
-        cameraMatrix = this.cameraTarget.transformationMatrix;
+        cameraMatrix = this.cameraTarget.getTransformationMatrix();
 
 
 
@@ -998,20 +1068,20 @@ class ObjectsRasterizer{
             cameraMatrix);
 
 
-            const planeAlign = __WEBPACK_IMPORTED_MODULE_0__math_utils__["d" /* axisToVec */](
-                [0,0,1,1],
-             __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](
-               __WEBPACK_IMPORTED_MODULE_0__math_utils__["g" /* inverse_mat4_rot_pos */](__WEBPACK_IMPORTED_MODULE_0__math_utils__["h" /* mat4RotationComponent */](
-                 cameraMatrix
-               )),
-               [0,0,1,1]
-             )
-            );
-
-          cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["j" /* mat_4_multiply */](
-            planeAlign,
-            cameraMatrix
-          );
+          //   const planeAlign = MathUtils.axisToVec(
+          //       [0,0,1,1],
+          //    MathUtils.multiplyVec4ByMatrix4(
+          //      MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
+          //        cameraMatrix
+          //      )),
+          //      [0,0,1,1]
+          //    )
+          //   );
+          //
+          // cameraMatrix = MathUtils.mat_4_multiply(
+          //   planeAlign,
+          //   cameraMatrix
+          // );
 
 
       //
@@ -1346,7 +1416,7 @@ const monkeyData ={
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__ = __webpack_require__(0);
 
-const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 0;
+const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 35;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
 const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
@@ -1374,21 +1444,18 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
+    this.setPosition([0,0,16]);
     this.angularVelocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["a" /* IdentityQuaternion */];
   }
   update(){
     this._handleControls();
     this._getSurfaceData();
-    const distanceFromSurface = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["B" /* vectorSquareMag */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["t" /* subtractVectors */]
-        (__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* mat4TranslationComponent */](
-          this.transformationMatrix),this.surfacePoint));
+    const surfaceOffset = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["t" /* subtractVectors */]
+      (this.getPosition(),this.surfacePoint);
+    const distanceFromSurface = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["B" /* vectorSquareMag */](surfaceOffset);
     if(isNaN(distanceFromSurface)){
     }
-    let localVelocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["l" /* multiplyVec4ByMatrix4 */](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["g" /* inverse_mat4_rot_pos */](
-        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["h" /* mat4RotationComponent */](this.transformationMatrix)),
-      this.velocity
-    );
+    let localVelocity = this.inverseTransformDirection(this.velocity);
     if(distanceFromSurface > SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
       this._fall();
     }
@@ -1396,18 +1463,16 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       this.fallSpeed = 0;
       this._accelerate(localVelocity);
       this._applyFriction(localVelocity);
-    }
+     }
     this._applyDrag(localVelocity);
     this._applyAngularDrag();
-    this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["l" /* multiplyVec4ByMatrix4 */](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["h" /* mat4RotationComponent */](this.transformationMatrix),
-      localVelocity
-    )
+    this.velocity = this.transformDirection(localVelocity);
     this._applyAngularVelocity();
     this._moveForward();
   }
   addAngularVelocity(quat){
     this.angularVelocity =  __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["k" /* multiplyQuaternions */](this.angularVelocity, quat);
+    this.angularVelocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["A" /* vectorNormalize */](this.angularVelocity);
   }
   _applyDrag(localVelocity){
     for(let i = 0; i < localVelocity.length; ++i){
@@ -1415,13 +1480,12 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _applyAngularVelocity(){
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["j" /* mat_4_multiply */](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["o" /* quaternionToMatrix */](this.angularVelocity),
-      this.transformationMatrix
-    );
+    debugger;
+     this.setRotation(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["k" /* multiplyQuaternions */](this.getRotation(),
+     this.angularVelocity));
   }
   _applyAngularDrag(){
-    this.angularVelocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["q" /* scaleQuaternion */](this.angularVelocity, 1 - ANGULAR_DRAG);
+    this.angularVelocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* scaleQuaternion */](this.angularVelocity, 1 - ANGULAR_DRAG);
   }
   _applyFriction(localVelocity){
     let signFlip;
@@ -1440,14 +1504,9 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
   }
   _steer(direction){
     this.addAngularVelocity(
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* axisAngleToQuaternion */]([0,0,1],
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* axisAngleToQuaternion */](
+        this.transformDirection([0,0,1]),
       -1 * direction * STEER_SPEED)
-    );
-  }
-  _convertLocalRotMatToWorldTransform(localRot){
-    return __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["j" /* mat_4_multiply */](
-      localRot,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["h" /* mat4RotationComponent */](this.transformationMatrix)
     );
   }
 
@@ -1462,23 +1521,20 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _handleEdgeCollision(collisionData){
-    this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["r" /* scaleVector */](
+    this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["q" /* scaleVector */](
         __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* bounceVectorOffPlane */](this.velocity,
           collisionData.normal),
         this.restitution
     ).concat([0]);
     let pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["A" /* vectorNormalize */](collisionData.normal);
-    pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["r" /* scaleVector */](pushBackVector, 2);
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["j" /* mat_4_multiply */](this.transformationMatrix,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["v" /* translationMatrix */](pushBackVector[0], pushBackVector[1],
-      pushBackVector[2])
-    );
+    pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["q" /* scaleVector */](pushBackVector, 2);
+    this.setPosition(this.transformPoint(pushBackVector));
     const collisionOffsetVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["t" /* subtractVectors */](
       collisionData.colliderPoint.slice(0,3),
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* mat4TranslationComponent */](this.transformationMatrix)
+      this.getPosition()
     );
-    let addAngularVelocAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["b" /* angleBetweenVectors */](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["r" /* scaleVector */](collisionData.normal, -1),
+    let addAngularVelocAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* angleBetweenVectors */](
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["q" /* scaleVector */](collisionData.normal, -1),
       collisionOffsetVector
     );
     addAngularVelocAngle /= 200;
@@ -1487,28 +1543,20 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       collisionData.normal,
       collisionOffsetVector
     );
-     this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* axisAngleToQuaternion */](
+     this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* axisAngleToQuaternion */](
        addAngularVelocAxis, addAngularVelocAngle)
      );
   };
   _handleTreeCollision(collisionData){
-    this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["r" /* scaleVector */](
+    this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["q" /* scaleVector */](
       this.velocity,
       -1 * this.restitution
     );
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["j" /* mat_4_multiply */](
-      this.transformationMatrix,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["v" /* translationMatrix */](0, -2, 0)
-    );
-
+    this.setPosition(this.transformPoint([0,-2,0]));
   }
   _moveForward(){
-    let worldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* mat4TranslationComponent */](
-      this.transformationMatrix
-    );
-    let nextWorldPos = worldPos;
-    const edgeCollisionData = this.slope.boxIsBeyondEdge(this.transformationMatrix, this.boxDimensions, this.currentSegmentNumber);
-    const obstacleCollisionData = this.slope.positionCollidesWithObstacle(nextWorldPos, this.currentSegmentNumber);
+    const edgeCollisionData = this.slope.boxIsBeyondEdge(this.getTransformationMatrix(), this.boxDimensions, this.currentSegmentNumber);
+    const obstacleCollisionData = this.slope.positionCollidesWithObstacle(this.getPosition(), this.currentSegmentNumber);
 
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
@@ -1517,11 +1565,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     else if(obstacleCollisionData){
       this._handleTreeCollision(obstacleCollisionData);
     }
-    let worldMoveVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* projectVectorOntoPlane */](
-      this.velocity, this.surfacePlaneNormal);
-    let transformationMatrixAfterMove = this._transformationMatrixAfterMove(worldMoveVector);
-    nextWorldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* mat4TranslationComponent */](
-      transformationMatrixAfterMove);
+    let nextWorldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["b" /* addVectors */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* projectVectorOntoPlane */](
+      this.velocity, this.surfacePlaneNormal), this.getPosition());
     if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
       slope.positionIsPastSegmentStart(nextWorldPos,
       this.currentSegmentNumber + 1)){
@@ -1532,98 +1577,49 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
          this.currentSegmentNumber) || this.floorTriangle;
 
-      // if(!MathUtils.pointIsAbovePlane(nextWorldPos, triangleAfterMove[0],
-      //   triangleAfterMove[1], triangleAfterMove[2])){
-      //
-      //   nextWorldPos = MathUtils.vectorTriangleIntersection(worldPos, worldMoveVector,
-      //       triangleAfterMove[0], triangleAfterMove[1], triangleAfterMove[2]);
-      //
-      //   worldMoveVector = MathUtils.subtractVectors(nextWorldPos, worldPos);
-      //   transformationMatrixAfterMove = MathUtils.mat_4_multiply(this.transformationMatrix,
-      //     MathUtils.translationMatrix(worldMoveVector[0], worldMoveVector[1], worldMoveVector[2])
-      //   );
-      // }
-
+      //  if(!MathUtils.pointIsAbovePlane(nextWorldPos, triangleAfterMove[0],
+      //    triangleAfterMove[1], triangleAfterMove[2])){
+      //    nextWorldPos = MathUtils.vectorTriangleIntersection(nextWorldPos, [0,0,-1],
+      //        triangleAfterMove[0], triangleAfterMove[1], triangleAfterMove[2]);
+      //  }
     }
-      this.transformationMatrix = transformationMatrixAfterMove;
 
+    this.setPosition(nextWorldPos);
     this._getSurfaceData();
-
-    //  const planeAlign = MathUtils.axisToVec(
-    //      [0,0,1,1],
-    //   MathUtils.multiplyVec4ByMatrix4(
-    //     MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
-    //       this.transformationMatrix
-    //     )),
-    //     this.surfacePlaneNormal.concat(1)
-    //   )
-    //  );
-
-    const surfaceNormalLocal = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["l" /* multiplyVec4ByMatrix4 */](
-        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["g" /* inverse_mat4_rot_pos */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["h" /* mat4RotationComponent */](
-          this.transformationMatrix
-        )),
-        this.surfacePlaneNormal.concat(1)
-    );
+    const localUp = this.transformDirection([0,0,1]);
     const planeAlignAxis = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["x" /* vectorCross */](
-      surfaceNormalLocal.slice(0,3), [0,0,1]);
-    const planeAlignAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["b" /* angleBetweenVectors */]([0,0,1],
-      surfaceNormalLocal.slice(0,3));
-      this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* axisAngleToQuaternion */](
-        planeAlignAxis, planeAlignAngle/50));
-    // const planeAlign = MathUtils.axisAngleToMatrix(planeAlignAxis, planeAlignAngle);
-    // this.transformationMatrix = MathUtils.mat_4_multiply(
-    //   planeAlign,this.transformationMatrix);
-
-    const posAfterSurfaceAlign = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* mat4TranslationComponent */](
-        this.transformationMatrix
-    )
-    const surfaceOffset = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["t" /* subtractVectors */](
-      this.surfacePoint,
-      posAfterSurfaceAlign
-    );
-
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["j" /* mat_4_multiply */](
-      this.transformationMatrix,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["v" /* translationMatrix */](surfaceOffset[0],
-        surfaceOffset[1], surfaceOffset[2])
-    );
+      this.surfacePlaneNormal, localUp);
+    const planeAlignAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* angleBetweenVectors */](localUp,
+      this.surfacePlaneNormal);
+        this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* axisAngleToQuaternion */](
+          planeAlignAxis, planeAlignAngle/50));
   }
 
   _getSurfaceData(){
-    let worldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* mat4TranslationComponent */](
-      this.transformationMatrix
-    );
-    let localDownVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["l" /* multiplyVec4ByMatrix4 */](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["h" /* mat4RotationComponent */](this.transformationMatrix),
-      [0,0,-1,1]
-    );
-    let newFloorTriangle = this.slope.getSurroundingTriangle(worldPos,this.currentSegmentNumber);
-    if(!newFloorTriangle){
-      let lastValidSurfaceXY = this.surfacePoint.slice();
-      lastValidSurfaceXY[2] = 0;
-      let currentPosXY = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* mat4TranslationComponent */](this.transformationMatrix);
-      currentPosXY[2] = 0;
-      const posOffset = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["t" /* subtractVectors */](currentPosXY, lastValidSurfaceXY);
-      this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["j" /* mat_4_multiply */](this.transformationMatrix,
-        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["v" /* translationMatrix */](posOffset[0], posOffset[1], posOffset[2])
-      );
-      newFloorTriangle = this.slope.getSurroundingTriangle(worldPos,this.currentSegmentNumber);
-    }
+
+    let localDownVector = this.transformDirection([0,0,-1]);
+    let newFloorTriangle = this.slope.getSurroundingTriangle(this.getPosition(),this.currentSegmentNumber);
+    // if(!newFloorTriangle){
+    //   let lastValidSurfaceXY = this.surfacePoint.slice();
+    //   lastValidSurfaceXY[2] = 0;
+    //   let currentPosXY = MathUtils.mat4TranslationComponent(this.transformationMatrix);
+    //   currentPosXY[2] = 0;
+    //   const posOffset = MathUtils.subtractVectors(currentPosXY, lastValidSurfaceXY);
+    //   this.transformationMatrix = MathUtils.mat_4_multiply(this.transformationMatrix,
+    //     MathUtils.translationMatrix(posOffset[0], posOffset[1], posOffset[2])
+    //   );
+    //   newFloorTriangle = this.slope.getSurroundingTriangle(worldPos,this.currentSegmentNumber);
+    // }
     this.floorTriangle = newFloorTriangle || this.floorTriangle;
     this.surfacePlaneNormal = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["m" /* planeNormal */](this.floorTriangle[0], this.floorTriangle[1],
       this.floorTriangle[2]);
-    this.surfacePoint = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["C" /* vectorTriangleIntersection */](worldPos, localDownVector,
-    this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2]);
+    this.surfacePoint = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["C" /* vectorTriangleIntersection */](this.transformPoint([0,0,1]),
+     this.transformDirection([0,0,-1]),
+     this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2]);
   }
   _fall(){
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["j" /* mat_4_multiply */](this.transformationMatrix,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["v" /* translationMatrix */](0,0, -1 * this.fallSpeed));
-      this.fallSpeed = this.fallSpeed + 0.02;
-  }
-  _transformationMatrixAfterMove(worldMoveVector){
-    return __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["j" /* mat_4_multiply */](this.transformationMatrix,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["v" /* translationMatrix */](worldMoveVector[0], worldMoveVector[1], worldMoveVector[2]));
+    this.setPosition(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["b" /* addVectors */](this.getPosition(), [0,0,-1* this.fallSpeed]));
+    this.fallSpeed = this.fallSpeed + 0.02;
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Character;
@@ -1676,7 +1672,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
 
   constructor(transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["f" /* identityMatrix4 */], rasterizer, img_src = "snow.jpg"){
     super(undefined);
-    this.transformationMatrix = transformationMatrix;
+    this._transformationMatrix = transformationMatrix.slice(0,16);
     this.mesh = new __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__["a" /* default */]({
       faces: [],
       vertices: [],
@@ -1915,7 +1911,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       obstacle = this.obstacles[segment_number][i];
       transformedPosition = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["l" /* multiplyVec4ByMatrix4 */](
         __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* inverse_mat4_rot_pos */](
-            obstacle.transformationMatrix
+            obstacle.getTransformationMatrix()
         ),
         pos.concat(1)
       );

@@ -241,7 +241,7 @@ export class ObjectsRasterizer{
       this.gl.enableVertexAttribArray(colorsAttrIndex);
       offset += 4;
     }
-    let viewMatrix = MathUtils.mat_4_multiply(obj.transformationMatrix, this.viewMatrix);
+    let viewMatrix = MathUtils.mat_4_multiply(obj.getTransformationMatrix(), this.viewMatrix);
     const viewMatrixUniformLocation = this.gl.getUniformLocation(program, "view_matrix");
     this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
 
@@ -253,7 +253,7 @@ export class ObjectsRasterizer{
     let cameraMatrix;
     if(this.cameraTarget){
 
-        cameraMatrix = this.cameraTarget.transformationMatrix;
+        cameraMatrix = this.cameraTarget.getTransformationMatrix();
 
 
 
@@ -264,20 +264,20 @@ export class ObjectsRasterizer{
             cameraMatrix);
 
 
-            const planeAlign = MathUtils.axisToVec(
-                [0,0,1,1],
-             MathUtils.multiplyVec4ByMatrix4(
-               MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
-                 cameraMatrix
-               )),
-               [0,0,1,1]
-             )
-            );
-
-          cameraMatrix = MathUtils.mat_4_multiply(
-            planeAlign,
-            cameraMatrix
-          );
+          //   const planeAlign = MathUtils.axisToVec(
+          //       [0,0,1,1],
+          //    MathUtils.multiplyVec4ByMatrix4(
+          //      MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
+          //        cameraMatrix
+          //      )),
+          //      [0,0,1,1]
+          //    )
+          //   );
+          //
+          // cameraMatrix = MathUtils.mat_4_multiply(
+          //   planeAlign,
+          //   cameraMatrix
+          // );
 
 
       //

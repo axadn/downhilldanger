@@ -366,9 +366,26 @@ export const quaternionToMatrix = (q) =>{
   q[1]*q[2]*2 + q[3]*q[0]*2, 1 - q[1]*q[1]*2 - q[3]*q[3]*2, q[2]*q[3]*2 - q[1]*q[0]*2, 0,
   q[1]*q[3]*2 - q[2]*q[0]*2, q[2]*q[3]*2 + q[1]*q[0]*2, 1 - q[1]*q[1]*2 - q[2]*q[2]*2, 0,
   0,                         0,                      0,                                1
-];
-
+  ];
 }
+/*
+0  1   2  3
+4  5   6  7
+8  9  10 11
+12 13  14 15
+*/
+export const setMatrixRotInPlace = (mat, q) =>{
+  q = vectorNormalize(q);
+  mat[0] = 1 - q[2]*q[2]*2 - q[3]*q[3]*2;
+  mat[1] = q[1]*q[2]*2 - q[3]*q[0]*2;
+  mat[2] = q[1]*q[3]*2 + q[2]*q[0]*2;
+  mat[4] = q[1]*q[2]*2 + q[3]*q[0]*2;
+  mat[5] = 1 - q[1]*q[1]*2 - q[3]*q[3]*2;
+  mat[6] = q[2]*q[3]*2 - q[1]*q[0]*2;
+  mat[8] = q[1]*q[3]*2 - q[2]*q[0]*2;
+  mat[9] = q[2]*q[3]*2 + q[1]*q[0]*2;
+  mat[10] = 1 - q[1]*q[1]*2 - q[2]*q[2]*2;
+};
 export const IdentityQuaternion = [1,0,0,0];
 
 export const lerpQuaternions = (quat1, quat2, lerpAmount) =>{

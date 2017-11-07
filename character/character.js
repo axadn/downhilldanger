@@ -1,5 +1,5 @@
 import GameObject from "../game_object/game_object";
-const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 0;
+const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 35;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
 const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
@@ -27,21 +27,18 @@ export default class Character extends GameObject{
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
+    this.setPosition([0,0,16]);
     this.angularVelocity = MathUtils.IdentityQuaternion;
   }
   update(){
     this._handleControls();
     this._getSurfaceData();
-    const distanceFromSurface = MathUtils.vectorSquareMag(MathUtils.subtractVectors
-        (MathUtils.mat4TranslationComponent(
-          this.transformationMatrix),this.surfacePoint));
+    const surfaceOffset = MathUtils.subtractVectors
+      (this.getPosition(),this.surfacePoint);
+    const distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
     if(isNaN(distanceFromSurface)){
     }
-    let localVelocity = MathUtils.multiplyVec4ByMatrix4(
-      MathUtils.inverse_mat4_rot_pos(
-        MathUtils.mat4RotationComponent(this.transformationMatrix)),
-      this.velocity
-    );
+    let localVelocity = this.inverseTransformDirection(this.velocity);
     if(distanceFromSurface > SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
       this._fall();
     }
@@ -49,18 +46,16 @@ export default class Character extends GameObject{
       this.fallSpeed = 0;
       this._accelerate(localVelocity);
       this._applyFriction(localVelocity);
-    }
+     }
     this._applyDrag(localVelocity);
     this._applyAngularDrag();
-    this.velocity = MathUtils.multiplyVec4ByMatrix4(
-      MathUtils.mat4RotationComponent(this.transformationMatrix),
-      localVelocity
-    )
+    this.velocity = this.transformDirection(localVelocity);
     this._applyAngularVelocity();
     this._moveForward();
   }
   addAngularVelocity(quat){
     this.angularVelocity =  MathUtils.multiplyQuaternions(this.angularVelocity, quat);
+    this.angularVelocity = MathUtils.vectorNormalize(this.angularVelocity);
   }
   _applyDrag(localVelocity){
     for(let i = 0; i < localVelocity.length; ++i){
@@ -68,10 +63,9 @@ export default class Character extends GameObject{
     }
   }
   _applyAngularVelocity(){
-    this.transformationMatrix = MathUtils.mat_4_multiply(
-      MathUtils.quaternionToMatrix(this.angularVelocity),
-      this.transformationMatrix
-    );
+    debugger;
+     this.setRotation(MathUtils.multiplyQuaternions(this.getRotation(),
+     this.angularVelocity));
   }
   _applyAngularDrag(){
     this.angularVelocity = MathUtils.scaleQuaternion(this.angularVelocity, 1 - ANGULAR_DRAG);
@@ -93,14 +87,9 @@ export default class Character extends GameObject{
   }
   _steer(direction){
     this.addAngularVelocity(
-      MathUtils.axisAngleToQuaternion([0,0,1],
+      MathUtils.axisAngleToQuaternion(
+        this.transformDirection([0,0,1]),
       -1 * direction * STEER_SPEED)
-    );
-  }
-  _convertLocalRotMatToWorldTransform(localRot){
-    return MathUtils.mat_4_multiply(
-      localRot,
-      MathUtils.mat4RotationComponent(this.transformationMatrix)
     );
   }
 
@@ -122,13 +111,10 @@ export default class Character extends GameObject{
     ).concat([0]);
     let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
     pushBackVector = MathUtils.scaleVector(pushBackVector, 2);
-    this.transformationMatrix = MathUtils.mat_4_multiply(this.transformationMatrix,
-      MathUtils.translationMatrix(pushBackVector[0], pushBackVector[1],
-      pushBackVector[2])
-    );
+    this.setPosition(this.transformPoint(pushBackVector));
     const collisionOffsetVector = MathUtils.subtractVectors(
       collisionData.colliderPoint.slice(0,3),
-      MathUtils.mat4TranslationComponent(this.transformationMatrix)
+      this.getPosition()
     );
     let addAngularVelocAngle = MathUtils.angleBetweenVectors(
       MathUtils.scaleVector(collisionData.normal, -1),
@@ -149,19 +135,11 @@ export default class Character extends GameObject{
       this.velocity,
       -1 * this.restitution
     );
-    this.transformationMatrix = MathUtils.mat_4_multiply(
-      this.transformationMatrix,
-      MathUtils.translationMatrix(0, -2, 0)
-    );
-
+    this.setPosition(this.transformPoint([0,-2,0]));
   }
   _moveForward(){
-    let worldPos = MathUtils.mat4TranslationComponent(
-      this.transformationMatrix
-    );
-    let nextWorldPos = worldPos;
-    const edgeCollisionData = this.slope.boxIsBeyondEdge(this.transformationMatrix, this.boxDimensions, this.currentSegmentNumber);
-    const obstacleCollisionData = this.slope.positionCollidesWithObstacle(nextWorldPos, this.currentSegmentNumber);
+    const edgeCollisionData = this.slope.boxIsBeyondEdge(this.getTransformationMatrix(), this.boxDimensions, this.currentSegmentNumber);
+    const obstacleCollisionData = this.slope.positionCollidesWithObstacle(this.getPosition(), this.currentSegmentNumber);
 
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
@@ -170,11 +148,8 @@ export default class Character extends GameObject{
     else if(obstacleCollisionData){
       this._handleTreeCollision(obstacleCollisionData);
     }
-    let worldMoveVector = MathUtils.projectVectorOntoPlane(
-      this.velocity, this.surfacePlaneNormal);
-    let transformationMatrixAfterMove = this._transformationMatrixAfterMove(worldMoveVector);
-    nextWorldPos = MathUtils.mat4TranslationComponent(
-      transformationMatrixAfterMove);
+    let nextWorldPos = MathUtils.addVectors(MathUtils.projectVectorOntoPlane(
+      this.velocity, this.surfacePlaneNormal), this.getPosition());
     if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
       slope.positionIsPastSegmentStart(nextWorldPos,
       this.currentSegmentNumber + 1)){
@@ -185,97 +160,48 @@ export default class Character extends GameObject{
       let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
          this.currentSegmentNumber) || this.floorTriangle;
 
-      // if(!MathUtils.pointIsAbovePlane(nextWorldPos, triangleAfterMove[0],
-      //   triangleAfterMove[1], triangleAfterMove[2])){
-      //
-      //   nextWorldPos = MathUtils.vectorTriangleIntersection(worldPos, worldMoveVector,
-      //       triangleAfterMove[0], triangleAfterMove[1], triangleAfterMove[2]);
-      //
-      //   worldMoveVector = MathUtils.subtractVectors(nextWorldPos, worldPos);
-      //   transformationMatrixAfterMove = MathUtils.mat_4_multiply(this.transformationMatrix,
-      //     MathUtils.translationMatrix(worldMoveVector[0], worldMoveVector[1], worldMoveVector[2])
-      //   );
-      // }
-
+      //  if(!MathUtils.pointIsAbovePlane(nextWorldPos, triangleAfterMove[0],
+      //    triangleAfterMove[1], triangleAfterMove[2])){
+      //    nextWorldPos = MathUtils.vectorTriangleIntersection(nextWorldPos, [0,0,-1],
+      //        triangleAfterMove[0], triangleAfterMove[1], triangleAfterMove[2]);
+      //  }
     }
-      this.transformationMatrix = transformationMatrixAfterMove;
 
+    this.setPosition(nextWorldPos);
     this._getSurfaceData();
-
-    //  const planeAlign = MathUtils.axisToVec(
-    //      [0,0,1,1],
-    //   MathUtils.multiplyVec4ByMatrix4(
-    //     MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
-    //       this.transformationMatrix
-    //     )),
-    //     this.surfacePlaneNormal.concat(1)
-    //   )
-    //  );
-
-    const surfaceNormalLocal = MathUtils.multiplyVec4ByMatrix4(
-        MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
-          this.transformationMatrix
-        )),
-        this.surfacePlaneNormal.concat(1)
-    );
+    const localUp = this.transformDirection([0,0,1]);
     const planeAlignAxis = MathUtils.vectorCross(
-      surfaceNormalLocal.slice(0,3), [0,0,1]);
-    const planeAlignAngle = MathUtils.angleBetweenVectors([0,0,1],
-      surfaceNormalLocal.slice(0,3));
-      this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
-        planeAlignAxis, planeAlignAngle/50));
-    // const planeAlign = MathUtils.axisAngleToMatrix(planeAlignAxis, planeAlignAngle);
-    // this.transformationMatrix = MathUtils.mat_4_multiply(
-    //   planeAlign,this.transformationMatrix);
-
-    const posAfterSurfaceAlign = MathUtils.mat4TranslationComponent(
-        this.transformationMatrix
-    )
-    const surfaceOffset = MathUtils.subtractVectors(
-      this.surfacePoint,
-      posAfterSurfaceAlign
-    );
-
-    this.transformationMatrix = MathUtils.mat_4_multiply(
-      this.transformationMatrix,
-      MathUtils.translationMatrix(surfaceOffset[0],
-        surfaceOffset[1], surfaceOffset[2])
-    );
+      this.surfacePlaneNormal, localUp);
+    const planeAlignAngle = MathUtils.angleBetweenVectors(localUp,
+      this.surfacePlaneNormal);
+        this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+          planeAlignAxis, planeAlignAngle/50));
   }
 
   _getSurfaceData(){
-    let worldPos = MathUtils.mat4TranslationComponent(
-      this.transformationMatrix
-    );
-    let localDownVector = MathUtils.multiplyVec4ByMatrix4(
-      MathUtils.mat4RotationComponent(this.transformationMatrix),
-      [0,0,-1,1]
-    );
-    let newFloorTriangle = this.slope.getSurroundingTriangle(worldPos,this.currentSegmentNumber);
-    if(!newFloorTriangle){
-      let lastValidSurfaceXY = this.surfacePoint.slice();
-      lastValidSurfaceXY[2] = 0;
-      let currentPosXY = MathUtils.mat4TranslationComponent(this.transformationMatrix);
-      currentPosXY[2] = 0;
-      const posOffset = MathUtils.subtractVectors(currentPosXY, lastValidSurfaceXY);
-      this.transformationMatrix = MathUtils.mat_4_multiply(this.transformationMatrix,
-        MathUtils.translationMatrix(posOffset[0], posOffset[1], posOffset[2])
-      );
-      newFloorTriangle = this.slope.getSurroundingTriangle(worldPos,this.currentSegmentNumber);
-    }
+
+    let localDownVector = this.transformDirection([0,0,-1]);
+    let newFloorTriangle = this.slope.getSurroundingTriangle(this.getPosition(),this.currentSegmentNumber);
+    // if(!newFloorTriangle){
+    //   let lastValidSurfaceXY = this.surfacePoint.slice();
+    //   lastValidSurfaceXY[2] = 0;
+    //   let currentPosXY = MathUtils.mat4TranslationComponent(this.transformationMatrix);
+    //   currentPosXY[2] = 0;
+    //   const posOffset = MathUtils.subtractVectors(currentPosXY, lastValidSurfaceXY);
+    //   this.transformationMatrix = MathUtils.mat_4_multiply(this.transformationMatrix,
+    //     MathUtils.translationMatrix(posOffset[0], posOffset[1], posOffset[2])
+    //   );
+    //   newFloorTriangle = this.slope.getSurroundingTriangle(worldPos,this.currentSegmentNumber);
+    // }
     this.floorTriangle = newFloorTriangle || this.floorTriangle;
     this.surfacePlaneNormal = MathUtils.planeNormal(this.floorTriangle[0], this.floorTriangle[1],
       this.floorTriangle[2]);
-    this.surfacePoint = MathUtils.vectorTriangleIntersection(worldPos, localDownVector,
-    this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2]);
+    this.surfacePoint = MathUtils.vectorTriangleIntersection(this.transformPoint([0,0,1]),
+     this.transformDirection([0,0,-1]),
+     this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2]);
   }
   _fall(){
-    this.transformationMatrix = MathUtils.mat_4_multiply(this.transformationMatrix,
-      MathUtils.translationMatrix(0,0, -1 * this.fallSpeed));
-      this.fallSpeed = this.fallSpeed + 0.02;
-  }
-  _transformationMatrixAfterMove(worldMoveVector){
-    return MathUtils.mat_4_multiply(this.transformationMatrix,
-      MathUtils.translationMatrix(worldMoveVector[0], worldMoveVector[1], worldMoveVector[2]));
+    this.setPosition(MathUtils.addVectors(this.getPosition(), [0,0,-1* this.fallSpeed]));
+    this.fallSpeed = this.fallSpeed + 0.02;
   }
 }
