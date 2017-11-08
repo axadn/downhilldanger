@@ -1,17 +1,48 @@
 export const DEFAULT_ANIMATION_FRAMERATE = 60;
 export const UPDATE_INTERVAL = 33;
+const ANGULAR_DRAG = 0.3;
+const DRAG = 0.4;
 import * as MathUtils from "../utils/math_utils";
 export default class GameObject {
   constructor(mesh, transformationMatrix = MathUtils.identityMatrix4){
     this.mesh = mesh;
-    this._transformationMatrix = transformationMatrix;
-    this._position = [0,0,0];
+    this._transformationMatrix = transformationMatrix.slice(0,16);
+    this._position = MathUtils.mat4TranslationComponent(transformationMatrix);
     this._rotation = MathUtils.IdentityQuaternion;
+    this.velocity = [0,0,0];
     setInterval(this.update.bind(this), UPDATE_INTERVAL);
+    this.angularVelocity = MathUtils.IdentityQuaternion;
   }
-  update(timestamp){
 
+  update(timestamp){
+    this._applyVelocityStep();
+    this._applyAngularVelocityStep();
+    let localVelocity = this.inverseTransformDirection(this.velocity);
+    this._applyDragStep();
+    this._applyAngularDragStep();
+    this.velocity = this.transformDirection(localVelocity);
   }
+
+  _applyVelocityStep(){
+    this.setPosition(MathUtils.addVectors(this._position, this.velocity));
+  }
+  _applyAngularVelocityStep(){
+    this.setRotation(MathUtils.multiplyQuaternions(this.angularVelocity,this.getRotation()));
+  }
+  addAngularVelocity(quat){
+    quat = MathUtils.vectorNormalize(quat);
+    this.angularVelocity =  MathUtils.multiplyQuaternions(this.angularVelocity, quat);
+    this.angularVelocity = MathUtils.vectorNormalize(this.angularVelocity);
+  }
+  _applyDragStep(){
+    for(let i = 0; i < this.velocity.length; ++i){
+      this.velocity[i] -= this.velocity[i] * DRAG;
+    }
+  }
+  _applyAngularDragStep(){
+    this.angularVelocity = MathUtils.scaleQuaternion(this.angularVelocity, 1 - ANGULAR_DRAG);
+  }
+
   transformPoint(point){
     return MathUtils.multiplyVec4ByMatrix4(
       this._transformationMatrix, point.concat([1])).slice(0,3);

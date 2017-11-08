@@ -264,20 +264,20 @@ export class ObjectsRasterizer{
             cameraMatrix);
 
 
-          //   const planeAlign = MathUtils.axisToVec(
-          //       [0,0,1,1],
-          //    MathUtils.multiplyVec4ByMatrix4(
-          //      MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
-          //        cameraMatrix
-          //      )),
-          //      [0,0,1,1]
-          //    )
-          //   );
-          //
-          // cameraMatrix = MathUtils.mat_4_multiply(
-          //   planeAlign,
-          //   cameraMatrix
-          // );
+            const planeAlign = MathUtils.axisToVec(
+                [0,0,1,1],
+             MathUtils.multiplyVec4ByMatrix4(
+               MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
+                 cameraMatrix
+               )),
+               [0,0,1,1]
+             )
+            );
+
+          cameraMatrix = MathUtils.mat_4_multiply(
+            planeAlign,
+            cameraMatrix
+          );
 
 
       //

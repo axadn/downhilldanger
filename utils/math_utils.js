@@ -208,7 +208,7 @@ export const projectVector = (vector, onto)=>{
 };
 
 export const projectVectorOntoPlane = (vector, planeNormal)=>{
-  return subtractVectors(vector, projectVector(vector, planeNormal));
+  return subtractVectors(vector.slice(0,3), projectVector(vector, planeNormal));
 };
 
 export const planeNormal = (t0, t1, t2) =>{
@@ -251,18 +251,6 @@ export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   }
   return result;
 };
-
-export const multiplyVecByMatrix3 = (matrix, vec) =>{
-  const result = [];
-  for(let i = 0; i < 3; ++i){
-    let colResult = 0;
-    for(let j = 0; i < 3; ++j){
-      colResult += matrix[j * 4 + i] * vec[j];
-    }
-    result.push(colResult);
-  }
-  return result;
-}
 
 /**
 triangle configuration :
@@ -331,10 +319,8 @@ export const twoVectorsToQuaternion = (vec1, vec2) => {
 };
 
 export const axisAngleToQuaternion = (axis, angle) => {
+  axis = vectorNormalize(axis);
   const sinOverTwo = Math.sin(angle/2);
-  if(isNaN(sinOverTwo)){
-    debugger;
-  }
   return [
     Math.cos(angle/2),
     axis[0] * sinOverTwo,
@@ -396,4 +382,4 @@ export const lerpQuaternions = (quat1, quat2, lerpAmount) =>{
   return result;
 }
 
-export const scaleQuaternion = (quat1, scale) => lerpQuaternions(IdentityQuaternion, quat1, scale);
+export const scaleQuaternion = (quat1, scale) => lerpQuaternions(quat1, IdentityQuaternion,  scale);
