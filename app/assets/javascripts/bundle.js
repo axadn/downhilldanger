@@ -1197,13 +1197,15 @@ function compileShader(gl, type, source){
 
 const keyDown = character => e=>{
   switch(e.key){
-    case "left":
+    case "ArrowLeft":
     case "a":
       character.input.left = true;
       break;
+    case "ArrowRight":
     case "d":
       character.input.right = true;
       break;
+    case "ArrowDown":
     case "s":
       character.input.back = true;
   }
@@ -1213,13 +1215,15 @@ const keyDown = character => e=>{
 
 const keyUp = character => e => {
   switch(e.key){
-    case "left":
+    case "ArrowLeft":
     case "a":
       character.input.left = false;
       break;
+    case "ArrowRight":
     case "d":
       character.input.right = false;
       break;
+    case "ArrowDown":
     case "s":
       character.input.back = false;
       break;
@@ -1435,13 +1439,12 @@ const monkeyData ={
 
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
-const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
-const ACCELERATION = 0.02;
 const STEER_SPEED = 0.02;
 
-const SNOWBOARD_RESTITUTION = 0.3;
+const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
+const BREAK_FRICTION = [0.187,0.187,0.187];
 
 
 class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["a" /* default */]{
@@ -1450,7 +1453,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.mesh = mesh;
     this.boundingBox = boundingBox;
     this.speed = 0.2;
-    this.fallSpeed = 0.2;
+    this.fallSpeed = 0.15;
     this.slope = slope;
     this.currentSegmentNumber = 0;
     this.input = {left: false, right: false, back: false}
@@ -1549,6 +1552,12 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
         this._steer(1);
       }
     }
+    if(this.input.back){
+      this.friction = BREAK_FRICTION
+    }
+    else{
+      this.friction = SNOWBOARD_FRICTION;
+    }
   }
   _handleEdgeCollision(collisionData){
     this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["s" /* scaleVector */](
@@ -1568,7 +1577,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["s" /* scaleVector */](collisionData.normal, -1),
       collisionOffsetVector
     );
-    addAngularVelocAngle /= 2;
+    addAngularVelocAngle /= 6.8;
     addAngularVelocAngle *= __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["B" /* vectorMag */](this.velocity);
     const addAngularVelocAxis = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["z" /* vectorCross */](
       collisionData.normal,

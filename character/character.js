@@ -1,13 +1,12 @@
 import GameObject from "../game_object/game_object";
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
-const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
-const ACCELERATION = 0.02;
 const STEER_SPEED = 0.02;
 
-const SNOWBOARD_RESTITUTION = 0.3;
+const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
+const BREAK_FRICTION = [0.187,0.187,0.187];
 import * as MathUtils from "../utils/math_utils";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
 export default class Character extends GameObject{
@@ -16,7 +15,7 @@ export default class Character extends GameObject{
     this.mesh = mesh;
     this.boundingBox = boundingBox;
     this.speed = 0.2;
-    this.fallSpeed = 0.2;
+    this.fallSpeed = 0.15;
     this.slope = slope;
     this.currentSegmentNumber = 0;
     this.input = {left: false, right: false, back: false}
@@ -115,6 +114,12 @@ export default class Character extends GameObject{
         this._steer(1);
       }
     }
+    if(this.input.back){
+      this.friction = BREAK_FRICTION
+    }
+    else{
+      this.friction = SNOWBOARD_FRICTION;
+    }
   }
   _handleEdgeCollision(collisionData){
     this.velocity = MathUtils.scaleVector(
@@ -134,7 +139,7 @@ export default class Character extends GameObject{
       MathUtils.scaleVector(collisionData.normal, -1),
       collisionOffsetVector
     );
-    addAngularVelocAngle /= 2;
+    addAngularVelocAngle /= 6.8;
     addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
     const addAngularVelocAxis = MathUtils.vectorCross(
       collisionData.normal,
