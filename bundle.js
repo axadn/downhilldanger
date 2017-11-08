@@ -82,7 +82,7 @@ const mat_4_multiply = (matrix0, matrix1)=>{
   }
   return result;
 };
-/* harmony export (immutable) */ __webpack_exports__["f"] = mat_4_multiply;
+/* harmony export (immutable) */ __webpack_exports__["k"] = mat_4_multiply;
 
 
 const identityMatrix4 = [
@@ -91,7 +91,7 @@ const identityMatrix4 = [
   0,0,1,0,
   0,0,0,1
 ];
-/* harmony export (immutable) */ __webpack_exports__["b"] = identityMatrix4;
+/* harmony export (immutable) */ __webpack_exports__["g"] = identityMatrix4;
 
 const translationMatrix = (x,y,z) =>([
   1,0,0,0,
@@ -99,7 +99,7 @@ const translationMatrix = (x,y,z) =>([
   0,0,1,0,
   x,y,z,1
 ]);
-/* harmony export (immutable) */ __webpack_exports__["p"] = translationMatrix;
+/* harmony export (immutable) */ __webpack_exports__["x"] = translationMatrix;
 
 const scaleMatrix =(x,y,z) => ([
   x,0,0,0,
@@ -107,7 +107,7 @@ const scaleMatrix =(x,y,z) => ([
   0,0,z,0,
   0,0,0,1
 ]);
-/* harmony export (immutable) */ __webpack_exports__["k"] = scaleMatrix;
+/* harmony export (immutable) */ __webpack_exports__["q"] = scaleMatrix;
 
 
 
@@ -122,7 +122,7 @@ const xRotationMatrix = radians =>{
     0, 0, 0, 1
   ]
 };
-/* harmony export (immutable) */ __webpack_exports__["w"] = xRotationMatrix;
+/* harmony export (immutable) */ __webpack_exports__["F"] = xRotationMatrix;
 
 
 const yRotationMatrix = radians => {
@@ -135,7 +135,7 @@ const yRotationMatrix = radians => {
     0, 0, 0, 1
   ];
 };
-/* harmony export (immutable) */ __webpack_exports__["x"] = yRotationMatrix;
+/* harmony export (immutable) */ __webpack_exports__["G"] = yRotationMatrix;
 
 
 const zRotationMatrix = radians => {
@@ -148,7 +148,7 @@ const zRotationMatrix = radians => {
     0, 0, 0, 1
   ];
 };
-/* harmony export (immutable) */ __webpack_exports__["y"] = zRotationMatrix;
+/* harmony export (immutable) */ __webpack_exports__["H"] = zRotationMatrix;
 
 
 const inverse_mat4_rot_pos = mat=>{
@@ -197,7 +197,7 @@ const inverse_mat4_rot_pos = mat=>{
     ],
   );
 }
-/* harmony export (immutable) */ __webpack_exports__["c"] = inverse_mat4_rot_pos;
+/* harmony export (immutable) */ __webpack_exports__["h"] = inverse_mat4_rot_pos;
 
 
 const swapYZMatrix =[
@@ -207,7 +207,7 @@ const swapYZMatrix =[
   0,1,0,0,//z
   0,0,0,1,//w
 ];
-/* harmony export (immutable) */ __webpack_exports__["o"] = swapYZMatrix;
+/* harmony export (immutable) */ __webpack_exports__["w"] = swapYZMatrix;
 
 const simple_perspective_matrix = [
   1,0,0,0,
@@ -215,7 +215,7 @@ const simple_perspective_matrix = [
   0,0,1,1,
   0,0,0,1
 ];
-/* harmony export (immutable) */ __webpack_exports__["m"] = simple_perspective_matrix;
+/* harmony export (immutable) */ __webpack_exports__["u"] = simple_perspective_matrix;
 
 
 const translate_mat4 = (mat, x =0, y=0, z=0)=>{
@@ -235,7 +235,7 @@ const pointIsAbovePlane = (pos, vertex0, vertex1, vertex2)=>{
   return vectorDot(offsetVector, planeNormal(vertex0,
   vertex1, vertex2)) > 0;
 }
-/* harmony export (immutable) */ __webpack_exports__["i"] = pointIsAbovePlane;
+/* harmony export (immutable) */ __webpack_exports__["o"] = pointIsAbovePlane;
 
 
 const addVectors = (vector1, vector2)=>{
@@ -245,7 +245,7 @@ const addVectors = (vector1, vector2)=>{
   };
   return newVector;
 }
-/* unused harmony export addVectors */
+/* harmony export (immutable) */ __webpack_exports__["b"] = addVectors;
 
 
 const vectorCross = (vector1, vector2)=>([
@@ -253,7 +253,7 @@ const vectorCross = (vector1, vector2)=>([
   vector1[2] * vector2[0] - vector1[0] * vector2[2],
   vector1[0] * vector2[1] - vector1[1] * vector2[0]
 ]);
-/* harmony export (immutable) */ __webpack_exports__["r"] = vectorCross;
+/* harmony export (immutable) */ __webpack_exports__["z"] = vectorCross;
 
 
 const subtractVectors = (vector1, vector2)=>{
@@ -263,14 +263,14 @@ const subtractVectors = (vector1, vector2)=>{
   }
   return newVector;
 }
-/* harmony export (immutable) */ __webpack_exports__["n"] = subtractVectors;
+/* harmony export (immutable) */ __webpack_exports__["v"] = subtractVectors;
 
 
 const vectorDot = (vector1, vector2) =>{
   return vector1[0] * vector2[0] + vector1[1] * vector2[1] +
   vector1[2] * vector2[2];
 }
-/* harmony export (immutable) */ __webpack_exports__["s"] = vectorDot;
+/* harmony export (immutable) */ __webpack_exports__["A"] = vectorDot;
 
 
 /* indices
@@ -287,7 +287,7 @@ const mat4TranslationComponent = (mat) =>{
     mat[14]
   ];
 };
-/* harmony export (immutable) */ __webpack_exports__["e"] = mat4TranslationComponent;
+/* harmony export (immutable) */ __webpack_exports__["j"] = mat4TranslationComponent;
 
 const mat4RotationComponent = (mat) =>(
     [
@@ -297,7 +297,7 @@ const mat4RotationComponent = (mat) =>(
       0,      0,     0,       1
     ]
 );
-/* harmony export (immutable) */ __webpack_exports__["d"] = mat4RotationComponent;
+/* harmony export (immutable) */ __webpack_exports__["i"] = mat4RotationComponent;
 
 
 const vectorSquareMag = vector => {
@@ -307,7 +307,7 @@ const vectorSquareMag = vector => {
   }
   return sum;
 };
-/* harmony export (immutable) */ __webpack_exports__["u"] = vectorSquareMag;
+/* harmony export (immutable) */ __webpack_exports__["D"] = vectorSquareMag;
 
 
 const projectVector = (vector, onto)=>{
@@ -318,9 +318,9 @@ const projectVector = (vector, onto)=>{
 
 
 const projectVectorOntoPlane = (vector, planeNormal)=>{
-  return subtractVectors(vector, projectVector(vector, planeNormal));
+  return subtractVectors(vector.slice(0,3), projectVector(vector, planeNormal));
 };
-/* harmony export (immutable) */ __webpack_exports__["j"] = projectVectorOntoPlane;
+/* harmony export (immutable) */ __webpack_exports__["p"] = projectVectorOntoPlane;
 
 
 const planeNormal = (t0, t1, t2) =>{
@@ -328,7 +328,7 @@ const planeNormal = (t0, t1, t2) =>{
   let vectorB = subtractVectors(t1, t0);
   return vectorCross(vectorA, vectorB);
 };
-/* harmony export (immutable) */ __webpack_exports__["h"] = planeNormal;
+/* harmony export (immutable) */ __webpack_exports__["n"] = planeNormal;
 
 
 const triangleContainsPoint =  (p, p0, p1, p2) =>{
@@ -345,7 +345,7 @@ const triangleContainsPoint =  (p, p0, p1, p2) =>{
         n) >= 0);
 
 };
-/* harmony export (immutable) */ __webpack_exports__["q"] = triangleContainsPoint;
+/* harmony export (immutable) */ __webpack_exports__["y"] = triangleContainsPoint;
 
 
 const scaleVector = (vec, scale)=>{
@@ -355,7 +355,7 @@ const scaleVector = (vec, scale)=>{
   }
   return newVec;
 };
-/* harmony export (immutable) */ __webpack_exports__["l"] = scaleVector;
+/* harmony export (immutable) */ __webpack_exports__["s"] = scaleVector;
 
 
 const multiplyVec4ByMatrix4 = (matrix, vec) =>{
@@ -369,7 +369,7 @@ const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   }
   return result;
 };
-/* harmony export (immutable) */ __webpack_exports__["g"] = multiplyVec4ByMatrix4;
+/* harmony export (immutable) */ __webpack_exports__["m"] = multiplyVec4ByMatrix4;
 
 
 /**
@@ -384,13 +384,13 @@ t0
 const vectorMag = (vector)=>{
   return Math.sqrt(vectorSquareMag(vector));
 };
-/* unused harmony export vectorMag */
+/* harmony export (immutable) */ __webpack_exports__["B"] = vectorMag;
 
 
 const vectorNormalize = (vector)=>{
   return scaleVector(vector, 1/vectorMag(vector));
 };
-/* harmony export (immutable) */ __webpack_exports__["t"] = vectorNormalize;
+/* harmony export (immutable) */ __webpack_exports__["C"] = vectorNormalize;
 
 const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
   const normal = vectorCross(subtractVectors(t1, t2),
@@ -399,28 +399,22 @@ const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
   const magnitude = -1 * vectorDot(diffVector, normal) / vectorDot(direction, normal);
   return addVectors(origin, scaleVector(direction, magnitude));
 };
-/* harmony export (immutable) */ __webpack_exports__["v"] = vectorTriangleIntersection;
+/* harmony export (immutable) */ __webpack_exports__["E"] = vectorTriangleIntersection;
 
 
-//https://stackoverflow.com/questions/193918/what-is-the-easiest-way-to-align-the-z-axis-with-a-vector
 const axisToVec = (axis,vec)=>{
-  const vec1 = vectorNormalize(vec.slice(0,3));
-  const axis1 = vectorNormalize(axis.slice(0,3));
-  const dot =vectorDot(axis1,vec1)
-  if(Math.abs(dot) <0.005 || Math.abs(dot) > 1){
-    return identityMatrix4;
-  }
-  const angle = Math.acos(dot);
+  const angle = angleBetweenVectors(axis.slice(0,3), vec.slice(0,3));
   if(Math.abs(angle) < 0.005){
     return identityMatrix4;
   }
-  const rotAxis = vectorNormalize(vectorCross(vec1, axis1));
+  const rotAxis = vectorCross(vec, axis);
   return axisAngleToMatrix(rotAxis, angle);
 };
-/* harmony export (immutable) */ __webpack_exports__["a"] = axisToVec;
+/* harmony export (immutable) */ __webpack_exports__["e"] = axisToVec;
 
 
 const axisAngleToMatrix = (axis, angle) =>{
+  axis = vectorNormalize(axis);
   const x = axis[0];
   const y = axis[1];
   const z = axis[2];
@@ -434,9 +428,110 @@ const axisAngleToMatrix = (axis, angle) =>{
     t*x*z-y*s, t*y*z+x*s, t*z*z+c, 0,
     0,         0,         0,       1
   ]);
-
 };
 /* unused harmony export axisAngleToMatrix */
+
+
+const bounceVectorOffPlane = (vector, planeNormal) =>{
+  planeNormal = vectorNormalize(planeNormal);
+  return addVectors(
+    scaleVector(
+      planeNormal,
+      -2 * vectorDot(vector, planeNormal)
+    ),
+    vector
+  );
+};
+/* harmony export (immutable) */ __webpack_exports__["f"] = bounceVectorOffPlane;
+
+const twoVectorsToQuaternion = (vec1, vec2) => {
+  const axis = vectorNormalize(vectorCross(vec1, vec2));
+  const angle = angleBetweenVectors(vec1, vec2);
+  return axisAngleToQuaternion(axis, angle);
+};
+/* unused harmony export twoVectorsToQuaternion */
+
+
+const axisAngleToQuaternion = (axis, angle) => {
+  axis = vectorNormalize(axis);
+  const sinOverTwo = Math.sin(angle/2);
+  return [
+    Math.cos(angle/2),
+    axis[0] * sinOverTwo,
+    axis[1] * sinOverTwo,
+    axis[2] * sinOverTwo
+  ];
+};
+/* harmony export (immutable) */ __webpack_exports__["d"] = axisAngleToQuaternion;
+
+
+const angleBetweenVectors = (to, from)=>{
+  to = vectorNormalize(to);
+  from = vectorNormalize(from);
+  const dot =vectorDot(to,from)
+  if(Math.abs(dot) <0.005 || Math.abs(dot) > 1){
+    return 0;
+  }
+  return Math.acos(dot);
+}
+/* harmony export (immutable) */ __webpack_exports__["c"] = angleBetweenVectors;
+
+const multiplyQuaternions = (q1, q2) => [
+  q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] - q1[3] * q2[3],
+  q1[0] * q2[1] + q1[1] * q2[0] + q1[2] * q2[3] - q1[3] * q2[2],
+  q1[0] * q2[2] - q1[1] * q1[3] + q1[2] * q2[0] + q1[3] * q2[1],
+  q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1] + q1[3] * q2[0]
+];
+/* harmony export (immutable) */ __webpack_exports__["l"] = multiplyQuaternions;
+
+
+const quaternionToMatrix = (q) =>{
+  q = vectorNormalize(q);
+  return [
+  1 - q[2]*q[2]*2 - q[3]*q[3]*2, q[1]*q[2]*2 - q[3]*q[0]*2, q[1]*q[3]*2 + q[2]*q[0]*2, 0,
+  q[1]*q[2]*2 + q[3]*q[0]*2, 1 - q[1]*q[1]*2 - q[3]*q[3]*2, q[2]*q[3]*2 - q[1]*q[0]*2, 0,
+  q[1]*q[3]*2 - q[2]*q[0]*2, q[2]*q[3]*2 + q[1]*q[0]*2, 1 - q[1]*q[1]*2 - q[2]*q[2]*2, 0,
+  0,                         0,                      0,                                1
+  ];
+}
+/* unused harmony export quaternionToMatrix */
+
+/*
+0  1   2  3
+4  5   6  7
+8  9  10 11
+12 13  14 15
+*/
+const setMatrixRotInPlace = (mat, q) =>{
+  q = vectorNormalize(q);
+  mat[0] = 1 - q[2]*q[2]*2 - q[3]*q[3]*2;
+  mat[1] = q[1]*q[2]*2 - q[3]*q[0]*2;
+  mat[2] = q[1]*q[3]*2 + q[2]*q[0]*2;
+  mat[4] = q[1]*q[2]*2 + q[3]*q[0]*2;
+  mat[5] = 1 - q[1]*q[1]*2 - q[3]*q[3]*2;
+  mat[6] = q[2]*q[3]*2 - q[1]*q[0]*2;
+  mat[8] = q[1]*q[3]*2 - q[2]*q[0]*2;
+  mat[9] = q[2]*q[3]*2 + q[1]*q[0]*2;
+  mat[10] = 1 - q[1]*q[1]*2 - q[2]*q[2]*2;
+};
+/* harmony export (immutable) */ __webpack_exports__["t"] = setMatrixRotInPlace;
+
+const IdentityQuaternion = [1,0,0,0];
+/* harmony export (immutable) */ __webpack_exports__["a"] = IdentityQuaternion;
+
+
+const lerpQuaternions = (quat1, quat2, lerpAmount) =>{
+  let result = [];
+  for(let i = 0; i < 4; ++i){
+    result.push(quat1[i] * lerpAmount + quat2[i] * (1 - lerpAmount));
+  }
+  return result;
+}
+/* unused harmony export lerpQuaternions */
+
+
+const scaleQuaternion = (quat1, scale) => lerpQuaternions(quat1, IdentityQuaternion,  scale);
+/* harmony export (immutable) */ __webpack_exports__["r"] = scaleQuaternion;
 
 
 
@@ -452,15 +547,97 @@ const DEFAULT_ANIMATION_FRAMERATE = 60;
 const UPDATE_INTERVAL = 33;
 /* unused harmony export UPDATE_INTERVAL */
 
+const ANGULAR_DRAG = 0.3;
+const DRAG = 0.4;
 
 class GameObject {
-  constructor(mesh, transformationMatrix = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["b" /* identityMatrix4 */]){
+  constructor(mesh, transformationMatrix = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["g" /* identityMatrix4 */]){
     this.mesh = mesh;
-    this.transformationMatrix = transformationMatrix;
+    this._transformationMatrix = transformationMatrix.slice(0,16);
+    this._position = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["j" /* mat4TranslationComponent */](transformationMatrix);
+    this._rotation = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["a" /* IdentityQuaternion */];
+    this.velocity = [0,0,0];
     setInterval(this.update.bind(this), UPDATE_INTERVAL);
+    this.angularVelocity = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["a" /* IdentityQuaternion */];
   }
-  update(timestamp){
 
+  update(timestamp){
+    this._applyVelocityStep();
+    this._applyAngularVelocityStep();
+    let localVelocity = this.inverseTransformDirection(this.velocity);
+    this._applyDragStep();
+    this._applyAngularDragStep();
+    this.velocity = this.transformDirection(localVelocity);
+  }
+
+  _applyVelocityStep(){
+    this.setPosition(__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["b" /* addVectors */](this._position, this.velocity));
+  }
+  _applyAngularVelocityStep(){
+    this.setRotation(__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["l" /* multiplyQuaternions */](this.angularVelocity,this.getRotation()));
+  }
+  addAngularVelocity(quat){
+    quat = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["C" /* vectorNormalize */](quat);
+    this.angularVelocity =  __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["l" /* multiplyQuaternions */](this.angularVelocity, quat);
+    this.angularVelocity = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["C" /* vectorNormalize */](this.angularVelocity);
+  }
+  _applyDragStep(){
+    for(let i = 0; i < this.velocity.length; ++i){
+      this.velocity[i] -= this.velocity[i] * DRAG;
+    }
+  }
+  _applyAngularDragStep(){
+    this.angularVelocity = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["r" /* scaleQuaternion */](this.angularVelocity, 1 - ANGULAR_DRAG);
+  }
+
+  transformPoint(point){
+    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+      this._transformationMatrix, point.concat([1])).slice(0,3);
+
+  }
+  transformDirection(direction){
+    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["i" /* mat4RotationComponent */](this._transformationMatrix),
+       direction.concat([1])).slice(0,3);
+  }
+  inverseTransformPoint(point){
+    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["h" /* inverse_mat4_rot_pos */](this._transformationMatrix),
+      point.concat([1])
+    ).slice(0,3);
+  }
+  inverseTransformDirection(direction){
+    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["h" /* inverse_mat4_rot_pos */](
+        __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["i" /* mat4RotationComponent */](this._transformationMatrix)
+      ),
+      direction.concat([1])
+    ).slice(0,3);
+  }
+  /*
+   0  1   2  3
+   4  5   6  7
+   8  9  10 11
+  12 13  14 15
+  */
+  setPosition(position){
+    this._position = position;
+    this._transformationMatrix[12] = position[0];
+    this._transformationMatrix[13] = position[1];
+    this._transformationMatrix[14] = position[2];
+  }
+  getRotation(){
+    return this._rotation;
+  }
+  getPosition(){
+    return this._position;
+  }
+  setRotation(rotQuat){
+    this._rotation = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["C" /* vectorNormalize */](rotQuat);
+    __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["t" /* setMatrixRotInPlace */](this._transformationMatrix,this._rotation);
+  }
+  getTransformationMatrix(){
+    return this._transformationMatrix;
   }
   playAnimation(name, loop = true){
     this.isPlayingAnimation = true;
@@ -571,7 +748,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 document.addEventListener("DOMContentLoaded", main);
 function main(){
   const rasterizer = new __WEBPACK_IMPORTED_MODULE_1__utils_webgl_utils__["a" /* ObjectsRasterizer */]();
-  const slope = new __WEBPACK_IMPORTED_MODULE_7__slope_slope__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["p" /* translationMatrix */](0,-3,-4), rasterizer, "assets/snow.jpg");
+  const slope = new __WEBPACK_IMPORTED_MODULE_7__slope_slope__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["x" /* translationMatrix */](0,-3,-4), rasterizer, "assets/snow.jpg");
   window.slope = slope;
 
   //boxManMesh.skinned = true;
@@ -654,11 +831,11 @@ class ObjectsRasterizer{
     }
 
     this.cameraDist = DEFAULT_CAMERA_DIST;
-    this.viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["b" /* identityMatrix4 */];
-    this.perspectiveMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["f" /* mat_4_multiply */](__WEBPACK_IMPORTED_MODULE_0__math_utils__["m" /* simple_perspective_matrix */],
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["k" /* scaleMatrix */](scale, scale, scale));
+    this.viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["g" /* identityMatrix4 */];
+    this.perspectiveMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["k" /* mat_4_multiply */](__WEBPACK_IMPORTED_MODULE_0__math_utils__["u" /* simple_perspective_matrix */],
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["q" /* scaleMatrix */](scale, scale, scale));
     if(swapYZ){
-      this.perspectiveMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["f" /* mat_4_multiply */](__WEBPACK_IMPORTED_MODULE_0__math_utils__["o" /* swapYZMatrix */], this.perspectiveMatrix)
+      this.perspectiveMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["k" /* mat_4_multiply */](__WEBPACK_IMPORTED_MODULE_0__math_utils__["w" /* swapYZMatrix */], this.perspectiveMatrix)
     }
     this.compileDefaultShaders();
   //this.gl.enable(this.gl.CULL_FACE);
@@ -852,9 +1029,9 @@ class ObjectsRasterizer{
         // }
         let unBound = [];
         for(let i = 0; i < boneTransforms.length; ++i){
-          unBound = unBound.concat(__WEBPACK_IMPORTED_MODULE_0__math_utils__["f" /* mat_4_multiply */](
+          unBound = unBound.concat(__WEBPACK_IMPORTED_MODULE_0__math_utils__["k" /* mat_4_multiply */](
             boneTransforms[i],
-            __WEBPACK_IMPORTED_MODULE_0__math_utils__["c" /* inverse_mat4_rot_pos */](obj.mesh.bones[i].bindPose)
+            __WEBPACK_IMPORTED_MODULE_0__math_utils__["h" /* inverse_mat4_rot_pos */](obj.mesh.bones[i].bindPose)
             ));
         }
         //for(let i = 0; i < boneTransforms.length; ++i){
@@ -883,7 +1060,7 @@ class ObjectsRasterizer{
       this.gl.enableVertexAttribArray(colorsAttrIndex);
       offset += 4;
     }
-    let viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["f" /* mat_4_multiply */](obj.transformationMatrix, this.viewMatrix);
+    let viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["k" /* mat_4_multiply */](obj.getTransformationMatrix(), this.viewMatrix);
     const viewMatrixUniformLocation = this.gl.getUniformLocation(program, "view_matrix");
     this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
 
@@ -895,28 +1072,28 @@ class ObjectsRasterizer{
     let cameraMatrix;
     if(this.cameraTarget){
 
-        cameraMatrix = this.cameraTarget.transformationMatrix;
+        cameraMatrix = this.cameraTarget.getTransformationMatrix();
 
 
 
 
 
-         cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["f" /* mat_4_multiply */](
-         __WEBPACK_IMPORTED_MODULE_0__math_utils__["p" /* translationMatrix */](0, -18, 8),
+         cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["k" /* mat_4_multiply */](
+         __WEBPACK_IMPORTED_MODULE_0__math_utils__["x" /* translationMatrix */](0, -18, 8),
             cameraMatrix);
 
 
-            const planeAlign = __WEBPACK_IMPORTED_MODULE_0__math_utils__["a" /* axisToVec */](
+            const planeAlign = __WEBPACK_IMPORTED_MODULE_0__math_utils__["e" /* axisToVec */](
                 [0,0,1,1],
-             __WEBPACK_IMPORTED_MODULE_0__math_utils__["g" /* multiplyVec4ByMatrix4 */](
-               __WEBPACK_IMPORTED_MODULE_0__math_utils__["c" /* inverse_mat4_rot_pos */](__WEBPACK_IMPORTED_MODULE_0__math_utils__["d" /* mat4RotationComponent */](
+             __WEBPACK_IMPORTED_MODULE_0__math_utils__["m" /* multiplyVec4ByMatrix4 */](
+               __WEBPACK_IMPORTED_MODULE_0__math_utils__["h" /* inverse_mat4_rot_pos */](__WEBPACK_IMPORTED_MODULE_0__math_utils__["i" /* mat4RotationComponent */](
                  cameraMatrix
                )),
                [0,0,1,1]
              )
             );
 
-          cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["f" /* mat_4_multiply */](
+          cameraMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["k" /* mat_4_multiply */](
             planeAlign,
             cameraMatrix
           );
@@ -956,9 +1133,9 @@ class ObjectsRasterizer{
     //cameraMatrix = MathUtils.mat_4_multiply()
     //viewMatrix = MathUtils.inverse_mat4_rot_pos(cameraMatrix);
     //cameraMatrix = MathUtils.mat_4_multiply(MathUtils.simple_perspective_matrix, viewMatrix);
-    let viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["c" /* inverse_mat4_rot_pos */](cameraMatrix);
-    viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["f" /* mat_4_multiply */](viewMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["o" /* swapYZMatrix */])
-    viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["f" /* mat_4_multiply */](viewMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["m" /* simple_perspective_matrix */]);
+    let viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["h" /* inverse_mat4_rot_pos */](cameraMatrix);
+    viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["k" /* mat_4_multiply */](viewMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["w" /* swapYZMatrix */])
+    viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["k" /* mat_4_multiply */](viewMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["u" /* simple_perspective_matrix */]);
     return viewMatrix;
   }
 
@@ -1020,12 +1197,15 @@ function compileShader(gl, type, source){
 
 const keyDown = character => e=>{
   switch(e.key){
+    case "ArrowLeft":
     case "a":
       character.input.left = true;
       break;
+    case "ArrowRight":
     case "d":
       character.input.right = true;
       break;
+    case "ArrowDown":
     case "s":
       character.input.back = true;
   }
@@ -1035,12 +1215,15 @@ const keyDown = character => e=>{
 
 const keyUp = character => e => {
   switch(e.key){
+    case "ArrowLeft":
     case "a":
       character.input.left = false;
       break;
+    case "ArrowRight":
     case "d":
       character.input.right = false;
       break;
+    case "ArrowDown":
     case "s":
       character.input.back = false;
       break;
@@ -1254,63 +1437,113 @@ const monkeyData ={
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__ = __webpack_require__(0);
 
-const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 0.4;
+const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
-const MAX_SPEED = 4;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
-const ACCELERATION = 0.02;
-const STEER_SPEED = 0.07;
+const STEER_SPEED = 0.02;
+
+const SNOWBOARD_RESTITUTION = 0.48;
+const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
+const BREAK_FRICTION = [0.187,0.12,0.187];
 
 
 class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["a" /* default */]{
-  constructor(mesh, boundingBox, slope, transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["b" /* identityMatrix4 */]){
+  constructor(mesh, boundingBox, slope, transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["g" /* identityMatrix4 */]){
     super(mesh, transformationMatrix);
     this.mesh = mesh;
     this.boundingBox = boundingBox;
     this.speed = 0.2;
-    this.fallSpeed = 0;
+    this.fallSpeed = 0.15;
     this.slope = slope;
     this.currentSegmentNumber = 0;
     this.input = {left: false, right: false, back: false}
+    this.velocity = [0,1,0];
+    this.angularVelocityAxis = [0,0,1,0];
+    this.angularVelocityAngle = 0;
+    this.friction = SNOWBOARD_FRICTION;
+    this.restitution = SNOWBOARD_RESTITUTION;
+    this.boxDimensions = [0.5,5,0.5];
+    this.setPosition([0,0,16]);
+
   }
   update(){
-    this._handleConrols();
+    this._ensureAboveSurface();
+    this._handleControls();
     this._getSurfaceData();
-    const distanceFromSurface = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["u" /* vectorSquareMag */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* subtractVectors */]
-        (__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* mat4TranslationComponent */](
-          this.transformationMatrix),this.surfacePoint));
-    if(isNaN(distanceFromSurface)){
-    }
-    if(distanceFromSurface > SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
-      this._fall();
-    }
-    else{
-      this.fallSpeed = 0;
-      this._accelerate();
-    }
     this._moveForward();
+    const surfaceOffset = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["v" /* subtractVectors */]
+      (this.getPosition(),this.surfacePoint);
+    const distanceFromSurface = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["D" /* vectorSquareMag */](surfaceOffset);
+
+    this.velocity[2] -= this.fallSpeed;
+    if(distanceFromSurface < SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
+      this._planeAlign();
+      this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* projectVectorOntoPlane */](this.velocity, this.transformDirection([0,0,1]));
+      let localVelocity = this.inverseTransformDirection(this.velocity);
+      this._applyFriction(localVelocity);
+      this.velocity = this.transformDirection(localVelocity);
+    }
+    super.update();
   }
-  _accelerate(){
-    this.speed += ACCELERATION;
-    if(this.speed > MAX_SPEED){
-      this.speed = MAX_SPEED;
+  _getSurfaceData(){
+    let localDownVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+      this.slope.segmentMatrices[this.currentSegmentNumber],
+      [0,0,-1,0]
+    );
+    let newFloorTriangle = this.slope.getSurroundingTriangle(this.getPosition(),this.currentSegmentNumber);
+    this.floorTriangle = newFloorTriangle || this.floorTriangle;
+    this.surfacePlaneNormal = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* planeNormal */](this.floorTriangle[0], this.floorTriangle[1],
+      this.floorTriangle[2]);
+    this.surfacePoint = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["E" /* vectorTriangleIntersection */](this.getPosition(),
+     __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](this.slope.segmentMatrices[this.currentSegmentNumber],[0,0,-1,0]),
+     this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2]);
+  }
+  _ensureAboveSurface(){
+    if(!this.floorTriangle) return;
+    if(!__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["o" /* pointIsAbovePlane */](this.getPosition(), this.floorTriangle[0],
+        this.floorTriangle[1], this.floorTriangle[2])){
+        const upVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+          this.slope.segmentMatrices[this.currentSegmentNumber],
+          [0,0,1,0]);
+        this.setPosition(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["E" /* vectorTriangleIntersection */](this.getPosition(),upVector,
+            this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2]));
+    }
+  }
+  _planeAlign(){
+    const surfaceNormalLocal = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["h" /* inverse_mat4_rot_pos */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* mat4RotationComponent */](
+          this.getTransformationMatrix()
+        )),
+        this.surfacePlaneNormal.concat(1)
+    );
+    const planeAlignAxis = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["z" /* vectorCross */](
+      surfaceNormalLocal.slice(0,3), [0,0,1]);
+    const planeAlignAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* angleBetweenVectors */]([0,0,1],
+      surfaceNormalLocal.slice(0,3));
+      this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* axisAngleToQuaternion */](
+        planeAlignAxis, planeAlignAngle/5));
+  }
+  _applyFriction(localVelocity){
+    let signFlip;
+    for(let i = 0; i < localVelocity.length; ++i){
+      if (Math.abs(localVelocity[i]) < Math.abs(this.friction[i])){
+        localVelocity[i] = 0;
+      }
+      else{
+        signFlip = localVelocity[i] < 0 ? -1 : 1;
+        localVelocity[i] -= this.friction[i] * signFlip;
+      }
     }
   }
   _steer(direction){
-    const zRot = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["y" /* zRotationMatrix */](direction * STEER_SPEED);
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](
-      zRot,
-      this.transformationMatrix,
+    this.addAngularVelocity(
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* axisAngleToQuaternion */](
+        this.transformDirection([0,0,1]),
+      -1 * direction * STEER_SPEED)
+    );
+  }
 
-    );
-  }
-  _convertLocalRotMatToWorldTransform(localRot){
-    return __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](
-      localRot,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* mat4RotationComponent */](this.transformationMatrix)
-    );
-  }
-  _handleConrols(){
+  _handleControls(){
     if(this.input.left ? !this.input.right : this.input.right){
       if(this.input.right){
         this._steer(-1);
@@ -1319,32 +1552,54 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
         this._steer(1);
       }
     }
+    if(this.input.back){
+      this.friction = BREAK_FRICTION
+    }
+    else{
+      this.friction = SNOWBOARD_FRICTION;
+    }
   }
   _handleEdgeCollision(collisionData){
-    let pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["t" /* vectorNormalize */](collisionData.normal);
-    this.speed *= EDGE_COLLISION_DAMP_FACTOR;
-    pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["l" /* scaleVector */](pushBackVector, this.speed*10);
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](this.transformationMatrix,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* translationMatrix */](pushBackVector[0], pushBackVector[1],
-      pushBackVector[2])
+    this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["s" /* scaleVector */](
+        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* bounceVectorOffPlane */](this.velocity,
+          collisionData.normal),
+        this.restitution
+    ).concat([0]);
+    let pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["C" /* vectorNormalize */](collisionData.normal);
+    pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["s" /* scaleVector */](pushBackVector, 2);
+    this.setPosition(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["b" /* addVectors */](this.getPosition(),
+      pushBackVector));
+    const collisionOffsetVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["v" /* subtractVectors */](
+      collisionData.colliderPoint.slice(0,3),
+      this.getPosition()
     );
-
+    let addAngularVelocAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* angleBetweenVectors */](
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["s" /* scaleVector */](collisionData.normal, -1),
+      collisionOffsetVector
+    );
+    addAngularVelocAngle /= 6.8;
+    addAngularVelocAngle *= __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["B" /* vectorMag */](this.velocity);
+    const addAngularVelocAxis = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["z" /* vectorCross */](
+      collisionData.normal,
+      collisionOffsetVector
+    );
+     this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* axisAngleToQuaternion */](
+       addAngularVelocAxis, addAngularVelocAngle)
+     );
   };
   _handleTreeCollision(collisionData){
-    this.speed *= -0.4;
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](
-      this.transformationMatrix,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* translationMatrix */](0, -2, 0)
+    this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["s" /* scaleVector */](
+      this.velocity,
+      -1 * this.restitution
     );
-
+    this.setPosition(this.transformPoint([0,-2,0]));
   }
   _moveForward(){
-    let worldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* mat4TranslationComponent */](
-      this.transformationMatrix
-    );
-    let nextWorldPos = worldPos;
-    const edgeCollisionData = this.slope.positionIsBeyondEdge(nextWorldPos, this.currentSegmentNumber);
-    const obstacleCollisionData = this.slope.positionCollidesWithObstacle(nextWorldPos, this.currentSegmentNumber);
+    const edgeCollisionData = this.slope.boxIsBeyondEdge(
+      this.getTransformationMatrix(), this.boxDimensions, this.currentSegmentNumber);
+    const obstacleCollisionData = this.slope.positionCollidesWithObstacle(
+      this.getPosition(), this.currentSegmentNumber);
+
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
       return;
@@ -1352,11 +1607,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     else if(obstacleCollisionData){
       this._handleTreeCollision(obstacleCollisionData);
     }
-    let worldMoveVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["j" /* projectVectorOntoPlane */](
-      this._calculateWorldMoveVector(), this.surfacePlaneNormal);
-    let transformationMatrixAfterMove = this._transformationMatrixAfterMove(worldMoveVector);
-    nextWorldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* mat4TranslationComponent */](
-      transformationMatrixAfterMove);
+    let nextWorldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["b" /* addVectors */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* projectVectorOntoPlane */](
+      this.velocity, this.surfacePlaneNormal), this.getPosition());
     if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
       slope.positionIsPastSegmentStart(nextWorldPos,
       this.currentSegmentNumber + 1)){
@@ -1366,93 +1618,12 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       }
       let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
          this.currentSegmentNumber) || this.floorTriangle;
-
-      if(!__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["i" /* pointIsAbovePlane */](nextWorldPos, triangleAfterMove[0],
-        triangleAfterMove[1], triangleAfterMove[2])){
-
-        nextWorldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["v" /* vectorTriangleIntersection */](worldPos, worldMoveVector,
-            triangleAfterMove[0], triangleAfterMove[1], triangleAfterMove[2]);
-
-        worldMoveVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* subtractVectors */](nextWorldPos, worldPos);
-        transformationMatrixAfterMove = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](this.transformationMatrix,
-          __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* translationMatrix */](worldMoveVector[0], worldMoveVector[1], worldMoveVector[2])
-        );
-      }
     }
-      this.transformationMatrix = transformationMatrixAfterMove;
-
-    this._getSurfaceData();
-
-     const planeAlign = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["a" /* axisToVec */](
-         [0,0,1,1],
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
-        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["c" /* inverse_mat4_rot_pos */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* mat4RotationComponent */](
-          this.transformationMatrix
-        )),
-        this.surfacePlaneNormal.concat(1)
-      )
-     );
-
-      this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](
-        planeAlign,
-        this.transformationMatrix
-      );
-
-    const posAfterSurfaceAlign = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* mat4TranslationComponent */](
-        this.transformationMatrix
-    )
-    const surfaceOffset = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* subtractVectors */](
-      this.surfacePoint,
-      posAfterSurfaceAlign
-    );
-
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](
-      this.transformationMatrix,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* translationMatrix */](surfaceOffset[0],
-        surfaceOffset[1], surfaceOffset[2])
-    )
-  }
-
-  _getSurfaceData(){
-    let worldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* mat4TranslationComponent */](
-      this.transformationMatrix
-    );
-    let localDownVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* mat4RotationComponent */](this.transformationMatrix),
-      [0,0,-1,1]
-    );
-    let newFloorTriangle = this.slope.getSurroundingTriangle(worldPos,this.currentSegmentNumber);
-    if(!newFloorTriangle){
-      let lastValidSurfaceXY = this.surfacePoint.slice();
-      lastValidSurfaceXY[2] = 0;
-      let currentPosXY = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* mat4TranslationComponent */](this.transformationMatrix);
-      currentPosXY[2] = 0;
-      const posOffset = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* subtractVectors */](currentPosXY, lastValidSurfaceXY);
-      this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](this.transformationMatrix,
-        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* translationMatrix */](posOffset[0], posOffset[1], posOffset[2])
-      );
-      newFloorTriangle = this.slope.getSurroundingTriangle(worldPos,this.currentSegmentNumber);
+    else if (this.currentSegmentNumber > 0 && !slope.positionIsPastSegmentStart(nextWorldPos,this.currentSegmentNumber)) {
+      --this.currentSegmentNumber;
+      let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
+         this.currentSegmentNumber) || this.floorTriangle;
     }
-    this.floorTriangle = newFloorTriangle || this.floorTriangle;
-    this.surfacePlaneNormal = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["h" /* planeNormal */](this.floorTriangle[0], this.floorTriangle[1],
-      this.floorTriangle[2]);
-    this.surfacePoint = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["v" /* vectorTriangleIntersection */](worldPos, localDownVector,
-    this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2]);
-  }
-  _fall(){
-    this.transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](this.transformationMatrix,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* translationMatrix */](0,0, -1 * this.fallSpeed));
-      this.fallSpeed = this.fallSpeed + 0.02;
-  }
-  _calculateWorldMoveVector(){
-    return __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* mat4RotationComponent */](
-        this.transformationMatrix),
-       [0,this.speed,0,1]).slice(0,3);
-  }
-  _transformationMatrixAfterMove(worldMoveVector){
-    return __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["f" /* mat_4_multiply */](this.transformationMatrix,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["p" /* translationMatrix */](worldMoveVector[0], worldMoveVector[1], worldMoveVector[2]));
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Character;
@@ -1465,19 +1636,21 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tree_js__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__game_object_mesh__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__balloon__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__ = __webpack_require__(2);
 const SEGMENT_WIDTH = 70;
 const SEGMENT_LENGTH = 40;
 const EDGE_LOOP_RESOLUTION = 5;
-const SLOPE_BUFFER_AMOUNT = 10;
+const SLOPE_BUFFER_AMOUNT = 30;
 const BACK_BUFFER_ANOUNT = 10;
 const TURN_TYPE_SWITCH_FREQUENCY = 3;
 const SHARP_TURN = 0.35;
 const GRADUAL_TURN = 0.14;
 const TILES_PER_SEGMENT = 1;
-const TREES_PER_SEGMENT = 3;
+const TREES_PER_SEGMENT = 2;
 const TREE_COLLIDER = "TREE_COLLIDER";
 const TREE_COLLIDER_HEIGHT = 20;
 const TREE_COLLIDER_WIDTH = 5;
@@ -1486,6 +1659,10 @@ const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
 const TREE_PROBABILITY_LENGTHWISE = 0.5;
 const TREE_MAX_DENSITY_WIDTHWISE = 4;
+const BALLOON_PROBABILITY_LENGTHWISE = 0.22;
+const BALLOON_DENSITY_WIDTHWISE = 2;
+const BALLOON_FLOAT_HEIGHT = 6;
+const BALLON_COLLIDER_SQRD_RADIUS = 1;
 const BOX_COLLIDER = "BOX_COLLIDER";
 
 
@@ -1493,12 +1670,14 @@ const BOX_COLLIDER = "BOX_COLLIDER";
 
 
 
-class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /* default */]{
 
-  constructor(transformationMatrix = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["b" /* identityMatrix4 */], rasterizer, img_src = "snow.jpg"){
+
+class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */]{
+
+  constructor(transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["g" /* identityMatrix4 */], rasterizer, img_src = "snow.jpg"){
     super(undefined);
-    this.transformationMatrix = transformationMatrix;
-    this.mesh = new __WEBPACK_IMPORTED_MODULE_3__game_object_mesh__["a" /* default */]({
+    this._transformationMatrix = transformationMatrix.slice(0,16);
+    this.mesh = new __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__["a" /* default */]({
       faces: [],
       vertices: [],
       textured: true,
@@ -1512,16 +1691,19 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     this.uvH = 0;
     this.segmentMatrices = [transformationMatrix];
     this.segmentRotation = [-0.2,0,0];
-    this.segmentPosition = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](transformationMatrix,
+    this.segmentPosition = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](transformationMatrix,
       [0,SEGMENT_LENGTH,0,1]).slice(0,3);
-      this.obstacles = [];
+    this.obstacles = [];
+    this.balloons = [];
+    this.balloonsCreatedSinceStart = 0;
     //this.segmentRotation[0] = 0;
     this._setupTreeMesh();
+    this._setupBalloonMesh();
     const firstLoop = this.createEdgeLoop();
     let unpackedVertices;
 
     for(let i = 0; i< firstLoop.length; i+=3){
-      unpackedVertices = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+      unpackedVertices = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
         transformationMatrix,
       firstLoop.slice(i,i+3).concat(1)).slice(0,3);
       for(let j = 0; j< unpackedVertices.length; ++j){
@@ -1540,8 +1722,13 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     this.treesCreatedSinceStart = 0;
     __WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */].textureBuffer = this.rasterizer.bufferTexture("assets/tree.png");
     __WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */].textured = true;
-    this.treeMesh= new __WEBPACK_IMPORTED_MODULE_3__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */]);
+    this.treeMesh= new __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */]);
     this.treeMesh.buffers = this.rasterizer.sendMeshToGPU(this.treeMesh);
+  }
+  _setupBalloonMesh(){
+    this.balloonMesh = new __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_1__balloon__["a" /* default */]);
+    this.balloonMesh.colored = true;
+    this.balloonMesh.buffers = this.rasterizer.sendMeshToGPU(this.balloonMesh);
   }
   _addUvsSegment(){
     for(let i = 0; i <= EDGE_LOOP_RESOLUTION; ++i){
@@ -1563,17 +1750,17 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
       let leftRightToggle = -1;
       for(let i = 0; i < 2; ++i){
         let transformationMatrix = this.segmentMatrices[this.segmentMatrices.length -1];
-        transformationMatrix = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
-          __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["p" /* translationMatrix */](leftRightToggle * SEGMENT_WIDTH/2, 0, 0),
+        transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat_4_multiply */](
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["x" /* translationMatrix */](leftRightToggle * SEGMENT_WIDTH/2, 0, 0),
           transformationMatrix
         );
         let treeObject;
         for(let i = 0; i < TREES_PER_SEGMENT; ++i){
           transformationMatrix =
-          __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
-            __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["p" /* translationMatrix */](0, SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat_4_multiply */](
+            __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["x" /* translationMatrix */](0, SEGMENT_LENGTH * i / TREES_PER_SEGMENT, 0,1),
             transformationMatrix );
-          treeObject = new __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /* default */](this.treeMesh,transformationMatrix);
+          treeObject = new __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */](this.treeMesh,transformationMatrix);
           treeObject.id = `tree${this.treesCreatedSinceStart}`;
           this.rasterizer.objects[treeObject.id] = treeObject;
           ++this.treesCreatedSinceStart;
@@ -1595,8 +1782,8 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
   _addObstacleSegment(){
     const obstacleSegment =[];
     const transformationMatrix =
-    __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
-      __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["p" /* translationMatrix */](0, -SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
+    __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat_4_multiply */](
+      __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["x" /* translationMatrix */](0, -SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
       this.segmentMatrices[this.segmentMatrices.length -1]);
     if(Math.random() < TREE_PROBABILITY_LENGTHWISE){
         const segment = 0;
@@ -1604,12 +1791,12 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
         //  TREE_MAX_DENSITY_WIDTHWISE);
         let id, gameObject, treeTransformation;
         for(let i = 0; i < widthWiseCount; ++i){
-          treeTransformation = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
-            __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["p" /* translationMatrix */]((Math.random() * 0.8 + 0.1) * SEGMENT_WIDTH -SEGMENT_WIDTH/2,
+          treeTransformation = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat_4_multiply */](
+            __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["x" /* translationMatrix */]((Math.random() * 0.8 + 0.1) * SEGMENT_WIDTH -SEGMENT_WIDTH/2,
              Math.random()* SEGMENT_LENGTH, 0),
              transformationMatrix
           );
-          gameObject = new __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /* default */](this.treeMesh, treeTransformation);
+          gameObject = new __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */](this.treeMesh, treeTransformation);
           id = `treeObstacle${this.treesCreatedSinceStart}`;
           gameObject.id = id;
           gameObject.collider = {type: BOX_COLLIDER, dimensions:[
@@ -1621,9 +1808,35 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     }
     this.obstacles.push(obstacleSegment);
   }
+  _addBalloonsSegment(){
+    const balloonSegment = [];
+    let transformationMatrix, newBalloon, id;
+    if(Math.random() < BALLOON_PROBABILITY_LENGTHWISE){
+      for(let i = 0; i <= Math.floor(Math.random() * BALLOON_DENSITY_WIDTHWISE); ++ i){
+        transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat_4_multiply */](
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["x" /* translationMatrix */](Math.random() * SEGMENT_WIDTH - SEGMENT_WIDTH/2,
+           SEGMENT_LENGTH/2, BALLOON_FLOAT_HEIGHT),
+          this.segmentMatrices[this.segmentMatrices.length - 1]
+        );
+        newBalloon = new __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */](this.balloonMesh, transformationMatrix);
+        id = `balloon${this.balloonsCreatedSinceStart}`;
+        newBalloon.id = id;
+        balloonSegment.push(newBalloon);
+        this.rasterizer.objects[id] = newBalloon;
+        ++this.balloonsCreatedSinceStart;
+      }
+    }
+    this.balloons.push(balloonSegment);
+  }
   _deleteObstacleSegment(){
     const deletedSegment = this.obstacles.shift();
     for(let i = 0; i< deletedSegment.length; ++i){
+      delete this.rasterizer.objects[deletedSegment[i].id];
+    }
+  }
+  _deleteBallonSegment(){
+    const deletedSegment = this.balloons.shift();
+    for(let i = 0; i < deletedSegment.length; ++i){
       delete this.rasterizer.objects[deletedSegment[i].id];
     }
   }
@@ -1635,8 +1848,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     return vertices;
   }
   notifyOfCharacterSegmentNumber(idx){
-    if(this.bufferedSegments < BACK_BUFFER_ANOUNT){
-      ++this.bufferedSegments;
+    if(idx < BACK_BUFFER_ANOUNT){
       return false;
     }
     this.generateSegment();
@@ -1644,7 +1856,6 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     return true;
   }
   generateNewSegmentRotation(){
-
     let randomTurn = Math.random();
     if (randomTurn < 0.05 * TURN_TYPE_SWITCH_FREQUENCY ){
       randomTurn = Math.random();
@@ -1684,14 +1895,14 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
   }
 
   positionIsPastSegmentStart(pos, segmentNumber){
-    const segmentStartLine = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
-      __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["d" /* mat4RotationComponent */](this.segmentMatrices[segmentNumber]),
+    const segmentStartLine = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["i" /* mat4RotationComponent */](this.segmentMatrices[segmentNumber]),
         [-1,0,0,1]);
-    const segmentStartNormal = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["r" /* vectorCross */]([0,0,1],
+    const segmentStartNormal = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["z" /* vectorCross */]([0,0,1],
        segmentStartLine);
-    const offsetVector = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["n" /* subtractVectors */](
-         pos, __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["e" /* mat4TranslationComponent */](this.segmentMatrices[segmentNumber]));
-    const result = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["s" /* vectorDot */](offsetVector, segmentStartNormal);
+    const offsetVector = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["v" /* subtractVectors */](
+         pos, __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["j" /* mat4TranslationComponent */](this.segmentMatrices[segmentNumber]));
+    const result = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["A" /* vectorDot */](offsetVector, segmentStartNormal);
     return result < 0;
   }
 
@@ -1701,9 +1912,9 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     let dimensions;
     for(let i =0; i < this.obstacles[segment_number].length; ++i){
       obstacle = this.obstacles[segment_number][i];
-      transformedPosition = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
-        __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["c" /* inverse_mat4_rot_pos */](
-            obstacle.transformationMatrix
+      transformedPosition = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+        __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["h" /* inverse_mat4_rot_pos */](
+            obstacle.getTransformationMatrix()
         ),
         pos.concat(1)
       );
@@ -1720,20 +1931,34 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     return false;
   }
 
+  positionCollidesWithBalloon(pos, segment_number){
+    const balloons = this.balloons[segment_number];
+    let balloonPos;
+    for(let i = 0; i < ballons.length; ++i){
+      balloonPos = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["j" /* mat4TranslationComponent */](balloons[i].transformationMatrix);
+      if(vectorSquareMag(
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["v" /* subtractVectors */](pos, balloonPos)
+        ) <=  BALLON_COLLIDER_SQRD_RADIUS){
+            return balloons[i];
+      }
+    }
+    return false;
+  }
+
   segmentLocalCoords(segment_number, pos){
     return
-          __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](object.position.concat(1),
-            __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["c" /* inverse_mat4_rot_pos */](
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](object.position.concat(1),
+            __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["h" /* inverse_mat4_rot_pos */](
               this.matrices[nextSegmentNumber]));
   }
 
   getSurroundingTriangle(pos, segmentNumber){
     const startIdx = 6 * EDGE_LOOP_RESOLUTION * segmentNumber;
     const vertex = this.mesh.packedVertex.bind(this.mesh);
-    const inverseSegmentTransform = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["c" /* inverse_mat4_rot_pos */](
+    const inverseSegmentTransform = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["h" /* inverse_mat4_rot_pos */](
       this.segmentMatrices[segmentNumber]
     );
-    const transformedPosition = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+    const transformedPosition = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
       inverseSegmentTransform,
       pos.concat(1)
     );
@@ -1742,75 +1967,96 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
       transformedTriangle = []
       for(let j = 0; j < 3; ++j){
         transformedTriangle.push(
-          __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
+          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
             inverseSegmentTransform,
           vertex(this.mesh.faces[i+j]).concat(1))
         );
       }
-      if(__WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["q" /* triangleContainsPoint */](transformedPosition, transformedTriangle[0],
+      if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["y" /* triangleContainsPoint */](transformedPosition, transformedTriangle[0],
         transformedTriangle[1],transformedTriangle[2])){
           return [vertex(this.mesh.faces[i]),
             vertex(this.mesh.faces[i + 1]), vertex(this.mesh.faces[i + 2])];
       }
     }
   }
-  _positionIsBeyondEdge(pos, segmentNumber, toggleLeft){
-    const xOffset = toggleLeft? -SEGMENT_WIDTH/2 : SEGMENT_WIDTH/2;
-    const currentSegPoint = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
-      this.segmentMatrices[segmentNumber],
-      [xOffset, 0, 0, 1]
 
-    );
-    const nextSegPoint = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](
-      this.segmentMatrices[segmentNumber + 1],
-      [xOffset, 0, 0, 1]
-    );
-    let vec0, vec1;
-    if(toggleLeft){
-      vec0 = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["n" /* subtractVectors */](nextSegPoint, currentSegPoint);
-      vec1 = [0,0,1];
+  _boxIsBeyondEdge(boxMatrix, boxDimensions, segmentNumber, toggleLeft){
+    const checkPoints = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["a" /* boxColliderToPoints */](boxMatrix, boxDimensions);
+    let pointBeyondEdge = false;
+    for(let i =0; i <checkPoints.length; ++i){
+      pointBeyondEdge = this._positionIsBeyondEdge(checkPoints[i], segmentNumber,
+        toggleLeft);
+      if(pointBeyondEdge){
+        return pointBeyondEdge;
+      }
     }
-    else{
-      vec1 = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["n" /* subtractVectors */](nextSegPoint, currentSegPoint);
-      vec0 = [0,0,1];
-    }
-    const edgeNormal = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["r" /* vectorCross */](vec0, vec1);
-    const posOffset = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["n" /* subtractVectors */](pos, currentSegPoint);
-    if(__WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["s" /* vectorDot */](posOffset, edgeNormal) < 0){
-      let edgeVector =  toggleLeft? vec0: vec1;
-      return{normal: edgeNormal, vector: edgeVector, pos0: currentSegPoint,
-        pos1: nextSegPoint, toggleLeft};
-    }
-    return false;
   }
+  boxIsBeyondEdge(boxMatrix, boxDimensions, segmentNumber){
+    return(
+      this._boxIsBeyondEdge(boxMatrix, boxDimensions,segmentNumber, true) ||
+      this._boxIsBeyondEdge(boxMatrix, boxDimensions,segmentNumber, false)
+    );
+  }
+
   positionIsBeyondEdge(pos, segmentNumber){
     return (
       this._positionIsBeyondEdge(pos, segmentNumber, true) ||
       this._positionIsBeyondEdge(pos, segmentNumber, false)
     );
   }
+  _positionIsBeyondEdge(pos, segmentNumber, toggleLeft){
+    const xOffset = toggleLeft? -SEGMENT_WIDTH/2 : SEGMENT_WIDTH/2;
+    const currentSegPoint = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+      this.segmentMatrices[segmentNumber],
+      [xOffset, 0, 0, 1]
+
+    );
+    const nextSegPoint = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](
+      this.segmentMatrices[segmentNumber + 1],
+      [xOffset, 0, 0, 1]
+    );
+    let vec0, vec1;
+    if(toggleLeft){
+      vec0 = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["v" /* subtractVectors */](nextSegPoint, currentSegPoint);
+      vec1 = [0,0,1];
+    }
+    else{
+      vec1 = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["v" /* subtractVectors */](nextSegPoint, currentSegPoint);
+      vec0 = [0,0,1];
+    }
+    const edgeNormal = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["z" /* vectorCross */](vec0, vec1);
+    const posOffset = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["v" /* subtractVectors */](pos, currentSegPoint);
+    if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["A" /* vectorDot */](posOffset, edgeNormal) < 0){
+      let edgeVector =  toggleLeft? vec0: vec1;
+      return{normal: edgeNormal, colliderPoint: pos,
+         vector: edgeVector, edgePoint0: currentSegPoint,
+        edgePoint1: nextSegPoint, toggleLeft};
+    }
+    return false;
+  }
+
   generateSegment(){
     const pos = this.segmentPosition;
     this.generateNewSegmentRotation();
 
-    let transformationMatrix = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["p" /* translationMatrix */](
+    let transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["x" /* translationMatrix */](
       pos[0], pos[1], pos[2]
     );
-    let xRot = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["w" /* xRotationMatrix */](this.segmentRotation[0]);
-    let yRot = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["x" /* yRotationMatrix */](this.segmentRotation[1]);
-    let zRot = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["y" /* zRotationMatrix */](this.segmentRotation[2]);
-    transformationMatrix = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
+    let xRot = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["F" /* xRotationMatrix */](this.segmentRotation[0]);
+    let yRot = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["G" /* yRotationMatrix */](this.segmentRotation[1]);
+    let zRot = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["H" /* zRotationMatrix */](this.segmentRotation[2]);
+    transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat_4_multiply */](
       yRot,
-      __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
+      __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat_4_multiply */](
         xRot,
-        __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["f" /* mat_4_multiply */](
+        __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat_4_multiply */](
           zRot,
           transformationMatrix
         )
       )
     );
-    this.segmentPosition = __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](transformationMatrix, [0, SEGMENT_LENGTH,
-    0,1]);
+    this.segmentPosition = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](transformationMatrix,
+       [0, SEGMENT_LENGTH, 0,1]);
 
      let newSegment = this.createEdgeLoop();
     // let transformedSegment = MathUtils.addVectors(newSegment, this.segmentPosition);
@@ -1819,7 +2065,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
      for(let i = 0; i < newSegment.length; i +=3){
        transformedPos = newSegment.slice(i, i+3);
        transformedPos.push(1);
-       transformedPos =  __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__["g" /* multiplyVec4ByMatrix4 */](transformationMatrix,transformedPos);
+       transformedPos =  __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](transformationMatrix,transformedPos);
        for(let i = 0; i < 3; ++i){
          transformedSegment.push(transformedPos[i]);
        }
@@ -1827,6 +2073,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     this._addSegment(transformedSegment);
     this._addSideGeometrySegment();
     this._addObstacleSegment();
+    this._addBalloonsSegment();
     //this.segmentPosition =
     //  MathUtils.mat4TranslationComponent(segmentMatrix);
     this.segmentMatrices.push(transformationMatrix);
@@ -1873,6 +2120,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
     this._deleteUvsSegment();
     this._deleteSideGeometrySegment();
     this._deleteObstacleSegment();
+    this._deleteBallonSegment();
     this.mesh.setDirty();
   }
 }
@@ -1886,15 +2134,15 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
 
 "use strict";
 /* harmony default export */ __webpack_exports__["a"] = ({
-    "vertices": [2.345939, -5.839525, 1.220433, -3.174587, -5.839523, 1.220433, 0.499237, -1.770323, 15.595764, 7.77719, 3.994827, 2.000748, 2.345939, -5.839525, 1.220433, 0.499237, -1.770323, 15.595764, -3.174587, -5.839523, 1.220433, -7.045706, 3.189215, 3.088122, 0.499237, -1.770323, 15.595764, -0.857804, -0.973635, 18.588009, 0.149692, 1.086353, 18.588009, 0.149692, 1.086353, -2.595972, 0.149692, 1.086353, 18.588009, 1.157186, -0.973636, 18.588009, 1.157186, -0.973636, -2.595972, -0.857804, -0.973635, 18.588009, 1.157186, -0.973636, 18.588009, 0.149692, 1.086353, 18.588009, -0.857803, -0.973636, -2.595972, 1.157186, -0.973636, -2.595972, 1.157186, -0.973636, 18.588009, 2.743958, 3.173958, 16.168344, 1.804478, -2.769673, 16.409208, 0.226553, 0.013231, 22.801958, 1.804478, -2.769673, 16.409208, -2.176155, -3.095458, 16.403688, 0.226553, 0.013231, 22.801958, 2.345939, -5.839525, 9.418711, -3.52722, -7.400364, 10.179499, -2.176155, -3.095458, 16.403688, 5.48859, 3.547212, 10.140981, 2.345939, -5.839525, 9.418711, 1.804478, -2.769673, 16.409208, -7.093747, 3.047025, 10.932926, -4.140082, 3.547257, 16.168344, -2.176155, -3.095458, 16.403688, -2.176155, -3.095458, 16.403688, -4.140082, 3.547257, 16.168344, 0.226553, 0.013231, 22.801958, -0.857803, -0.973636, -2.595972, 0.149692, 1.086353, -2.595972, 1.157186, -0.973636, -2.595972, -0.857803, -0.973636, -2.595972, -0.857804, -0.973635, 18.588009, 0.149692, 1.086353, -2.595972, 0.149692, 1.086353, -2.595972, 0.149692, 1.086353, 18.588009, 1.157186, -0.973636, -2.595972, -0.857804, -0.973635, 18.588009, -0.857803, -0.973636, -2.595972, 1.157186, -0.973636, 18.588009, 1.804478, -2.769673, 16.409208, 2.345939, -5.839525, 9.418711, -2.176155, -3.095458, 16.403688, 2.743958, 3.173958, 16.168344, 5.48859, 3.547212, 10.140981, 1.804478, -2.769673, 16.409208, -3.52722, -7.400364, 10.179499, -7.093747, 3.047025, 10.932926, -2.176155, -3.095458, 16.403688],
+    "vertices": [1.557284, -4.881069, 1.220433, -2.305502, -4.881067, 1.220433, 0.265122, -1.595123, 15.595764, 5.357604, 3.060327, 2.000748, 1.557284, -4.881069, 1.220433, 0.265122, -1.595123, 15.595764, -2.305502, -4.881067, 1.220433, -5.014175, 2.409782, 3.088122, 0.265122, -1.595123, 15.595764, -0.217849, -0.647796, 18.588009, 0.149692, 0.434673, 18.588009, 0.149692, 0.434673, -2.595972, 0.149692, 0.434673, 18.588009, 0.517232, -0.647796, 18.588009, 0.517232, -0.647796, -2.595972, -0.217849, -0.647796, 18.588009, 0.517232, -0.647796, 18.588009, 0.149692, 0.434673, 18.588009, -0.217849, -0.647796, -2.595972, 0.517232, -0.647796, -2.595972, 0.517232, -0.647796, 18.588009, 1.835783, 2.397462, 16.168344, 1.178417, -2.402114, 16.409208, 0.074321, -0.154875, 22.801958, 1.178417, -2.402114, 16.409208, -1.606885, -2.66519, 16.403688, 0.074321, -0.154875, 22.801958, 1.557284, -4.881069, 9.418711, -2.552244, -6.14147, 10.179499, -1.606885, -2.66519, 16.403688, 3.756239, 2.69887, 10.140981, 1.557284, -4.881069, 9.418711, 1.178417, -2.402114, 16.409208, -5.047791, 2.294961, 10.932926, -2.981071, 2.698907, 16.168344, -1.606885, -2.66519, 16.403688, -1.606885, -2.66519, 16.403688, -2.981071, 2.698907, 16.168344, 0.074321, -0.154875, 22.801958, -0.217849, -0.647796, -2.595972, 0.149692, 0.434673, -2.595972, 0.517232, -0.647796, -2.595972, -2.118086, 4.178652, 1.220433, 1.7447, 4.17865, 1.220433, -0.825924, 1.598287, 15.595764, -5.918405, -2.057512, 2.000748, -2.118086, 4.178652, 1.220433, -0.825924, 1.598287, 15.595764, 1.7447, 4.17865, 1.220433, 4.453373, -1.546658, 3.088122, -0.825924, 1.598287, 15.595764, -2.396585, -1.536982, 16.168344, -1.739219, 2.231995, 16.409208, 0.060611, 0.03945, 22.883163, -1.739219, 2.231995, 16.409208, 1.046084, 2.438582, 16.403688, 0.060611, 0.03945, 22.883163, 1.991442, 5.168411, 10.179499, 1.046084, 2.438582, 16.403688, -1.739219, 2.231995, 16.409208, -4.317041, -1.77367, 10.140981, -2.118086, 4.178652, 9.418711, -1.739219, 2.231995, 16.409208, 4.486988, -1.456492, 10.932926, 2.420269, -1.773699, 16.168344, 1.046084, 2.438582, 16.403688, 1.046084, 2.438582, 16.403688, 2.420269, -1.773699, 16.168344, 0.060611, 0.03945, 22.883163, -0.217849, -0.647796, -2.595972, -0.217849, -0.647796, 18.588009, 0.149692, 0.434673, -2.595972, 0.149692, 0.434673, -2.595972, 0.149692, 0.434673, 18.588009, 0.517232, -0.647796, -2.595972, -0.217849, -0.647796, 18.588009, -0.217849, -0.647796, -2.595972, 0.517232, -0.647796, 18.588009, 1.178417, -2.402114, 16.409208, 1.557284, -4.881069, 9.418711, -1.606885, -2.66519, 16.403688, 1.835783, 2.397462, 16.168344, 3.756239, 2.69887, 10.140981, 1.178417, -2.402114, 16.409208, -2.552244, -6.14147, 10.179499, -5.047791, 2.294961, 10.932926, -1.606885, -2.66519, 16.403688, -2.118086, 4.178652, 9.418711, 1.991442, 5.168411, 10.179499, -1.739219, 2.231995, 16.409208, -2.396585, -1.536982, 16.168344, -4.317041, -1.77367, 10.140981, -1.739219, 2.231995, 16.409208, 1.991442, 5.168411, 10.179499, 4.486988, -1.456492, 10.932926, 1.046084, 2.438582, 16.403688],
 
-    "normals": [-0.458754, 0.837764, -0.29606, 0.467299, 0.812128, -0.349315, -0.050081, 0.890957, -0.451247, -0.840358, 0.483535, -0.244819, -0.458754, 0.837764, -0.29606, -0.050081, 0.890957, -0.451247, 0.467299, 0.812128, -0.349315, 0.838557, 0.428999, -0.335734, -0.050081, 0.890957, -0.451247, -0.704459, -0.43965, 0.557115, 0.0, 0.834925, 0.55031, 0.0, 0.834925, -0.55031, 0.0, 0.834925, 0.55031, 0.704459, -0.43965, 0.557115, 0.704459, -0.43965, -0.557115, -0.704459, -0.43965, 0.557115, 0.704459, -0.43965, 0.557115, 0.0, 0.834925, 0.55031, -0.704459, -0.43965, -0.557115, 0.704459, -0.43965, -0.557115, 0.704459, -0.43965, 0.557115, -0.922575, 0.131108, -0.362835, -0.623249, 0.659566, -0.420087, -0.05768, 0.691977, -0.719565, -0.623249, 0.659566, -0.420087, 0.479781, 0.693899, -0.536912, -0.05768, 0.691977, -0.719565, -0.585345, 0.70098, -0.407361, 0.25895, 0.767174, -0.58681, 0.479781, 0.693899, -0.536912, -0.92288, 0.237373, -0.303201, -0.585345, 0.70098, -0.407361, -0.623249, 0.659566, -0.420087, 0.847774, 0.274667, -0.453658, 0.848231, 0.233924, -0.475112, 0.479781, 0.693899, -0.536912, 0.479781, 0.693899, -0.536912, 0.848231, 0.233924, -0.475112, -0.05768, 0.691977, -0.719565, -0.704459, -0.43965, -0.557115, 0.0, 0.834925, -0.55031, 0.704459, -0.43965, -0.557115, -0.704459, -0.43965, -0.557115, -0.704459, -0.43965, 0.557115, 0.0, 0.834925, -0.55031, 0.0, 0.834925, -0.55031, 0.0, 0.834925, 0.55031, 0.704459, -0.43965, -0.557115, -0.704459, -0.43965, 0.557115, -0.704459, -0.43965, -0.557115, 0.704459, -0.43965, 0.557115, -0.623249, 0.659566, -0.420087, -0.585345, 0.70098, -0.407361, 0.479781, 0.693899, -0.536912, -0.922575, 0.131108, -0.362835, -0.92288, 0.237373, -0.303201, -0.623249, 0.659566, -0.420087, 0.25895, 0.767174, -0.58681, 0.847774, 0.274667, -0.453658, 0.479781, 0.693899, -0.536912],
+    "normals": [-0.483688, 0.842769, -0.236122, 0.480911, 0.832118, -0.276193, -0.043703, 0.92346, -0.381115, -0.880398, 0.438948, -0.179449, -0.483688, 0.842769, -0.236122, -0.043703, 0.92346, -0.381115, 0.480911, 0.832118, -0.276193, 0.885617, 0.39256, -0.248085, -0.043703, 0.92346, -0.381115, -0.672292, -0.481735, 0.562059, 0.0, 0.839137, 0.54387, 0.0, 0.839137, -0.54387, 0.0, 0.839137, 0.54387, 0.672292, -0.481735, 0.562059, 0.672292, -0.481735, -0.562059, -0.672292, -0.481735, 0.562059, 0.672292, -0.481735, 0.562059, 0.0, 0.839137, 0.54387, -0.672292, -0.481735, -0.562059, 0.672292, -0.481735, -0.562059, 0.672292, -0.481735, 0.562059, -0.957732, 0.117985, -0.262307, -0.65627, 0.673482, -0.340129, -0.019562, 0.762871, -0.646229, -0.65627, 0.673482, -0.340129, 0.522965, 0.73104, -0.438185, -0.019562, 0.762871, -0.646229, -0.646443, 0.688803, -0.328013, 0.248054, 0.829218, -0.500809, 0.522965, 0.73104, -0.438185, -0.951964, 0.222114, -0.21073, -0.646443, 0.688803, -0.328013, -0.65627, 0.673482, -0.340129, 0.905881, 0.258431, -0.335429, 0.909146, 0.217292, -0.355266, 0.522965, 0.73104, -0.438185, 0.522965, 0.73104, -0.438185, 0.909146, 0.217292, -0.355266, -0.019562, 0.762871, -0.646229, -0.672292, -0.481735, -0.562059, 0.0, 0.839137, -0.54387, 0.672292, -0.481735, -0.562059, 0.452254, -0.869869, -0.196783, -0.451094, -0.860897, -0.235176, 0.035829, -0.950804, -0.307627, 0.831965, -0.528214, -0.169591, 0.452254, -0.869869, -0.196783, 0.035829, -0.950804, -0.307627, -0.451094, -0.860897, -0.235176, -0.846004, -0.477554, -0.237007, 0.035829, -0.950804, -0.307627, 0.942381, -0.145085, -0.30137, 0.647053, -0.669759, -0.364269, -0.060701, -0.809687, -0.583667, 0.647053, -0.669759, -0.364269, -0.517136, -0.753868, -0.405225, -0.060701, -0.809687, -0.583667, -0.318857, -0.868831, -0.378704, -0.517136, -0.753868, -0.405225, 0.647053, -0.669759, -0.364269, 0.935667, -0.291879, -0.198248, 0.636647, -0.733268, -0.238685, 0.647053, -0.669759, -0.364269, -0.887112, -0.328959, -0.32371, -0.906217, -0.27781, -0.318674, -0.517136, -0.753868, -0.405225, -0.517136, -0.753868, -0.405225, -0.906217, -0.27781, -0.318674, -0.060701, -0.809687, -0.583667, -0.672292, -0.481735, -0.562059, -0.672292, -0.481735, 0.562059, 0.0, 0.839137, -0.54387, 0.0, 0.839137, -0.54387, 0.0, 0.839137, 0.54387, 0.672292, -0.481735, -0.562059, -0.672292, -0.481735, 0.562059, -0.672292, -0.481735, -0.562059, 0.672292, -0.481735, 0.562059, -0.65627, 0.673482, -0.340129, -0.646443, 0.688803, -0.328013, 0.522965, 0.73104, -0.438185, -0.957732, 0.117985, -0.262307, -0.951964, 0.222114, -0.21073, -0.65627, 0.673482, -0.340129, 0.248054, 0.829218, -0.500809, 0.905881, 0.258431, -0.335429, 0.522965, 0.73104, -0.438185, 0.636647, -0.733268, -0.238685, -0.318857, -0.868831, -0.378704, 0.647053, -0.669759, -0.364269, 0.942381, -0.145085, -0.30137, 0.935667, -0.291879, -0.198248, 0.647053, -0.669759, -0.364269, -0.318857, -0.868831, -0.378704, -0.887112, -0.328959, -0.32371, -0.517136, -0.753868, -0.405225],
 
     "colors": [],
 
-    "uvs": [0.478762, 0.015432, 0.731847, 0.015432, 0.478762, 0.993737, 0.225678, 0.015432, 0.478762, 0.015432, 0.225678, 0.993737, 0.731847, 0.015432, 0.984932, 0.015432, 0.731847, 0.993737, 0.15441, 0.171148, 0.15441, -0.011232, 0.15441, -0.011232, 0.009955, -0.011232, 0.009955, 0.171148, 0.009955, 0.171148, 0.15441, 0.171148, 0.009955, 0.171148, 0.15441, -0.011232, 0.15441, 0.171148, 0.009955, 0.171148, 0.009955, 0.171148, 0.225678, 0.504585, 0.478762, 0.504584, 0.225678, 0.993737, 0.478762, 0.504584, 0.731847, 0.504585, 0.478762, 0.993737, 0.478762, 0.015432, 0.731847, 0.015432, 0.731847, 0.504585, 0.225678, 0.015432, 0.478762, 0.015432, 0.478762, 0.504584, 0.984932, 0.015432, 0.984932, 0.504585, 0.731847, 0.504585, 0.731847, 0.504585, 0.984932, 0.504585, 0.731847, 0.993737, 0.15441, 0.171148, 0.009955, -0.011232, 0.009955, 0.171148, 0.15441, 0.171148, 0.15441, 0.171148, 0.15441, -0.011232, 0.009955, -0.011232, 0.009955, -0.011232, 0.009955, 0.171148, 0.15441, 0.171148, 0.15441, 0.171148, 0.009955, 0.171148, 0.478762, 0.504584, 0.478762, 0.015432, 0.731847, 0.504585, 0.225678, 0.504585, 0.225678, 0.015432, 0.478762, 0.504584, 0.731847, 0.015432, 0.984932, 0.015432, 0.731847, 0.504585],
+    "uvs": [0.478762, 0.015432, 0.731847, 0.015432, 0.478762, 0.993737, 0.225678, 0.015432, 0.478762, 0.015432, 0.225678, 0.993737, 0.731847, 0.015432, 0.984932, 0.015432, 0.731847, 0.993737, 0.15441, 0.171148, 0.15441, -0.011232, 0.15441, -0.011232, 0.009955, -0.011232, 0.009955, 0.171148, 0.009955, 0.171148, 0.15441, 0.171148, 0.009955, 0.171148, 0.15441, -0.011232, 0.15441, 0.171148, 0.009955, 0.171148, 0.009955, 0.171148, 0.225678, 0.504585, 0.478762, 0.504584, 0.225678, 0.993737, 0.478762, 0.504584, 0.731847, 0.504585, 0.478762, 0.993737, 0.478762, 0.015432, 0.731847, 0.015432, 0.731847, 0.504585, 0.225678, 0.015432, 0.478762, 0.015432, 0.478762, 0.504584, 0.984932, 0.015432, 0.984932, 0.504585, 0.731847, 0.504585, 0.731847, 0.504585, 0.984932, 0.504585, 0.731847, 0.993737, 0.15441, 0.171148, 0.009955, -0.011232, 0.009955, 0.171148, 0.478762, 0.015432, 0.731847, 0.015432, 0.478762, 0.993737, 0.225678, 0.015432, 0.478762, 0.015432, 0.225678, 0.993737, 0.731847, 0.015432, 0.984932, 0.015432, 0.731847, 0.993737, 0.225678, 0.504585, 0.478762, 0.504584, 0.225678, 0.993737, 0.478762, 0.504584, 0.731847, 0.504585, 0.478762, 0.993737, 0.731847, 0.015432, 0.731847, 0.504585, 0.478762, 0.504584, 0.225678, 0.015432, 0.478762, 0.015432, 0.478762, 0.504584, 0.984932, 0.015432, 0.984932, 0.504585, 0.731847, 0.504585, 0.731847, 0.504585, 0.984932, 0.504585, 0.731847, 0.993737, 0.15441, 0.171148, 0.15441, 0.171148, 0.15441, -0.011232, 0.009955, -0.011232, 0.009955, -0.011232, 0.009955, 0.171148, 0.15441, 0.171148, 0.15441, 0.171148, 0.009955, 0.171148, 0.478762, 0.504584, 0.478762, 0.015432, 0.731847, 0.504585, 0.225678, 0.504585, 0.225678, 0.015432, 0.478762, 0.504584, 0.731847, 0.015432, 0.984932, 0.015432, 0.731847, 0.504585, 0.478762, 0.015432, 0.731847, 0.015432, 0.478762, 0.504584, 0.225678, 0.504585, 0.225678, 0.015432, 0.478762, 0.504584, 0.731847, 0.015432, 0.984932, 0.015432, 0.731847, 0.504585],
 
-    "faces": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59],
+    "faces": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95],
 
     "bones": [],
 
@@ -1904,6 +2152,96 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__["a" /
 
     "animations": {}
 });
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony default export */ __webpack_exports__["a"] = ({
+    "vertices": [-2.072248, 1.505576, -0.832262, -0.791528, 2.436073, -0.832262, -0.489191, 1.505576, -2.17889, -2.072248, 1.505576, 0.832262, -1.280719, 0.930497, 2.17889, -0.489191, 1.505576, 2.17889, -2.072248, 1.505576, 0.832262, -0.791528, 2.436074, 0.832262, -0.791528, 2.436073, -0.832262, -0.489191, 1.505576, -2.17889, -0.791528, 2.436073, -0.832262, 0.791528, 2.436073, -0.832262, -0.489191, 1.505576, 2.17889, 0.489192, 1.505576, 2.17889, 0.791529, 2.436074, 0.832262, -0.791528, 2.436074, 0.832262, 0.791529, 2.436074, 0.832262, 0.791528, 2.436073, -0.832262, 0.489192, 1.505576, -2.17889, 0.791528, 2.436073, -0.832262, 2.072248, 1.505576, -0.832262, 0.489192, 1.505576, 2.17889, 1.28072, 0.930497, 2.17889, 2.072248, 1.505576, 0.832262, 0.791528, 2.436073, -0.832262, 0.791529, 2.436074, 0.832262, 2.072248, 1.505576, 0.832262, 1.28072, 0.930497, -2.17889, 2.072248, 1.505576, -0.832262, 2.561439, 0.0, -0.832262, 1.28072, 0.930497, 2.17889, 1.583057, -0.0, 2.17889, 2.56144, 0.0, 0.832262, 2.072248, 1.505576, 0.832262, 2.56144, 0.0, 0.832262, 2.561439, 0.0, -0.832262, 1.240287, -0.150705, -2.729312, 2.561439, 0.0, -0.832262, 2.072248, -1.505576, -0.832262, 1.583057, -0.0, 2.17889, 1.28072, -0.930497, 2.17889, 2.072248, -1.505576, 0.832262, 2.56144, 0.0, 0.832262, 2.072248, -1.505576, 0.832262, 2.072248, -1.505576, -0.832262, 1.003413, -0.879727, -2.729312, 2.072248, -1.505576, -0.832262, 0.791529, -2.436073, -0.832262, 1.28072, -0.930497, 2.17889, 0.489192, -1.505576, 2.17889, 0.791529, -2.436073, 0.832262, 2.072248, -1.505576, 0.832262, 0.791529, -2.436073, 0.832262, 0.791529, -2.436073, -0.832262, 0.38327, -1.330288, -2.729312, 0.791529, -2.436073, -0.832262, -0.791528, -2.436073, -0.832262, 0.489192, -1.505576, 2.17889, -0.489191, -1.505576, 2.17889, -0.791528, -2.436073, 0.832262, 0.791529, -2.436073, 0.832262, -0.791528, -2.436073, 0.832262, -0.791528, -2.436073, -0.832262, -0.791528, -2.436073, -0.832262, -2.072247, -1.505576, -0.832262, -1.003413, -0.879728, -2.729312, -0.489191, -1.505576, 2.17889, -1.280719, -0.930497, 2.17889, -2.072247, -1.505576, 0.832262, -0.791528, -2.436073, 0.832262, -2.072247, -1.505576, 0.832262, -2.072247, -1.505576, -0.832262, 0.0, -0.150705, -3.299341, -1.240287, -0.150705, -2.729312, -1.280719, 0.930497, -2.17889, -2.561439, 0.0, -0.832262, -2.561439, -0.0, 0.832262, -2.072248, 1.505576, 0.832262, -1.583056, 0.0, 2.17889, 0.0, -0.0, 2.693256, -1.280719, 0.930497, 2.17889, -2.561439, 0.0, -0.832262, -2.072248, 1.505576, -0.832262, -1.280719, 0.930497, -2.17889, -1.583056, 0.0, 2.17889, -1.280719, 0.930497, 2.17889, -2.072248, 1.505576, 0.832262, 0.0, -0.150705, -3.299341, -1.280719, 0.930497, -2.17889, -0.489191, 1.505576, -2.17889, -1.280719, 0.930497, 2.17889, 0.0, -0.0, 2.693256, -0.489191, 1.505576, 2.17889, 0.0, -0.150705, -3.299341, -0.489191, 1.505576, -2.17889, 0.489192, 1.505576, -2.17889, -0.489191, 1.505576, 2.17889, 0.0, -0.0, 2.693256, 0.489192, 1.505576, 2.17889, 0.0, -0.150705, -3.299341, 0.489192, 1.505576, -2.17889, 1.28072, 0.930497, -2.17889, 0.489192, 1.505576, 2.17889, 0.0, -0.0, 2.693256, 1.28072, 0.930497, 2.17889, 0.0, -0.150705, -3.299341, 1.28072, 0.930497, -2.17889, 1.240287, -0.150705, -2.729312, 1.28072, 0.930497, 2.17889, 0.0, -0.0, 2.693256, 1.583057, -0.0, 2.17889, 0.0, -0.150705, -3.299341, 1.240287, -0.150705, -2.729312, 1.003413, -0.879727, -2.729312, 1.583057, -0.0, 2.17889, 0.0, -0.0, 2.693256, 1.28072, -0.930497, 2.17889, 0.0, -0.150705, -3.299341, 1.003413, -0.879727, -2.729312, 0.38327, -1.330288, -2.729312, 1.28072, -0.930497, 2.17889, 0.0, -0.0, 2.693256, 0.489192, -1.505576, 2.17889, 0.0, -0.150705, -3.299341, 0.38327, -1.330288, -2.729312, -0.383269, -1.330288, -2.729312, 0.489192, -1.505576, 2.17889, 0.0, -0.0, 2.693256, -0.489191, -1.505576, 2.17889, 0.0, -0.150705, -3.299341, -0.383269, -1.330288, -2.729312, -1.003413, -0.879728, -2.729312, -0.489191, -1.505576, 2.17889, 0.0, -0.0, 2.693256, -1.280719, -0.930497, 2.17889, -2.072247, -1.505576, -0.832262, -2.561439, 0.0, -0.832262, -1.240287, -0.150705, -2.729312, -1.280719, -0.930497, 2.17889, -1.583056, 0.0, 2.17889, -2.561439, -0.0, 0.832262, 0.0, -0.150705, -3.299341, -1.003413, -0.879728, -2.729312, -1.240287, -0.150705, -2.729312, -2.072247, -1.505576, -0.832262, -2.072247, -1.505576, 0.832262, -2.561439, -0.0, 0.832262, -1.280719, -0.930497, 2.17889, 0.0, -0.0, 2.693256, -1.583056, 0.0, 2.17889, 0.057702, 0.443236, -4.228172, 0.393527, -0.383082, -4.381704, -0.601891, -0.248365, -4.31964, 0.393527, -0.383082, -4.381704, 0.057702, 0.443236, -4.228172, 0.0, -0.150705, -3.299341, -0.601891, -0.248365, -4.31964, 0.393527, -0.383082, -4.381704, 0.0, -0.150705, -3.299341, -0.601891, -0.248365, -4.31964, 0.0, -0.150705, -3.299341, 0.057702, 0.443236, -4.228172, -1.280719, 0.930497, -2.17889, -2.072248, 1.505576, -0.832262, -0.489191, 1.505576, -2.17889, -0.791528, 2.436074, 0.832262, -2.072248, 1.505576, 0.832262, -0.489191, 1.505576, 2.17889, -2.072248, 1.505576, -0.832262, -2.072248, 1.505576, 0.832262, -0.791528, 2.436073, -0.832262, 0.489192, 1.505576, -2.17889, -0.489191, 1.505576, -2.17889, 0.791528, 2.436073, -0.832262, -0.791528, 2.436074, 0.832262, -0.489191, 1.505576, 2.17889, 0.791529, 2.436074, 0.832262, -0.791528, 2.436073, -0.832262, -0.791528, 2.436074, 0.832262, 0.791528, 2.436073, -0.832262, 1.28072, 0.930497, -2.17889, 0.489192, 1.505576, -2.17889, 2.072248, 1.505576, -0.832262, 0.791529, 2.436074, 0.832262, 0.489192, 1.505576, 2.17889, 2.072248, 1.505576, 0.832262, 2.072248, 1.505576, -0.832262, 0.791528, 2.436073, -0.832262, 2.072248, 1.505576, 0.832262, 1.240287, -0.150705, -2.729312, 1.28072, 0.930497, -2.17889, 2.561439, 0.0, -0.832262, 2.072248, 1.505576, 0.832262, 1.28072, 0.930497, 2.17889, 2.56144, 0.0, 0.832262, 2.072248, 1.505576, -0.832262, 2.072248, 1.505576, 0.832262, 2.561439, 0.0, -0.832262, 1.003413, -0.879727, -2.729312, 1.240287, -0.150705, -2.729312, 2.072248, -1.505576, -0.832262, 2.56144, 0.0, 0.832262, 1.583057, -0.0, 2.17889, 2.072248, -1.505576, 0.832262, 2.561439, 0.0, -0.832262, 2.56144, 0.0, 0.832262, 2.072248, -1.505576, -0.832262, 0.38327, -1.330288, -2.729312, 1.003413, -0.879727, -2.729312, 0.791529, -2.436073, -0.832262, 2.072248, -1.505576, 0.832262, 1.28072, -0.930497, 2.17889, 0.791529, -2.436073, 0.832262, 2.072248, -1.505576, -0.832262, 2.072248, -1.505576, 0.832262, 0.791529, -2.436073, -0.832262, -0.383269, -1.330288, -2.729312, 0.38327, -1.330288, -2.729312, -0.791528, -2.436073, -0.832262, 0.791529, -2.436073, 0.832262, 0.489192, -1.505576, 2.17889, -0.791528, -2.436073, 0.832262, 0.791529, -2.436073, -0.832262, 0.791529, -2.436073, 0.832262, -0.791528, -2.436073, -0.832262, -0.383269, -1.330288, -2.729312, -0.791528, -2.436073, -0.832262, -1.003413, -0.879728, -2.729312, -0.791528, -2.436073, 0.832262, -0.489191, -1.505576, 2.17889, -2.072247, -1.505576, 0.832262, -0.791528, -2.436073, -0.832262, -0.791528, -2.436073, 0.832262, -2.072247, -1.505576, -0.832262, -2.072248, 1.505576, -0.832262, -2.561439, 0.0, -0.832262, -2.072248, 1.505576, 0.832262, -1.240287, -0.150705, -2.729312, -2.561439, 0.0, -0.832262, -1.280719, 0.930497, -2.17889, -2.561439, -0.0, 0.832262, -1.583056, 0.0, 2.17889, -2.072248, 1.505576, 0.832262, -1.003413, -0.879728, -2.729312, -2.072247, -1.505576, -0.832262, -1.240287, -0.150705, -2.729312, -2.072247, -1.505576, 0.832262, -1.280719, -0.930497, 2.17889, -2.561439, -0.0, 0.832262, -2.561439, 0.0, -0.832262, -2.072247, -1.505576, -0.832262, -2.561439, -0.0, 0.832262],
+
+    "normals": [-0.773614, 0.562059, -0.292459, -0.29548, 0.909452, -0.292459, -0.217444, 0.672048, -0.707816, -0.773614, 0.562059, 0.292459, -0.505814, 0.367473, 0.780419, -0.193182, 0.594623, 0.780419, -0.773614, 0.562059, 0.292459, -0.29548, 0.909452, 0.292459, -0.29548, 0.909452, -0.292459, -0.217444, 0.672048, -0.707816, -0.29548, 0.909452, -0.292459, 0.29548, 0.909452, -0.292459, -0.193182, 0.594623, 0.780419, 0.193182, 0.594623, 0.780419, 0.29548, 0.909452, 0.292459, -0.29548, 0.909452, 0.292459, 0.29548, 0.909452, 0.292459, 0.29548, 0.909452, -0.292459, 0.217444, 0.672048, -0.707816, 0.29548, 0.909452, -0.292459, 0.773614, 0.562059, -0.292459, 0.193182, 0.594623, 0.780419, 0.505814, 0.367473, 0.780419, 0.773614, 0.562059, 0.292459, 0.29548, 0.909452, -0.292459, 0.29548, 0.909452, 0.292459, 0.773614, 0.562059, 0.292459, 0.573962, 0.453322, -0.681906, 0.773614, 0.562059, -0.292459, 0.958647, 0.004791, -0.284524, 0.505814, 0.367473, 0.780419, 0.625202, 0.0, 0.780419, 0.956267, 0.0, 0.292459, 0.773614, 0.562059, 0.292459, 0.956267, 0.0, 0.292459, 0.958647, 0.004791, -0.284524, 0.638356, 0.067324, -0.766747, 0.958647, 0.004791, -0.284524, 0.781152, -0.562822, -0.270119, 0.625202, 0.0, 0.780419, 0.505814, -0.367473, 0.780419, 0.773614, -0.562059, 0.292459, 0.956267, 0.0, 0.292459, 0.773614, -0.562059, 0.292459, 0.781152, -0.562822, -0.270119, 0.549333, -0.406812, -0.72985, 0.781152, -0.562822, -0.270119, 0.299722, -0.9176, -0.260994, 0.505814, -0.367473, 0.780419, 0.193182, -0.594623, 0.780419, 0.29548, -0.909452, 0.292459, 0.773614, -0.562059, 0.292459, 0.29548, -0.909452, 0.292459, 0.299722, -0.9176, -0.260994, 0.211371, -0.658406, -0.722343, 0.299722, -0.9176, -0.260994, -0.299722, -0.9176, -0.260994, 0.193182, -0.594623, 0.780419, -0.193182, -0.594623, 0.780419, -0.29548, -0.909452, 0.292459, 0.29548, -0.909452, 0.292459, -0.29548, -0.909452, 0.292459, -0.299722, -0.9176, -0.260994, -0.299722, -0.9176, -0.260994, -0.781152, -0.562822, -0.270119, -0.549333, -0.406812, -0.72985, -0.193182, -0.594623, 0.780419, -0.505814, -0.367473, 0.780419, -0.773614, -0.562059, 0.292459, -0.29548, -0.909452, 0.292459, -0.773614, -0.562059, 0.292459, -0.781152, -0.562822, -0.270119, 0.007508, 0.086612, -0.996185, -0.638356, 0.067324, -0.766747, -0.573962, 0.453322, -0.681906, -0.958647, 0.004791, -0.284524, -0.956267, 0.0, 0.292459, -0.773614, 0.562059, 0.292459, -0.625202, 0.0, 0.780419, 0.0, 0.0, 1.0, -0.505814, 0.367473, 0.780419, -0.958647, 0.004791, -0.284524, -0.773614, 0.562059, -0.292459, -0.573962, 0.453322, -0.681906, -0.625202, 0.0, 0.780419, -0.505814, 0.367473, 0.780419, -0.773614, 0.562059, 0.292459, 0.007508, 0.086612, -0.996185, -0.573962, 0.453322, -0.681906, -0.217444, 0.672048, -0.707816, -0.505814, 0.367473, 0.780419, 0.0, 0.0, 1.0, -0.193182, 0.594623, 0.780419, 0.007508, 0.086612, -0.996185, -0.217444, 0.672048, -0.707816, 0.217444, 0.672048, -0.707816, -0.193182, 0.594623, 0.780419, 0.0, 0.0, 1.0, 0.193182, 0.594623, 0.780419, 0.007508, 0.086612, -0.996185, 0.217444, 0.672048, -0.707816, 0.573962, 0.453322, -0.681906, 0.193182, 0.594623, 0.780419, 0.0, 0.0, 1.0, 0.505814, 0.367473, 0.780419, 0.007508, 0.086612, -0.996185, 0.573962, 0.453322, -0.681906, 0.638356, 0.067324, -0.766747, 0.505814, 0.367473, 0.780419, 0.0, 0.0, 1.0, 0.625202, 0.0, 0.780419, 0.007508, 0.086612, -0.996185, 0.638356, 0.067324, -0.766747, 0.549333, -0.406812, -0.72985, 0.625202, 0.0, 0.780419, 0.0, 0.0, 1.0, 0.505814, -0.367473, 0.780419, 0.007508, 0.086612, -0.996185, 0.549333, -0.406812, -0.72985, 0.211371, -0.658406, -0.722343, 0.505814, -0.367473, 0.780419, 0.0, 0.0, 1.0, 0.193182, -0.594623, 0.780419, 0.007508, 0.086612, -0.996185, 0.211371, -0.658406, -0.722343, -0.211371, -0.658406, -0.722343, 0.193182, -0.594623, 0.780419, 0.0, 0.0, 1.0, -0.193182, -0.594623, 0.780419, 0.007508, 0.086612, -0.996185, -0.211371, -0.658406, -0.722343, -0.549333, -0.406812, -0.72985, -0.193182, -0.594623, 0.780419, 0.0, 0.0, 1.0, -0.505814, -0.367473, 0.780419, -0.781152, -0.562822, -0.270119, -0.958647, 0.004791, -0.284524, -0.638356, 0.067324, -0.766747, -0.505814, -0.367473, 0.780419, -0.625202, 0.0, 0.780419, -0.956267, 0.0, 0.292459, 0.007508, 0.086612, -0.996185, -0.549333, -0.406812, -0.72985, -0.638356, 0.067324, -0.766747, -0.781152, -0.562822, -0.270119, -0.773614, -0.562059, 0.292459, -0.956267, 0.0, 0.292459, -0.505814, -0.367473, 0.780419, 0.0, 0.0, 1.0, -0.625202, 0.0, 0.780419, 0.160131, 0.9523, -0.259651, 0.706992, -0.51561, -0.483993, -0.889126, -0.268899, -0.370281, 0.706992, -0.51561, -0.483993, 0.160131, 0.9523, -0.259651, 0.007508, 0.086612, -0.996185, -0.889126, -0.268899, -0.370281, 0.706992, -0.51561, -0.483993, 0.007508, 0.086612, -0.996185, -0.889126, -0.268899, -0.370281, 0.007508, 0.086612, -0.996185, 0.160131, 0.9523, -0.259651, -0.573962, 0.453322, -0.681906, -0.773614, 0.562059, -0.292459, -0.217444, 0.672048, -0.707816, -0.29548, 0.909452, 0.292459, -0.773614, 0.562059, 0.292459, -0.193182, 0.594623, 0.780419, -0.773614, 0.562059, -0.292459, -0.773614, 0.562059, 0.292459, -0.29548, 0.909452, -0.292459, 0.217444, 0.672048, -0.707816, -0.217444, 0.672048, -0.707816, 0.29548, 0.909452, -0.292459, -0.29548, 0.909452, 0.292459, -0.193182, 0.594623, 0.780419, 0.29548, 0.909452, 0.292459, -0.29548, 0.909452, -0.292459, -0.29548, 0.909452, 0.292459, 0.29548, 0.909452, -0.292459, 0.573962, 0.453322, -0.681906, 0.217444, 0.672048, -0.707816, 0.773614, 0.562059, -0.292459, 0.29548, 0.909452, 0.292459, 0.193182, 0.594623, 0.780419, 0.773614, 0.562059, 0.292459, 0.773614, 0.562059, -0.292459, 0.29548, 0.909452, -0.292459, 0.773614, 0.562059, 0.292459, 0.638356, 0.067324, -0.766747, 0.573962, 0.453322, -0.681906, 0.958647, 0.004791, -0.284524, 0.773614, 0.562059, 0.292459, 0.505814, 0.367473, 0.780419, 0.956267, 0.0, 0.292459, 0.773614, 0.562059, -0.292459, 0.773614, 0.562059, 0.292459, 0.958647, 0.004791, -0.284524, 0.549333, -0.406812, -0.72985, 0.638356, 0.067324, -0.766747, 0.781152, -0.562822, -0.270119, 0.956267, 0.0, 0.292459, 0.625202, 0.0, 0.780419, 0.773614, -0.562059, 0.292459, 0.958647, 0.004791, -0.284524, 0.956267, 0.0, 0.292459, 0.781152, -0.562822, -0.270119, 0.211371, -0.658406, -0.722343, 0.549333, -0.406812, -0.72985, 0.299722, -0.9176, -0.260994, 0.773614, -0.562059, 0.292459, 0.505814, -0.367473, 0.780419, 0.29548, -0.909452, 0.292459, 0.781152, -0.562822, -0.270119, 0.773614, -0.562059, 0.292459, 0.299722, -0.9176, -0.260994, -0.211371, -0.658406, -0.722343, 0.211371, -0.658406, -0.722343, -0.299722, -0.9176, -0.260994, 0.29548, -0.909452, 0.292459, 0.193182, -0.594623, 0.780419, -0.29548, -0.909452, 0.292459, 0.299722, -0.9176, -0.260994, 0.29548, -0.909452, 0.292459, -0.299722, -0.9176, -0.260994, -0.211371, -0.658406, -0.722343, -0.299722, -0.9176, -0.260994, -0.549333, -0.406812, -0.72985, -0.29548, -0.909452, 0.292459, -0.193182, -0.594623, 0.780419, -0.773614, -0.562059, 0.292459, -0.299722, -0.9176, -0.260994, -0.29548, -0.909452, 0.292459, -0.781152, -0.562822, -0.270119, -0.773614, 0.562059, -0.292459, -0.958647, 0.004791, -0.284524, -0.773614, 0.562059, 0.292459, -0.638356, 0.067324, -0.766747, -0.958647, 0.004791, -0.284524, -0.573962, 0.453322, -0.681906, -0.956267, 0.0, 0.292459, -0.625202, 0.0, 0.780419, -0.773614, 0.562059, 0.292459, -0.549333, -0.406812, -0.72985, -0.781152, -0.562822, -0.270119, -0.638356, 0.067324, -0.766747, -0.773614, -0.562059, 0.292459, -0.505814, -0.367473, 0.780419, -0.956267, 0.0, 0.292459, -0.958647, 0.004791, -0.284524, -0.781152, -0.562822, -0.270119, -0.956267, 0.0, 0.292459],
+
+    "colors": [0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.933333, 0.623529, 0.690196, 0.678431, 0.141176, 0.141176, 0.690196, 0.152941, 0.156863, 0.933333, 0.623529, 0.690196, 0.913725, 0.007843, 0.062745, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.690196, 0.152941, 0.156863, 0.756863, 0.184314, 0.223529, 0.913725, 0.007843, 0.062745, 0.913725, 0.007843, 0.062745, 0.913725, 0.007843, 0.062745, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.756863, 0.184314, 0.223529, 0.682353, 0.145098, 0.14902, 0.921569, 0.003922, 0.062745, 0.678431, 0.141176, 0.141176, 0.913725, 0.007843, 0.062745, 0.921569, 0.003922, 0.062745, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.682353, 0.145098, 0.14902, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.921569, 0.003922, 0.062745, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.686275, 0.113725, 0.156863, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.929412, 0.0, 0.058824, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.92549, 0.0, 0.058824, 0.929412, 0.0, 0.058824, 0.92549, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.964706, 0.384314, 0.411765, 0.92549, 0.0, 0.058824, 0.964706, 0.384314, 0.411765, 0.678431, 0.141176, 0.141176, 0.698039, 0.156863, 0.164706, 0.678431, 0.141176, 0.141176, 0.815686, 0.152941, 0.227451, 0.678431, 0.141176, 0.141176, 0.682353, 0.145098, 0.145098, 0.894118, 0.047059, 0.094118, 0.964706, 0.384314, 0.411765, 0.894118, 0.047059, 0.094118, 0.678431, 0.141176, 0.141176, 0.541176, 0.07451, 0.121569, 0.85098, 0.152941, 0.247059, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.933333, 0.623529, 0.690196, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.933333, 0.623529, 0.690196, 0.560784, 0.082353, 0.121569, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.690196, 0.152941, 0.156863, 0.560784, 0.082353, 0.121569, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.690196, 0.152941, 0.156863, 0.243137, 0.0, 0.015686, 0.756863, 0.184314, 0.223529, 0.560784, 0.082353, 0.121569, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.756863, 0.184314, 0.223529, 0.243137, 0.0, 0.015686, 0.682353, 0.145098, 0.14902, 0.560784, 0.082353, 0.121569, 0.678431, 0.141176, 0.141176, 0.796078, 0.14902, 0.211765, 0.682353, 0.145098, 0.14902, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.541176, 0.07451, 0.121569, 0.690196, 0.098039, 0.164706, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.541176, 0.07451, 0.121569, 0.65098, 0.086275, 0.145098, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.541176, 0.07451, 0.121569, 0.65098, 0.086275, 0.145098, 0.85098, 0.152941, 0.247059, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.541176, 0.07451, 0.121569, 0.772549, 0.14902, 0.196078, 0.815686, 0.152941, 0.227451, 0.678431, 0.141176, 0.141176, 0.243137, 0.0, 0.015686, 0.682353, 0.145098, 0.145098, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.85098, 0.152941, 0.247059, 0.682353, 0.145098, 0.145098, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.541176, 0.07451, 0.121569, 0.815686, 0.152941, 0.227451, 0.85098, 0.152941, 0.247059, 0.678431, 0.141176, 0.141176, 0.890196, 0.027451, 0.07451, 0.929412, 0.0, 0.058824, 0.682353, 0.145098, 0.145098, 0.243137, 0.0, 0.015686, 0.678431, 0.141176, 0.141176, 0.239216, 0.0, 0.015686, 0.239216, 0.0, 0.015686, 0.239216, 0.0, 0.015686, 0.239216, 0.0, 0.015686, 0.239216, 0.0, 0.015686, 0.560784, 0.082353, 0.121569, 0.513726, 0.070588, 0.109804, 0.239216, 0.0, 0.015686, 0.541176, 0.07451, 0.121569, 0.239216, 0.0, 0.015686, 0.560784, 0.082353, 0.121569, 0.25098, 0.003922, 0.019608, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.913725, 0.007843, 0.062745, 0.933333, 0.623529, 0.690196, 0.690196, 0.152941, 0.156863, 0.678431, 0.141176, 0.141176, 0.933333, 0.623529, 0.690196, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.913725, 0.007843, 0.062745, 0.690196, 0.152941, 0.156863, 0.913725, 0.007843, 0.062745, 0.678431, 0.141176, 0.141176, 0.913725, 0.007843, 0.062745, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.913725, 0.007843, 0.062745, 0.756863, 0.184314, 0.223529, 0.921569, 0.003922, 0.062745, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.921569, 0.003922, 0.062745, 0.686275, 0.113725, 0.156863, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.921569, 0.003922, 0.062745, 0.682353, 0.145098, 0.14902, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.921569, 0.003922, 0.062745, 0.678431, 0.141176, 0.141176, 0.654902, 0.098039, 0.145098, 0.686275, 0.113725, 0.156863, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.65098, 0.086275, 0.145098, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.92549, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.85098, 0.152941, 0.247059, 0.65098, 0.086275, 0.145098, 0.678431, 0.141176, 0.141176, 0.92549, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.964706, 0.384314, 0.411765, 0.678431, 0.141176, 0.141176, 0.92549, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.772549, 0.14902, 0.196078, 0.698039, 0.156863, 0.164706, 0.815686, 0.152941, 0.227451, 0.964706, 0.384314, 0.411765, 0.678431, 0.141176, 0.141176, 0.894118, 0.047059, 0.094118, 0.678431, 0.141176, 0.141176, 0.964706, 0.384314, 0.411765, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.933333, 0.623529, 0.690196, 0.85098, 0.152941, 0.247059, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.933333, 0.623529, 0.690196, 0.815686, 0.152941, 0.227451, 0.678431, 0.141176, 0.141176, 0.85098, 0.152941, 0.247059, 0.890196, 0.027451, 0.07451, 0.682353, 0.145098, 0.145098, 0.929412, 0.0, 0.058824, 0.678431, 0.141176, 0.141176, 0.678431, 0.141176, 0.141176, 0.929412, 0.0, 0.058824],
+
+    "uvs": [],
+
+    "faces": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251],
+
+    "bones": [],
+
+    "boneWeights": [],
+
+    "boneIndices": [],
+
+    "animations": {}
+});
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__math_utils__ = __webpack_require__(0);
+
+
+const boxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1) =>{
+  let worldCoordsPoints, transformedPoint, currentPointCollides, temp;
+  let collidingVertices = [];
+  for(let boxOrderSwitch = 0; boxOrderSwitch <= 1; ++boxOrderSwitch){
+    worldCoordsPoints = boxColliderToPoints(matrix0, dimensions0);
+    for(let i = 0; i < worldCoordsPoints.length; ++i){
+      currentPointCollides = true;
+      transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["m" /* multiplyVec4ByMatrix4 */](
+        __WEBPACK_IMPORTED_MODULE_0__math_utils__["h" /* inverse_mat4_rot_pos */](matrix1),
+        worldCoordsPoints[i]
+      );
+      for(let j = 0; j < 3; ++j){
+        if(transformedPoint[j] > dimensions1[j] ||
+           transformedPoint[j] < -1* dimensions1[j]){
+             currentPointCollides = false;
+        }
+      }
+      if(currentPointCollides){
+        collidingVertices.push(worldCoordsPoint);
+      }
+    }
+    temp = matrix0;
+    matrix0 = matrix1;
+    matrix1 = temp;
+    temp = dimensions0;
+    dimensions0 = dimensions1;
+    dimensions1 = temp;
+  }
+  if(collidingVertices.length > 0){
+    return collidingVertices;
+  }
+}
+/* unused harmony export boxIntersectsBox */
+
+
+const boxColliderToPoints = (matrix, dimensions) =>{
+  const points = [];
+  for(let xDirection = -1; xDirection <= 1; xDirection+= 2){
+    for(let yDirection = -1; yDirection<= 1; yDirection+= 2){
+      for(let zDirection = -1; zDirection<= 1; zDirection+= 2){
+        points.push(
+          __WEBPACK_IMPORTED_MODULE_0__math_utils__["m" /* multiplyVec4ByMatrix4 */](
+            matrix, [dimensions[0] * xDirection,
+            dimensions[1] * yDirection,
+            dimensions[2] * zDirection, 1]
+          )
+        );
+      }
+    }
+  }
+  return points;
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = boxColliderToPoints;
+
 
 
 /***/ })

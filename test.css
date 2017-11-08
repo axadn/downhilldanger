@@ -1,4 +1,9 @@
+body{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 canvas{
-  width: 600px;
-  height: 600px;
+  width: calc((100vh*2 + 100vw)/3);
+  height: 100vh;
 }
