@@ -1,6 +1,7 @@
 
 export const keyDown = character => e=>{
   switch(e.key){
+    case "left":
     case "a":
       character.input.left = true;
       break;
@@ -14,6 +15,7 @@ export const keyDown = character => e=>{
 
 export const keyUp = character => e => {
   switch(e.key){
+    case "left":
     case "a":
       character.input.left = false;
       break;

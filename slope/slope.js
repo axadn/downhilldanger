@@ -205,8 +205,7 @@ export default class Slope extends GameObject{
     return vertices;
   }
   notifyOfCharacterSegmentNumber(idx){
-    if(this.bufferedSegments < BACK_BUFFER_ANOUNT){
-      ++this.bufferedSegments;
+    if(idx < BACK_BUFFER_ANOUNT){
       return false;
     }
     this.generateSegment();

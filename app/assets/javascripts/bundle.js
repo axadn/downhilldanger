@@ -1197,6 +1197,7 @@ function compileShader(gl, type, source){
 
 const keyDown = character => e=>{
   switch(e.key){
+    case "left":
     case "a":
       character.input.left = true;
       break;
@@ -1212,6 +1213,7 @@ const keyDown = character => e=>{
 
 const keyUp = character => e => {
   switch(e.key){
+    case "left":
     case "a":
       character.input.left = false;
       break;
@@ -1837,8 +1839,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     return vertices;
   }
   notifyOfCharacterSegmentNumber(idx){
-    if(this.bufferedSegments < BACK_BUFFER_ANOUNT){
-      ++this.bufferedSegments;
+    if(idx < BACK_BUFFER_ANOUNT){
       return false;
     }
     this.generateSegment();
