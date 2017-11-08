@@ -6,7 +6,7 @@ const STEER_SPEED = 0.02;
 
 const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
-const BREAK_FRICTION = [0.187,0.187,0.187];
+const BREAK_FRICTION = [0.187,0.12,0.187];
 import * as MathUtils from "../utils/math_utils";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
 export default class Character extends GameObject{

@@ -7,7 +7,7 @@ const TURN_TYPE_SWITCH_FREQUENCY = 3;
 const SHARP_TURN = 0.35;
 const GRADUAL_TURN = 0.14;
 const TILES_PER_SEGMENT = 1;
-const TREES_PER_SEGMENT = 3;
+const TREES_PER_SEGMENT = 2;
 const TREE_COLLIDER = "TREE_COLLIDER";
 const TREE_COLLIDER_HEIGHT = 20;
 const TREE_COLLIDER_WIDTH = 5;
@@ -112,10 +112,10 @@ export default class Slope extends GameObject{
           transformationMatrix
         );
         let treeObject;
-        for(let i = 0; i < 1; ++i){
+        for(let i = 0; i < TREES_PER_SEGMENT; ++i){
           transformationMatrix =
           MathUtils.mat_4_multiply(
-            MathUtils.translationMatrix(0, 0, 0,1),
+            MathUtils.translationMatrix(0, SEGMENT_LENGTH * i / TREES_PER_SEGMENT, 0,1),
             transformationMatrix );
           treeObject = new GameObject(this.treeMesh,transformationMatrix);
           treeObject.id = `tree${this.treesCreatedSinceStart}`;
