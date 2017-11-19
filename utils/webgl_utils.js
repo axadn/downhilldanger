@@ -1,7 +1,7 @@
 const DEFAULT_CAMERA_DIST = 1;
 
 import * as MathUtils from "./math_utils";
-
+import GameObject from "../game_object/game_object";
 export class ObjectsRasterizer{
   constructor(scale= 0.5, swapYZ = true){
     const canvas = document.querySelector("#glCanvas");
@@ -25,6 +25,7 @@ export class ObjectsRasterizer{
     this.position = [0,0,0];
 
     this.objects = {};
+    this.camera = new GameObject();
   }
   compileDefaultShaders(){
     this.defaultProgram = this.compileByID("default-vertex-shader", "default-fragment-shader");
@@ -167,6 +168,10 @@ export class ObjectsRasterizer{
     this.gl.viewport(0,0, this.gl.canvas.clientWidth, this.gl.canvas.clientHeight);
   }
 
+  drawSkyBox(){
+    this.skyBox.setPosition(this.camera.getPosition());
+    this.draw(this.skyBox);
+  }
   draw(obj){
     const program = this.determineProgram(obj.mesh.skinned,
         obj.mesh.textured, obj.mesh.colored);
@@ -247,42 +252,22 @@ export class ObjectsRasterizer{
 
     this.gl.drawElements(this.gl.TRIANGLES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
   }
-
+  positionCamera(){
+    this.camera.setPosition(this.cameraTarget.transformPoint([0, -18, 8]));
+    let rotation = this.cameraTarget.getRotation();
+    const upLocal = this.cameraTarget.inverseTransformDirection([0,0,1]);
+    const angleToUp = MathUtils.angleBetweenVectors([0,0,1], upLocal);
+    const upAlignAxis = MathUtils.vectorCross(upLocal, [0,0,1]);
+    this.camera.setRotation(
+      MathUtils.multiplyQuaternions(
+        MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp),
+        rotation
+      )
+    );
+  }
   calculateViewMatrix(){
     //let cameraMatrix =  MathUtils.swapYZMatrix;
-    let cameraMatrix;
-    if(this.cameraTarget){
-
-        cameraMatrix = this.cameraTarget.getTransformationMatrix();
-
-
-
-
-
-         cameraMatrix = MathUtils.mat_4_multiply(
-         MathUtils.translationMatrix(0, -18, 8),
-            cameraMatrix);
-
-
-            const planeAlign = MathUtils.axisToVec(
-                [0,0,1,1],
-             MathUtils.multiplyVec4ByMatrix4(
-               MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
-                 cameraMatrix
-               )),
-               [0,0,1,1]
-             )
-            );
-
-          cameraMatrix = MathUtils.mat_4_multiply(
-            planeAlign,
-            cameraMatrix
-          );
-
-    }
-    else{
-      cameraMatrix = MathUtils.swapYZMatrix;
-    }
+    let cameraMatrix = this.camera.getTransformationMatrix();
     let viewMatrix = MathUtils.inverse_mat4_rot_pos(cameraMatrix);
     viewMatrix = MathUtils.mat_4_multiply(viewMatrix, MathUtils.swapYZMatrix)
     viewMatrix = MathUtils.mat_4_multiply(viewMatrix, MathUtils.simple_perspective_matrix);
@@ -290,12 +275,14 @@ export class ObjectsRasterizer{
   }
 
   drawObjects(timestamp){
-
     this.adjustToCanvas();
     this.gl.clearColor(0.8, 0.8, 0.81, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    this.positionCamera();
     this.viewMatrix = this.calculateViewMatrix();
-
+    if(this.skyBox){
+      this.drawSkyBox();
+    }
     const objKeys = Object.keys(this.objects);
     let obj;
     for(let i = 0; i < objKeys.length; ++i){

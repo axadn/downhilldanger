@@ -372,6 +372,11 @@ export const setMatrixRotInPlace = (mat, q) =>{
   mat[9] = q[2]*q[3]*2 + q[1]*q[0]*2;
   mat[10] = 1 - q[1]*q[1]*2 - q[2]*q[2]*2;
 };
+export const setMatrixLocInPlace = (mat, vec) =>{
+  mat[3] = vec[0];
+  mat[7] = vec[1];
+  mat[11] = vec[2];
+};
 export const IdentityQuaternion = [1,0,0,0];
 
 export const lerpQuaternions = (quat1, quat2, lerpAmount) =>{
