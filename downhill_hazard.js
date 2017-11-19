@@ -4,6 +4,7 @@ import * as Input from "./input.js";
 import monkeyData from "./untitled.js";
 import boxManMesh from "./boxMan.js";
 import GameObject from "./game_object/game_object";
+import SkyBox from "./skybox.json";
 import Character from "./character/character";
 import Slope from "./slope/slope";
 import Mesh from "./game_object/mesh";
@@ -19,6 +20,12 @@ function main(){
   const boxMan = new Character(new Mesh(boxManMesh), undefined, slope);
   //boxMan.playAnimation("rest");
   rasterizer.objects.boxMan = boxMan;
+  SkyBox.img_src = "assets/skybox.jpg";
+  SkyBox.textured = true;
+  SkyBox.rasterizer = rasterizer;
+  let skyMesh = new Mesh(SkyBox);
+  skyMesh.buffers = rasterizer.sendMeshToGPU(skyMesh);
+  rasterizer.skyBox = new GameObject(skyMesh);
   window.requestAnimationFrame(rasterizer.drawObjects.bind(rasterizer));
 //  window.requestAnimationFrame(
 //    () => rasterizer.draw(boxMan));

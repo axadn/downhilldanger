@@ -1,6 +1,6 @@
 var path = require("path");
 module.exports = {
-  entry: "./crazy_motorcycle.js",
+  entry: "./downhill_hazard.js",
   output: {
     path: path.resolve(__dirname, 'app', 'assets', 'javascripts'),
     filename: "bundle.js",
