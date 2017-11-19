@@ -279,41 +279,10 @@ export class ObjectsRasterizer{
             cameraMatrix
           );
 
-
-      //
-      //
-      //
-      //
-      // //
-      //   // cameraMatrix = MathUtils.mat_4_multiply( //align z to up
-      //   //   MathUtils.axisToVec(
-      //   //     MathUtils.multiplyVec4ByMatrix4(
-      //   //       MathUtils.mat4RotationComponent(cameraMatrix),
-      //   //       [0,0,1,1]
-      //   //     ).slice(0,3),
-      //   //     [0,0,1]
-      //   //   ),
-      //   //   cameraMatrix
-      //   // );
-      //
-      //   cameraMatrix = MathUtils.mat_4_multiply(
-      //   MathUtils.xRotationMatrix(-0.6),
-      //      cameraMatrix
-      //   );
-
-
     }
     else{
-    //  cameraMatrix = MathUtils.swapYZMatrix;
+      cameraMatrix = MathUtils.swapYZMatrix;
     }
-
-    //cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.zRotationMatrix(this.rotation[2]));
-  //  cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.xRotationMatrix(this.rotation[0]));
-  //  cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.translationMatrix(this.position[0],this.position[1], this.position[2]));
-    //cameraMatrix = MathUtils.mat_4_multiply(cameraMatrix, MathUtils.xRotationMatrix(this.rotation[0]));
-    //cameraMatrix = MathUtils.mat_4_multiply()
-    //viewMatrix = MathUtils.inverse_mat4_rot_pos(cameraMatrix);
-    //cameraMatrix = MathUtils.mat_4_multiply(MathUtils.simple_perspective_matrix, viewMatrix);
     let viewMatrix = MathUtils.inverse_mat4_rot_pos(cameraMatrix);
     viewMatrix = MathUtils.mat_4_multiply(viewMatrix, MathUtils.swapYZMatrix)
     viewMatrix = MathUtils.mat_4_multiply(viewMatrix, MathUtils.simple_perspective_matrix);
