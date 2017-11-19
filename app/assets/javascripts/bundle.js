@@ -1690,7 +1690,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     this.bufferedSegments = 0;
     this.uvH = 0;
     this.segmentMatrices = [transformationMatrix];
-    this.segmentRotation = [-0.2,0,0];
+    this.segmentRotation = [-0.25,0,0];
     this.segmentPosition = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["m" /* multiplyVec4ByMatrix4 */](transformationMatrix,
       [0,SEGMENT_LENGTH,0,1]).slice(0,3);
     this.obstacles = [];

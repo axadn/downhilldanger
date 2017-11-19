@@ -47,7 +47,7 @@ export default class Slope extends GameObject{
     this.bufferedSegments = 0;
     this.uvH = 0;
     this.segmentMatrices = [transformationMatrix];
-    this.segmentRotation = [-0.2,0,0];
+    this.segmentRotation = [-0.25,0,0];
     this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix,
       [0,SEGMENT_LENGTH,0,1]).slice(0,3);
     this.obstacles = [];
