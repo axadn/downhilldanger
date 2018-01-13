@@ -1,6 +1,6 @@
 ## Downhill Hazard
 
-[Downhill Hazard](https://axadn.github.io/downhill-hazard/) is a 3D browser game built from scratch using vanilla JavaScript.
+[Downhill Hazard](https://axadn.github.io/downhill-hazard/) is a 3D snowboarding game with physics built from scratch using JavaScript.
 
 
 ### Features and Overview
@@ -20,6 +20,5 @@ requires setting up a server due to the browser treating loading an image from a
 ### Moving forward
 - Add debugging functions the rasterizer class to instantly rasterize guide lines and boxes to
 assist with debugging of physics and other features
-- Implement an object pool for the trees to eliminate slowdowns due to garbage collection
-- Add a sky box
+- Implement an object pool for the trees to help slowdowns due to garbage collection
 - Add skeletal animation and texturing to the player
