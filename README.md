@@ -21,4 +21,5 @@ requires setting up a server due to the browser treating loading an image from a
 - Add debugging functions the rasterizer class to instantly rasterize guide lines and boxes to
 assist with debugging of physics and other features
 - Implement an object pool for the trees to help slowdowns due to garbage collection
+- Help garbage collecion by doing as Many physics and math operations as possible in place instead of creating new objects
 - Add skeletal animation and texturing to the player
