@@ -51,15 +51,17 @@ export const boxColliderToPoints = (matrix, dimensions) =>{
   return points;
 };
 
-/**we need to divide the space around the box into six sections
-to determine which side the ray is colliding with
+/**we can divide the space around the box into six sections
+to approximate which side the ray is colliding with
+
+this works well enough for short rays near the surface
 
 the dividing lines radiate out from the corners following equations such as
 x = y = z
 
-the spaces follow inequalites such as 
-x > abs(y) && x > abs(z)
--x > abs(y) && -x > abs(z)
+so the spaces follow inequalites such as 
+x > abs(y - ySize) && x > abs(z - zSize)
+-x > abs(y - ySize) && -x > abs(z - zSize)
 
 y > abs(x) && y > abs(z)
 -y > abs(x) && -y > abs(z)
