@@ -151,9 +151,10 @@ export default class Character extends GameObject{
   };
   _handleTreeCollision(collisionData){
     this.velocity = MathUtils.scaleVector(
-      this.velocity,
-      -1 * this.restitution
-    );
+      MathUtils.bounceVectorOffPlane(this.velocity,
+        collisionData.normal),
+      this.restitution
+  ).concat([0]);
     this.setPosition(this.transformPoint([0,-2,0]));
   }
   _moveForward(){

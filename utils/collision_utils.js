@@ -31,7 +31,7 @@ export const boxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1) =>{
   if(collidingVertices.length > 0){
     return collidingVertices;
   }
-}
+};
 
 export const boxColliderToPoints = (matrix, dimensions) =>{
   const points = [];
@@ -49,4 +49,27 @@ export const boxColliderToPoints = (matrix, dimensions) =>{
     }
   }
   return points;
-}
+};
+
+/**we need to divide the space around the box into six sections
+to determine which side the ray is colliding with
+
+the dividing lines radiate out from the corners following equations such as
+x = y = z
+
+the spaces follow inequalites such as 
+x > abs(y) && x > abs(z)
+-x > abs(y) && -x > abs(z)
+
+y > abs(x) && y > abs(z)
+-y > abs(x) && -y > abs(z)
+
+z > abs(x) && z > abs(y)
+-z > abs(x) && -z > abs(y)
+
+therefore, we can first see which component of the vector has the greates absolute
+value, then differentiate between the two possible sides by the component's sign
+**/
+export function vectorCollidesWithBox(vect, boxMatrix, boxDimensions){
+
+};

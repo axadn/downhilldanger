@@ -4,7 +4,7 @@
   "description": "",
   "main": "downhill_hazard",
   "dependencies": {
-    "webpack": "^3.8.1"
+    "webpack": "^3.10.0"
   },
   "devDependencies": {}
 }
