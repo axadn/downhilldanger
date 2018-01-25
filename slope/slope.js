@@ -263,6 +263,14 @@ export default class Slope extends GameObject{
     return result < 0;
   }
 
+  boxCollidesWithObstacle(boxMatrix, boxDimensions, movement, segment_number){
+    let obstacle;
+    let collisionData;
+    for(let i = 0; i < this.obstacles[segment_number].length; ++i){
+      obstacle = this.obstacles[segment_number][i];
+      collisionData = CollisionUtils.movingBoxIntersectsBox()
+    }
+  }
   positionCollidesWithObstacle(pos, segment_number){
     let transformedPosition;
     let obstacle;

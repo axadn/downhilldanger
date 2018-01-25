@@ -1886,6 +1886,14 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     return result < 0;
   }
 
+  boxCollidesWithObstacle(boxMatrix, boxDimensions, movement, segment_number){
+    let obstacle;
+    let collisionData;
+    for(let i = 0; i < this.obstacles[segment_number].length; ++i){
+      obstacle = this.obstacles[segment_number][i];
+      collisionData = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["b" /* movingBoxIntersectsBox */]()
+    }
+  }
   positionCollidesWithObstacle(pos, segment_number){
     let transformedPosition;
     let obstacle;
@@ -2179,7 +2187,7 @@ const movingBoxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1, move
     };
   }
 };
-/* unused harmony export movingBoxIntersectsBox */
+/* harmony export (immutable) */ __webpack_exports__["b"] = movingBoxIntersectsBox;
 
 function approximateCollisionNormal(position, boxMatrix, boxDimensions){
   const transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](
