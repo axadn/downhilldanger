@@ -121,11 +121,11 @@ export default class Character extends GameObject{
       this.friction = SNOWBOARD_FRICTION;
     }
   }
-  _handleEdgeCollision(collisionData){
+  _handleCollision(collisionData){
     this.velocity = MathUtils.scaleVector(
-        MathUtils.bounceVectorOffPlane(this.velocity,
-          collisionData.normal),
-        this.restitution
+      MathUtils.bounceVectorOffPlane(this.velocity,
+        collisionData.normal),
+      this.restitution
     ).concat([0]);
     let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
     pushBackVector = MathUtils.scaleVector(pushBackVector, 2);
@@ -145,23 +145,24 @@ export default class Character extends GameObject{
       collisionData.normal,
       collisionOffsetVector
     );
-     this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
-       addAngularVelocAxis, addAngularVelocAngle)
-     );
+    this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+      addAngularVelocAxis, addAngularVelocAngle)
+    );
+  }
+  _handleEdgeCollision(collisionData){
+    debugger;
+   this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){
-    this.velocity = MathUtils.scaleVector(
-      MathUtils.bounceVectorOffPlane(this.velocity,
-        collisionData.normal),
-      this.restitution
-  ).concat([0]);
-    this.setPosition(this.transformPoint([0,-2,0]));
+    debugger;
+    this._handleCollision(collisionData);
   }
   _moveForward(){
     const edgeCollisionData = this.slope.boxIsBeyondEdge(
       this.getTransformationMatrix(), this.boxDimensions, this.currentSegmentNumber);
-    const obstacleCollisionData = this.slope.positionCollidesWithObstacle(
-      this.getPosition(), this.currentSegmentNumber);
+    const obstacleCollisionData = this.slope.boxCollidesWithObstacle(
+      this.getTransformationMatrix(), this.boxDimensions,
+      this.velocity, this.currentSegmentNumber);
 
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);

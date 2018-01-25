@@ -1538,11 +1538,11 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       this.friction = SNOWBOARD_FRICTION;
     }
   }
-  _handleEdgeCollision(collisionData){
+  _handleCollision(collisionData){
     this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["r" /* scaleVector */](
-        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* bounceVectorOffPlane */](this.velocity,
-          collisionData.normal),
-        this.restitution
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* bounceVectorOffPlane */](this.velocity,
+        collisionData.normal),
+      this.restitution
     ).concat([0]);
     let pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["B" /* vectorNormalize */](collisionData.normal);
     pushBackVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["r" /* scaleVector */](pushBackVector, 2);
@@ -1562,23 +1562,24 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       collisionData.normal,
       collisionOffsetVector
     );
-     this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* axisAngleToQuaternion */](
-       addAngularVelocAxis, addAngularVelocAngle)
-     );
+    this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["d" /* axisAngleToQuaternion */](
+      addAngularVelocAxis, addAngularVelocAngle)
+    );
+  }
+  _handleEdgeCollision(collisionData){
+    debugger;
+   this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){
-    this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["r" /* scaleVector */](
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["e" /* bounceVectorOffPlane */](this.velocity,
-        collisionData.normal),
-      this.restitution
-  ).concat([0]);
-    this.setPosition(this.transformPoint([0,-2,0]));
+    debugger;
+    this._handleCollision(collisionData);
   }
   _moveForward(){
     const edgeCollisionData = this.slope.boxIsBeyondEdge(
       this.getTransformationMatrix(), this.boxDimensions, this.currentSegmentNumber);
-    const obstacleCollisionData = this.slope.positionCollidesWithObstacle(
-      this.getPosition(), this.currentSegmentNumber);
+    const obstacleCollisionData = this.slope.boxCollidesWithObstacle(
+      this.getTransformationMatrix(), this.boxDimensions,
+      this.velocity, this.currentSegmentNumber);
 
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
@@ -1633,11 +1634,11 @@ const TILES_PER_SEGMENT = 1;
 const TREES_PER_SEGMENT = 2;
 const TREE_COLLIDER = "TREE_COLLIDER";
 const TREE_COLLIDER_HEIGHT = 20;
-const TREE_COLLIDER_WIDTH = 5;
-const TREE_COLLIDER_DEPTH = 5;
+const TREE_COLLIDER_WIDTH = 3;
+const TREE_COLLIDER_DEPTH = 3;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
-const TREE_PROBABILITY_LENGTHWISE = 0.5;
+const TREE_PROBABILITY_LENGTHWISE = 0.58
 const TREE_MAX_DENSITY_WIDTHWISE = 4;
 const BALLOON_PROBABILITY_LENGTHWISE = 0.22;
 const BALLOON_DENSITY_WIDTHWISE = 2;
@@ -1767,8 +1768,8 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       this.segmentMatrices[this.segmentMatrices.length -1]);
     if(Math.random() < TREE_PROBABILITY_LENGTHWISE){
         const segment = 0;
-        const widthWiseCount = 1; //Math.floor(Math.random()*
-        //  TREE_MAX_DENSITY_WIDTHWISE);
+        const widthWiseCount = Math.floor(Math.random()*
+          TREE_MAX_DENSITY_WIDTHWISE);
         let id, gameObject, treeTransformation;
         for(let i = 0; i < widthWiseCount; ++i){
           treeTransformation = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["j" /* mat_4_multiply */](
@@ -1780,7 +1781,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
           id = `treeObstacle${this.treesCreatedSinceStart}`;
           gameObject.id = id;
           gameObject.collider = {type: BOX_COLLIDER, dimensions:[
-            TREE_COLLIDER_WIDTH, TREE_COLLIDER_HEIGHT, TREE_COLLIDER_DEPTH]};
+            TREE_COLLIDER_WIDTH, TREE_COLLIDER_DEPTH, TREE_COLLIDER_HEIGHT,]};
           obstacleSegment.push(gameObject);
           this.rasterizer.objects[id] = gameObject;
           ++this.treesCreatedSinceStart;
@@ -1891,9 +1892,14 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     let collisionData;
     for(let i = 0; i < this.obstacles[segment_number].length; ++i){
       obstacle = this.obstacles[segment_number][i];
-      collisionData = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["b" /* movingBoxIntersectsBox */]()
+      collisionData = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["b" /* movingBoxIntersectsBox */](
+        boxMatrix, boxDimensions, obstacle.getTransformationMatrix(),
+        obstacle.collider.dimensions, movement);
+      if(collisionData) return collisionData;
     }
+    return false;
   }
+
   positionCollidesWithObstacle(pos, segment_number){
     let transformedPosition;
     let obstacle;
@@ -2179,11 +2185,12 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
 
 
 const movingBoxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1, moveVector) =>{
-  const collidingPoint = boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1) || 
+  const colliderPoint = boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1) || 
   boxIntersectsBox(matrix1, dimensions1, matrix0, dimensions0);
-  if(collidingPoint){
+  if(colliderPoint){
     return {normal: approximateCollisionNormal(
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["u" /* subtractVectors */](collidingPoint, moveVector), matrix1, dimensions1)
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["u" /* subtractVectors */](colliderPoint, moveVector.concat(0)), matrix1, dimensions1),
+      colliderPoint
     };
   }
 };
@@ -2196,15 +2203,24 @@ function approximateCollisionNormal(position, boxMatrix, boxDimensions){
   let maxDistFromSurface = 0;
   let distFromSurface;
   for(let i = 0; i < 2; ++i){
-    distFromSurface = Math.abs(transformedPoint) - boxDimensions[i];
+    distFromSurface = Math.abs(transformedPoint[i]) - boxDimensions[i];
     if(distFromSurface > maxDistFromSurface){
       maxDistFromSurface = distFromSurface;
       maxDimensionIndex = i;
     }
   }
+  if(!maxDistFromSurface){
+    for(let i = 0; i < 2; ++i){
+      distFromSurface = Math.abs(transformedPoint[i]);
+      if(distFromSurface >= maxDistFromSurface){
+        maxDistFromSurface = distFromSurface;
+        maxDimensionIndex = i;
+      }
+    }
+  }
   const normal = [0,0,0,0];
-  normal[maxDimensionIndex] = 1;
-  return __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](boxMatrix, normal);
+  normal[maxDimensionIndex] = (transformedPoint[maxDimensionIndex] < 0) ? -1 : 1;
+  return __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](boxMatrix, normal).slice(0,3);
 };
 function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
   let transformedPoint, pointCollides;
@@ -2222,7 +2238,9 @@ function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
            break;
       }
     }
-    if(pointCollides) return true;
+    if(pointCollides){
+       return worldCoordsPoints[i];
+    }
   }
   return false;
 }

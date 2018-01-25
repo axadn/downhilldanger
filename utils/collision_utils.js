@@ -1,11 +1,12 @@
 import * as MathUtils from "./math_utils";
 
 export const movingBoxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1, moveVector) =>{
-  const collidingPoint = boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1) || 
+  const colliderPoint = boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1) || 
   boxIntersectsBox(matrix1, dimensions1, matrix0, dimensions0);
-  if(collidingPoint){
+  if(colliderPoint){
     return {normal: approximateCollisionNormal(
-      MathUtils.subtractVectors(collidingPoint, moveVector), matrix1, dimensions1)
+      MathUtils.subtractVectors(colliderPoint, moveVector.concat(0)), matrix1, dimensions1),
+      colliderPoint
     };
   }
 };
@@ -16,15 +17,24 @@ export function approximateCollisionNormal(position, boxMatrix, boxDimensions){
   let maxDistFromSurface = 0;
   let distFromSurface;
   for(let i = 0; i < 2; ++i){
-    distFromSurface = Math.abs(transformedPoint) - boxDimensions[i];
+    distFromSurface = Math.abs(transformedPoint[i]) - boxDimensions[i];
     if(distFromSurface > maxDistFromSurface){
       maxDistFromSurface = distFromSurface;
       maxDimensionIndex = i;
     }
   }
+  if(!maxDistFromSurface){
+    for(let i = 0; i < 2; ++i){
+      distFromSurface = Math.abs(transformedPoint[i]);
+      if(distFromSurface >= maxDistFromSurface){
+        maxDistFromSurface = distFromSurface;
+        maxDimensionIndex = i;
+      }
+    }
+  }
   const normal = [0,0,0,0];
-  normal[maxDimensionIndex] = 1;
-  return MathUtils.multiplyVec4ByMatrix4(boxMatrix, normal);
+  normal[maxDimensionIndex] = (transformedPoint[maxDimensionIndex] < 0) ? -1 : 1;
+  return MathUtils.multiplyVec4ByMatrix4(boxMatrix, normal).slice(0,3);
 };
 export function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
   let transformedPoint, pointCollides;
@@ -42,7 +52,9 @@ export function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
            break;
       }
     }
-    if(pointCollides) return true;
+    if(pointCollides){
+       return worldCoordsPoints[i];
+    }
   }
   return false;
 }

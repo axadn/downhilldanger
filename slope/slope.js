@@ -10,11 +10,11 @@ const TILES_PER_SEGMENT = 1;
 const TREES_PER_SEGMENT = 2;
 const TREE_COLLIDER = "TREE_COLLIDER";
 const TREE_COLLIDER_HEIGHT = 20;
-const TREE_COLLIDER_WIDTH = 5;
-const TREE_COLLIDER_DEPTH = 5;
+const TREE_COLLIDER_WIDTH = 3;
+const TREE_COLLIDER_DEPTH = 3;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
-const TREE_PROBABILITY_LENGTHWISE = 0.5;
+const TREE_PROBABILITY_LENGTHWISE = 0.58
 const TREE_MAX_DENSITY_WIDTHWISE = 4;
 const BALLOON_PROBABILITY_LENGTHWISE = 0.22;
 const BALLOON_DENSITY_WIDTHWISE = 2;
@@ -144,8 +144,8 @@ export default class Slope extends GameObject{
       this.segmentMatrices[this.segmentMatrices.length -1]);
     if(Math.random() < TREE_PROBABILITY_LENGTHWISE){
         const segment = 0;
-        const widthWiseCount = 1; //Math.floor(Math.random()*
-        //  TREE_MAX_DENSITY_WIDTHWISE);
+        const widthWiseCount = Math.floor(Math.random()*
+          TREE_MAX_DENSITY_WIDTHWISE);
         let id, gameObject, treeTransformation;
         for(let i = 0; i < widthWiseCount; ++i){
           treeTransformation = MathUtils.mat_4_multiply(
@@ -157,7 +157,7 @@ export default class Slope extends GameObject{
           id = `treeObstacle${this.treesCreatedSinceStart}`;
           gameObject.id = id;
           gameObject.collider = {type: BOX_COLLIDER, dimensions:[
-            TREE_COLLIDER_WIDTH, TREE_COLLIDER_HEIGHT, TREE_COLLIDER_DEPTH]};
+            TREE_COLLIDER_WIDTH, TREE_COLLIDER_DEPTH, TREE_COLLIDER_HEIGHT,]};
           obstacleSegment.push(gameObject);
           this.rasterizer.objects[id] = gameObject;
           ++this.treesCreatedSinceStart;
@@ -268,9 +268,14 @@ export default class Slope extends GameObject{
     let collisionData;
     for(let i = 0; i < this.obstacles[segment_number].length; ++i){
       obstacle = this.obstacles[segment_number][i];
-      collisionData = CollisionUtils.movingBoxIntersectsBox()
+      collisionData = CollisionUtils.movingBoxIntersectsBox(
+        boxMatrix, boxDimensions, obstacle.getTransformationMatrix(),
+        obstacle.collider.dimensions, movement);
+      if(collisionData) return collisionData;
     }
+    return false;
   }
+
   positionCollidesWithObstacle(pos, segment_number){
     let transformedPosition;
     let obstacle;
