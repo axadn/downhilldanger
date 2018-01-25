@@ -2165,44 +2165,59 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export vectorCollidesWithBox */
+/* unused harmony export approximateCollisionNormal */
+/* unused harmony export boxIntersectsBox */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__math_utils__ = __webpack_require__(0);
 
 
-const boxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1) =>{
-  let worldCoordsPoints, transformedPoint, currentPointCollides, temp;
-  let collidingVertices = [];
-  for(let boxOrderSwitch = 0; boxOrderSwitch <= 1; ++boxOrderSwitch){
-    worldCoordsPoints = boxColliderToPoints(matrix0, dimensions0);
-    for(let i = 0; i < worldCoordsPoints.length; ++i){
-      currentPointCollides = true;
-      transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](
-        __WEBPACK_IMPORTED_MODULE_0__math_utils__["g" /* inverse_mat4_rot_pos */](matrix1),
-        worldCoordsPoints[i]
-      );
-      for(let j = 0; j < 3; ++j){
-        if(transformedPoint[j] > dimensions1[j] ||
-           transformedPoint[j] < -1* dimensions1[j]){
-             currentPointCollides = false;
-        }
-      }
-      if(currentPointCollides){
-        collidingVertices.push(worldCoordsPoint);
-      }
-    }
-    temp = matrix0;
-    matrix0 = matrix1;
-    matrix1 = temp;
-    temp = dimensions0;
-    dimensions0 = dimensions1;
-    dimensions1 = temp;
-  }
-  if(collidingVertices.length > 0){
-    return collidingVertices;
+const movingBoxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1, moveVector) =>{
+  const collidingPoint = boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1) || 
+  boxIntersectsBox(matrix1, dimensions1, matrix0, dimensions0);
+  if(collidingPoint){
+    return {normal: approximateCollisionNormal(
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["u" /* subtractVectors */](collidingPoint, moveVector), matrix1, dimensions1)
+    };
   }
 };
-/* unused harmony export boxIntersectsBox */
+/* unused harmony export movingBoxIntersectsBox */
 
+function approximateCollisionNormal(position, boxMatrix, boxDimensions){
+  const transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](
+    __WEBPACK_IMPORTED_MODULE_0__math_utils__["g" /* inverse_mat4_rot_pos */](boxMatrix), position);
+  let maxDimensionIndex;
+  let maxDistFromSurface = 0;
+  let distFromSurface;
+  for(let i = 0; i < 2; ++i){
+    distFromSurface = Math.abs(transformedPoint) - boxDimensions[i];
+    if(distFromSurface > maxDistFromSurface){
+      maxDistFromSurface = distFromSurface;
+      maxDimensionIndex = i;
+    }
+  }
+  const normal = [0,0,0,0];
+  normal[maxDimensionIndex] = 1;
+  return __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](boxMatrix, normal);
+};
+function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
+  let transformedPoint, pointCollides;
+  const worldCoordsPoints = boxColliderToPoints(matrix0, dimensions0);
+  for(let i = 0; i < worldCoordsPoints.length; ++i){
+    transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["g" /* inverse_mat4_rot_pos */](matrix1),
+      worldCoordsPoints[i]
+    );
+    pointCollides = true;
+    for(let j = 0; j < 3; ++j){
+      if(transformedPoint[j] > dimensions1[j] ||
+         transformedPoint[j] < -1* dimensions1[j]){
+           pointCollides = false;
+           break;
+      }
+    }
+    if(pointCollides) return true;
+  }
+  return false;
+}
 
 const boxColliderToPoints = (matrix, dimensions) =>{
   const points = [];
@@ -2223,31 +2238,6 @@ const boxColliderToPoints = (matrix, dimensions) =>{
 };
 /* harmony export (immutable) */ __webpack_exports__["a"] = boxColliderToPoints;
 
-
-/**we can divide the space around the box into six sections
-to approximate which side the ray is colliding with
-
-this works well enough for short rays near the surface
-
-the dividing lines radiate out from the corners following equations such as
-x = y = z
-
-so the spaces follow inequalites such as 
-x > abs(y - ySize) && x > abs(z - zSize)
--x > abs(y - ySize) && -x > abs(z - zSize)
-
-y > abs(x) && y > abs(z)
--y > abs(x) && -y > abs(z)
-
-z > abs(x) && z > abs(y)
--z > abs(x) && -z > abs(y)
-
-therefore, we can first see which component of the vector has the greates absolute
-value, then differentiate between the two possible sides by the component's sign
-**/
-function vectorCollidesWithBox(vect, boxMatrix, boxDimensions){
-
-};
 
 /***/ })
 /******/ ]);
