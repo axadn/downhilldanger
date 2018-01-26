@@ -1,4 +1,5 @@
 import * as MathUtils from "./math_utils";
+import { angleBetweenVectors } from "./math_utils";
 
 export const movingBoxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1, moveVector) =>{
   const colliderPoint = boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1) || 
@@ -17,19 +18,10 @@ export function approximateCollisionNormal(position, boxMatrix, boxDimensions){
   let maxDistFromSurface = 0;
   let distFromSurface;
   for(let i = 0; i < 2; ++i){
-    distFromSurface = Math.abs(transformedPoint[i]) - boxDimensions[i];
+    distFromSurface = Math.abs(Math.abs(transformedPoint[i]) - boxDimensions[i]);
     if(distFromSurface > maxDistFromSurface){
       maxDistFromSurface = distFromSurface;
       maxDimensionIndex = i;
-    }
-  }
-  if(!maxDistFromSurface){
-    for(let i = 0; i < 2; ++i){
-      distFromSurface = Math.abs(transformedPoint[i]);
-      if(distFromSurface >= maxDistFromSurface){
-        maxDistFromSurface = distFromSurface;
-        maxDimensionIndex = i;
-      }
     }
   }
   const normal = [0,0,0,0];
@@ -55,6 +47,44 @@ export function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
     if(pointCollides){
        return worldCoordsPoints[i];
     }
+  }
+  return false;
+}
+
+export function sphereCollidesCapsule(sphereOrigin, spehereRadius,
+capuslePoint0, capsulePoint1, capsuleRadius){
+  const capsuleVector = MathUtils.subtractVectors(capsulePoint1, capsulePoint0);
+  const point0ToSphereOrigin = MathUtils.subtractVectors(sphereOrigin, capuslePoint0);
+  const point0ToSphereAngle = MathUtils.angleBetweenVectors(point0ToSphereOrigin, capsuleVector);
+
+  const maxDist = sphereRadius + capsuleRadius;
+  const dist;
+  if(point0ToSphereAngle < Math.PI/2 &&
+    point1ToSphereAngle < Math.PI/2){
+    dist =  MathUtils.vectorMagnitude(point0ToSpherOrigin) * Math.sin(point0ToSphereAngle);
+    if(dist <= maxDist){
+      const rotationMatrix = MathUtils.axisAngleToMatrix(
+        MathUtils.vectorCross(point0ToSphereOrigin, capsuleVector),
+        Math.PI/2 
+      );
+      const capsuleNormal = MathUtils.multiplyVec4ByMatrix4(rotationMatrix, capsuleVector);
+      return {capsuleNormal,
+      sphereNormal: MathUtils.scaleVector(capsuleNormal, -1),
+      penetration: maxDist - dist};
+    }
+    return false;
+  } else if((dist = MathUtils.distance(capsulePoint0, sphereOrigin)) <= maxtDist){
+    const capsuleNormal = MathUtils.subtractVectors(sphereOrigin, capsulePoint0);
+    return {capsuleNormal,
+      sphereNormal: MathUtils.scaleVector(capsuleNormal, -1),
+      penetration: maxDist - dist
+    };
+  } else if((dist = MathUtils.distance(capsulePoint1, sphereOrigin)) <= maxDist){
+    const capsuleNormal = MathUtils.subtractVectors(sphereOrigin, capsulePoint1);
+    return {capsuleNormal,
+      sphereNormal: MathUtils.scaleVector(capsuleNormal, -1),
+      penetration: maxDist - dist
+    };
   }
   return false;
 }

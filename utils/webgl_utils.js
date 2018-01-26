@@ -19,7 +19,7 @@ export class ObjectsRasterizer{
       this.perspectiveMatrix = MathUtils.mat_4_multiply(MathUtils.swapYZMatrix, this.perspectiveMatrix)
     }
     this.compileDefaultShaders();
-  //this.gl.enable(this.gl.CULL_FACE);
+    //this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
     this.rotation = [0,0,0];
     this.position = [0,0,0];
@@ -253,7 +253,7 @@ export class ObjectsRasterizer{
     this.gl.drawElements(this.gl.TRIANGLES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
   }
   positionCamera(){
-    this.camera.setPosition(this.cameraTarget.transformPoint([0, -18, 8]));
+    this.camera.setPosition(this.cameraTarget.transformPoint([0, -18, 6]));
     let rotation = this.cameraTarget.getRotation();
     const upLocal = this.cameraTarget.inverseTransformDirection([0,0,1]);
     const angleToUp = MathUtils.angleBetweenVectors([0,0,1], upLocal);

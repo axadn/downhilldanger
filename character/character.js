@@ -29,6 +29,7 @@ export default class Character extends GameObject{
 
   }
   update(){
+    debugger;
     this._ensureAboveSurface();
     this._handleControls();
     this._getSurfaceData();
@@ -150,7 +151,6 @@ export default class Character extends GameObject{
     );
   }
   _handleEdgeCollision(collisionData){
-    debugger;
    this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){

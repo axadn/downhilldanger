@@ -855,7 +855,7 @@ class ObjectsRasterizer{
       this.perspectiveMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["j" /* mat_4_multiply */](__WEBPACK_IMPORTED_MODULE_0__math_utils__["v" /* swapYZMatrix */], this.perspectiveMatrix)
     }
     this.compileDefaultShaders();
-  //this.gl.enable(this.gl.CULL_FACE);
+    //this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
     this.rotation = [0,0,0];
     this.position = [0,0,0];
@@ -1089,7 +1089,7 @@ class ObjectsRasterizer{
     this.gl.drawElements(this.gl.TRIANGLES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
   }
   positionCamera(){
-    this.camera.setPosition(this.cameraTarget.transformPoint([0, -18, 8]));
+    this.camera.setPosition(this.cameraTarget.transformPoint([0, -18, 6]));
     let rotation = this.cameraTarget.getRotation();
     const upLocal = this.cameraTarget.inverseTransformDirection([0,0,1]);
     const angleToUp = __WEBPACK_IMPORTED_MODULE_0__math_utils__["c" /* angleBetweenVectors */]([0,0,1], upLocal);
@@ -1446,6 +1446,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 
   }
   update(){
+    debugger;
     this._ensureAboveSurface();
     this._handleControls();
     this._getSurfaceData();
@@ -1567,7 +1568,6 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     );
   }
   _handleEdgeCollision(collisionData){
-    debugger;
    this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){
@@ -1621,6 +1621,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__ = __webpack_require__(2);
 const SEGMENT_WIDTH = 70;
 const SEGMENT_LENGTH = 40;
@@ -1633,9 +1634,9 @@ const GRADUAL_TURN = 0.14;
 const TILES_PER_SEGMENT = 1;
 const TREES_PER_SEGMENT = 2;
 const TREE_COLLIDER = "TREE_COLLIDER";
-const TREE_COLLIDER_HEIGHT = 20;
-const TREE_COLLIDER_WIDTH = 3;
-const TREE_COLLIDER_DEPTH = 3;
+const TREE_COLLIDER_HEIGHT = 30;
+const TREE_COLLIDER_WIDTH = 0.7;
+const TREE_COLLIDER_DEPTH = 0.7;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
 const TREE_PROBABILITY_LENGTHWISE = 0.58
@@ -1892,7 +1893,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     let collisionData;
     for(let i = 0; i < this.obstacles[segment_number].length; ++i){
       obstacle = this.obstacles[segment_number][i];
-      collisionData = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["b" /* movingBoxIntersectsBox */](
+      collisionData = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["movingBoxIntersectsBox"](
         boxMatrix, boxDimensions, obstacle.getTransformationMatrix(),
         obstacle.collider.dimensions, movement);
       if(collisionData) return collisionData;
@@ -1975,7 +1976,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
   }
 
   _boxIsBeyondEdge(boxMatrix, boxDimensions, segmentNumber, toggleLeft){
-    const checkPoints = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["a" /* boxColliderToPoints */](boxMatrix, boxDimensions);
+    const checkPoints = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["boxColliderToPoints"](boxMatrix, boxDimensions);
     let pointBeyondEdge = false;
     for(let i =0; i <checkPoints.length; ++i){
       pointBeyondEdge = this._positionIsBeyondEdge(checkPoints[i], segmentNumber,
@@ -2176,94 +2177,10 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
 
 /***/ }),
 /* 13 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, __webpack_exports__) {
 
 "use strict";
-/* unused harmony export approximateCollisionNormal */
-/* unused harmony export boxIntersectsBox */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__math_utils__ = __webpack_require__(0);
-
-
-const movingBoxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1, moveVector) =>{
-  const colliderPoint = boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1) || 
-  boxIntersectsBox(matrix1, dimensions1, matrix0, dimensions0);
-  if(colliderPoint){
-    return {normal: approximateCollisionNormal(
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["u" /* subtractVectors */](colliderPoint, moveVector.concat(0)), matrix1, dimensions1),
-      colliderPoint
-    };
-  }
-};
-/* harmony export (immutable) */ __webpack_exports__["b"] = movingBoxIntersectsBox;
-
-function approximateCollisionNormal(position, boxMatrix, boxDimensions){
-  const transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](
-    __WEBPACK_IMPORTED_MODULE_0__math_utils__["g" /* inverse_mat4_rot_pos */](boxMatrix), position);
-  let maxDimensionIndex;
-  let maxDistFromSurface = 0;
-  let distFromSurface;
-  for(let i = 0; i < 2; ++i){
-    distFromSurface = Math.abs(transformedPoint[i]) - boxDimensions[i];
-    if(distFromSurface > maxDistFromSurface){
-      maxDistFromSurface = distFromSurface;
-      maxDimensionIndex = i;
-    }
-  }
-  if(!maxDistFromSurface){
-    for(let i = 0; i < 2; ++i){
-      distFromSurface = Math.abs(transformedPoint[i]);
-      if(distFromSurface >= maxDistFromSurface){
-        maxDistFromSurface = distFromSurface;
-        maxDimensionIndex = i;
-      }
-    }
-  }
-  const normal = [0,0,0,0];
-  normal[maxDimensionIndex] = (transformedPoint[maxDimensionIndex] < 0) ? -1 : 1;
-  return __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](boxMatrix, normal).slice(0,3);
-};
-function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
-  let transformedPoint, pointCollides;
-  const worldCoordsPoints = boxColliderToPoints(matrix0, dimensions0);
-  for(let i = 0; i < worldCoordsPoints.length; ++i){
-    transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["g" /* inverse_mat4_rot_pos */](matrix1),
-      worldCoordsPoints[i]
-    );
-    pointCollides = true;
-    for(let j = 0; j < 3; ++j){
-      if(transformedPoint[j] > dimensions1[j] ||
-         transformedPoint[j] < -1* dimensions1[j]){
-           pointCollides = false;
-           break;
-      }
-    }
-    if(pointCollides){
-       return worldCoordsPoints[i];
-    }
-  }
-  return false;
-}
-
-const boxColliderToPoints = (matrix, dimensions) =>{
-  const points = [];
-  for(let xDirection = -1; xDirection <= 1; xDirection+= 2){
-    for(let yDirection = -1; yDirection<= 1; yDirection+= 2){
-      for(let zDirection = -1; zDirection<= 1; zDirection+= 2){
-        points.push(
-          __WEBPACK_IMPORTED_MODULE_0__math_utils__["l" /* multiplyVec4ByMatrix4 */](
-            matrix, [dimensions[0] * xDirection,
-            dimensions[1] * yDirection,
-            dimensions[2] * zDirection, 1]
-          )
-        );
-      }
-    }
-  }
-  return points;
-};
-/* harmony export (immutable) */ __webpack_exports__["a"] = boxColliderToPoints;
-
+throw new Error("Module parse failed: Unexpected token (61:12)\nYou may need an appropriate loader to handle this file type.\n| \n|   const maxDist = sphereRadius + capsuleRadius;\n|   const dist;\n|   if(point0ToSphereAngle < Math.PI/2 &&\n|     point1ToSphereAngle < Math.PI/2){");
 
 /***/ })
 /******/ ]);
