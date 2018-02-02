@@ -2275,10 +2275,10 @@ capsulePoint0, capsulePoint1, capsuleRadius){
   if(point0ToSphereAngle < Math.PI/2 &&
     point1ToSphereAngle < Math.PI/2){
     dist =  __WEBPACK_IMPORTED_MODULE_0__math_utils__["C" /* vectorMag */](point0ToSphereOrigin) * Math.sin(point0ToSphereAngle);
-    if(dist <= maxDist){l
+    if(dist <= maxDist){
       const rotationMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["d" /* axisAngleToMatrix */](
         __WEBPACK_IMPORTED_MODULE_0__math_utils__["A" /* vectorCross */](point0ToSphereOrigin, capsuleVector),
-        Math.PI/2 
+        Math.PI/2
       );
       const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["n" /* multiplyVec4ByMatrix4 */](rotationMatrix, capsuleVector);
       return {capsuleNormal,
