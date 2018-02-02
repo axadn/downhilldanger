@@ -58,7 +58,7 @@ capuslePoint0, capsulePoint1, capsuleRadius){
   const point0ToSphereAngle = MathUtils.angleBetweenVectors(point0ToSphereOrigin, capsuleVector);
 
   const maxDist = sphereRadius + capsuleRadius;
-  const dist;
+  let dist;
   if(point0ToSphereAngle < Math.PI/2 &&
     point1ToSphereAngle < Math.PI/2){
     dist =  MathUtils.vectorMagnitude(point0ToSpherOrigin) * Math.sin(point0ToSphereAngle);
