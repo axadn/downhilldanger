@@ -312,9 +312,11 @@ export const bounceVectorOffPlane = (vector, planeNormal) =>{
     vector
   );
 };
+
 export function distance(vector0, vector1){
   return vectorMag(subtractVectors(vector0, vector1));
 }
+
 export const twoVectorsToQuaternion = (vec1, vec2) => {
   const axis = vectorNormalize(vectorCross(vec1, vec2));
   const angle = angleBetweenVectors(vec1, vec2);

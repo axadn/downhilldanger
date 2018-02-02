@@ -282,6 +282,7 @@ export default class Slope extends GameObject{
     let collisionData;
     for(let i = 0; i < this.obstacles[segment_number].length; ++i){
       obstacle = this.obstacles[segment_number][i];
+      debugger;
       collisionData = CollisionUtils.sphereCollidesCapsule(MathUtils.mat4TranslationComponent(
         obstacle.getTransformationMatrix()
       ),TREE_RADIUS,capsulePointA,capsulePointB,capsuleRadius );

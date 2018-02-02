@@ -51,17 +51,20 @@ export function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
   return false;
 }
 
-export function sphereCollidesCapsule(sphereOrigin, spehereRadius,
-capuslePoint0, capsulePoint1, capsuleRadius){
+export function sphereCollidesCapsule(sphereOrigin, sphereRadius,
+capsulePoint0, capsulePoint1, capsuleRadius){
   const capsuleVector = MathUtils.subtractVectors(capsulePoint1, capsulePoint0);
-  const point0ToSphereOrigin = MathUtils.subtractVectors(sphereOrigin, capuslePoint0);
+  const point0ToSphereOrigin = MathUtils.subtractVectors(sphereOrigin, capsulePoint0);
   const point0ToSphereAngle = MathUtils.angleBetweenVectors(point0ToSphereOrigin, capsuleVector);
-
+  const point1ToSphereOrigin = MathUtils.subtractVectors(sphereOrigin, capsulePoint1);
+  const point1ToSphereAngle = MathUtils.angleBetweenVectors(point1ToSphereOrigin,
+     MathUtils.scaleVector(capsuleVector, -1)
+    );
   const maxDist = sphereRadius + capsuleRadius;
   let dist;
   if(point0ToSphereAngle < Math.PI/2 &&
     point1ToSphereAngle < Math.PI/2){
-    dist =  MathUtils.vectorMag(point0ToSpherOrigin) * Math.sin(point0ToSphereAngle);
+    dist =  MathUtils.vectorMag(point0ToSphereOrigin) * Math.sin(point0ToSphereAngle);
     if(dist <= maxDist){l
       const rotationMatrix = MathUtils.axisAngleToMatrix(
         MathUtils.vectorCross(point0ToSphereOrigin, capsuleVector),
@@ -73,7 +76,7 @@ capuslePoint0, capsulePoint1, capsuleRadius){
       penetration: maxDist - dist};
     }
     return false;
-  } else if((dist = MathUtils.distance(capsulePoint0, sphereOrigin)) <= maxtDist){
+  } else if((dist = MathUtils.distance(capsulePoint0, sphereOrigin)) <= maxDist){
     const capsuleNormal = MathUtils.subtractVectors(sphereOrigin, capsulePoint0);
     return {capsuleNormal,
       sphereNormal: MathUtils.scaleVector(capsuleNormal, -1),

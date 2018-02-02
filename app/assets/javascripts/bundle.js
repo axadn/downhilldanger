@@ -445,9 +445,11 @@ const bounceVectorOffPlane = (vector, planeNormal) =>{
 };
 /* harmony export (immutable) */ __webpack_exports__["f"] = bounceVectorOffPlane;
 
+
 function distance(vector0, vector1){
   return vectorMag(subtractVectors(vector0, vector1));
 }
+
 const twoVectorsToQuaternion = (vec1, vec2) => {
   const axis = vectorNormalize(vectorCross(vec1, vec2));
   const angle = angleBetweenVectors(vec1, vec2);
@@ -1449,8 +1451,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.setPosition([0,0,16]);
 
   }
+
   update(){
-    debugger;
     this._ensureAboveSurface();
     this._handleControls();
     this._getSurfaceData();
@@ -1469,6 +1471,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
     super.update();
   }
+  
   _getSurfaceData(){
     let localDownVector = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["n" /* multiplyVec4ByMatrix4 */](
       this.slope.segmentMatrices[this.currentSegmentNumber],
@@ -1575,15 +1578,17 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
    this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){
-    debugger;
     this._handleCollision(collisionData);
   }
   _moveForward(){
     const edgeCollisionData = this.slope.boxIsBeyondEdge(
       this.getTransformationMatrix(), this.boxDimensions, this.currentSegmentNumber);
-    const obstacleCollisionData = this.slope.boxCollidesWithObstacle(
-      this.getTransformationMatrix(), this.boxDimensions,
-      this.velocity, this.currentSegmentNumber);
+    const obstacleCollisionData = this.slope.capsuleCollidesWithObstacle(this.getPosition(),
+    __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["b" /* addVectors */](this.getPosition(), this.velocity),this.boxDimensions[1],this.currentSegmentNumber);
+    
+    // this.slope.boxCollidesWithObstacle(
+    //   this.getTransformationMatrix(), this.boxDimensions,
+    //   this.velocity, this.currentSegmentNumber);
 
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
@@ -1910,6 +1915,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     let collisionData;
     for(let i = 0; i < this.obstacles[segment_number].length; ++i){
       obstacle = this.obstacles[segment_number][i];
+      debugger;
       collisionData = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["c" /* sphereCollidesCapsule */](__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat4TranslationComponent */](
         obstacle.getTransformationMatrix()
       ),TREE_RADIUS,capsulePointA,capsulePointB,capsuleRadius );
@@ -2256,17 +2262,20 @@ function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
   return false;
 }
 
-function sphereCollidesCapsule(sphereOrigin, spehereRadius,
-capuslePoint0, capsulePoint1, capsuleRadius){
+function sphereCollidesCapsule(sphereOrigin, sphereRadius,
+capsulePoint0, capsulePoint1, capsuleRadius){
   const capsuleVector = __WEBPACK_IMPORTED_MODULE_0__math_utils__["w" /* subtractVectors */](capsulePoint1, capsulePoint0);
-  const point0ToSphereOrigin = __WEBPACK_IMPORTED_MODULE_0__math_utils__["w" /* subtractVectors */](sphereOrigin, capuslePoint0);
+  const point0ToSphereOrigin = __WEBPACK_IMPORTED_MODULE_0__math_utils__["w" /* subtractVectors */](sphereOrigin, capsulePoint0);
   const point0ToSphereAngle = __WEBPACK_IMPORTED_MODULE_0__math_utils__["c" /* angleBetweenVectors */](point0ToSphereOrigin, capsuleVector);
-
+  const point1ToSphereOrigin = __WEBPACK_IMPORTED_MODULE_0__math_utils__["w" /* subtractVectors */](sphereOrigin, capsulePoint1);
+  const point1ToSphereAngle = __WEBPACK_IMPORTED_MODULE_0__math_utils__["c" /* angleBetweenVectors */](point1ToSphereOrigin,
+     __WEBPACK_IMPORTED_MODULE_0__math_utils__["t" /* scaleVector */](capsuleVector, -1)
+    );
   const maxDist = sphereRadius + capsuleRadius;
   let dist;
   if(point0ToSphereAngle < Math.PI/2 &&
     point1ToSphereAngle < Math.PI/2){
-    dist =  __WEBPACK_IMPORTED_MODULE_0__math_utils__["C" /* vectorMag */](point0ToSpherOrigin) * Math.sin(point0ToSphereAngle);
+    dist =  __WEBPACK_IMPORTED_MODULE_0__math_utils__["C" /* vectorMag */](point0ToSphereOrigin) * Math.sin(point0ToSphereAngle);
     if(dist <= maxDist){l
       const rotationMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["d" /* axisAngleToMatrix */](
         __WEBPACK_IMPORTED_MODULE_0__math_utils__["A" /* vectorCross */](point0ToSphereOrigin, capsuleVector),
@@ -2278,7 +2287,7 @@ capuslePoint0, capsulePoint1, capsuleRadius){
       penetration: maxDist - dist};
     }
     return false;
-  } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["g" /* distance */](capsulePoint0, sphereOrigin)) <= maxtDist){
+  } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["g" /* distance */](capsulePoint0, sphereOrigin)) <= maxDist){
     const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["w" /* subtractVectors */](sphereOrigin, capsulePoint0);
     return {capsuleNormal,
       sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["t" /* scaleVector */](capsuleNormal, -1),

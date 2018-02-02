@@ -28,8 +28,8 @@ export default class Character extends GameObject{
     this.setPosition([0,0,16]);
 
   }
+
   update(){
-    debugger;
     this._ensureAboveSurface();
     this._handleControls();
     this._getSurfaceData();
@@ -48,6 +48,7 @@ export default class Character extends GameObject{
     }
     super.update();
   }
+  
   _getSurfaceData(){
     let localDownVector = MathUtils.multiplyVec4ByMatrix4(
       this.slope.segmentMatrices[this.currentSegmentNumber],
@@ -154,15 +155,17 @@ export default class Character extends GameObject{
    this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){
-    debugger;
     this._handleCollision(collisionData);
   }
   _moveForward(){
     const edgeCollisionData = this.slope.boxIsBeyondEdge(
       this.getTransformationMatrix(), this.boxDimensions, this.currentSegmentNumber);
-    const obstacleCollisionData = this.slope.boxCollidesWithObstacle(
-      this.getTransformationMatrix(), this.boxDimensions,
-      this.velocity, this.currentSegmentNumber);
+    const obstacleCollisionData = this.slope.capsuleCollidesWithObstacle(this.getPosition(),
+    MathUtils.addVectors(this.getPosition(), this.velocity),this.boxDimensions[1],this.currentSegmentNumber);
+    
+    // this.slope.boxCollidesWithObstacle(
+    //   this.getTransformationMatrix(), this.boxDimensions,
+    //   this.velocity, this.currentSegmentNumber);
 
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
