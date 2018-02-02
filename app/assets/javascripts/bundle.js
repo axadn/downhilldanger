@@ -1915,7 +1915,6 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     let collisionData;
     for(let i = 0; i < this.obstacles[segment_number].length; ++i){
       obstacle = this.obstacles[segment_number][i];
-      debugger;
       collisionData = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["c" /* sphereCollidesCapsule */](__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat4TranslationComponent */](
         obstacle.getTransformationMatrix()
       ),TREE_RADIUS,capsulePointA,capsulePointB,capsuleRadius );
