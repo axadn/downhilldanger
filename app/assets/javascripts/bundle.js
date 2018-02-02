@@ -1640,6 +1640,7 @@ const TREE_COLLIDER = "TREE_COLLIDER";
 const TREE_COLLIDER_HEIGHT = 30;
 const TREE_COLLIDER_WIDTH = 0.7;
 const TREE_COLLIDER_DEPTH = 0.7;
+const TREE_RADIUS = 3;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
 const TREE_PROBABILITY_LENGTHWISE = 0.58
@@ -1899,6 +1900,19 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       collisionData = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["b" /* movingBoxIntersectsBox */](
         boxMatrix, boxDimensions, obstacle.getTransformationMatrix(),
         obstacle.collider.dimensions, movement);
+      if(collisionData) return collisionData;
+    }
+    return false;
+  }
+
+  capsuleCollidesWithObstacle(capsulePointA, capsulePointB, capsuleRadius, segment_number){
+    let obstacle;
+    let collisionData;
+    for(let i = 0; i < this.obstacles[segment_number].length; ++i){
+      obstacle = this.obstacles[segment_number][i];
+      collisionData = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["c" /* sphereCollidesCapsule */](__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["k" /* mat4TranslationComponent */](
+        obstacle.getTransformationMatrix()
+      ),TREE_RADIUS,capsulePointA,capsulePointB,capsuleRadius );
       if(collisionData) return collisionData;
     }
     return false;
@@ -2185,7 +2199,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
 "use strict";
 /* unused harmony export approximateCollisionNormal */
 /* unused harmony export boxIntersectsBox */
-/* unused harmony export sphereCollidesCapsule */
+/* harmony export (immutable) */ __webpack_exports__["c"] = sphereCollidesCapsule;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__math_utils__ = __webpack_require__(0);
 
 

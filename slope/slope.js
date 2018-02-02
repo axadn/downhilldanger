@@ -12,6 +12,7 @@ const TREE_COLLIDER = "TREE_COLLIDER";
 const TREE_COLLIDER_HEIGHT = 30;
 const TREE_COLLIDER_WIDTH = 0.7;
 const TREE_COLLIDER_DEPTH = 0.7;
+const TREE_RADIUS = 3;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
 const TREE_PROBABILITY_LENGTHWISE = 0.58
@@ -271,6 +272,19 @@ export default class Slope extends GameObject{
       collisionData = CollisionUtils.movingBoxIntersectsBox(
         boxMatrix, boxDimensions, obstacle.getTransformationMatrix(),
         obstacle.collider.dimensions, movement);
+      if(collisionData) return collisionData;
+    }
+    return false;
+  }
+
+  capsuleCollidesWithObstacle(capsulePointA, capsulePointB, capsuleRadius, segment_number){
+    let obstacle;
+    let collisionData;
+    for(let i = 0; i < this.obstacles[segment_number].length; ++i){
+      obstacle = this.obstacles[segment_number][i];
+      collisionData = CollisionUtils.sphereCollidesCapsule(MathUtils.mat4TranslationComponent(
+        obstacle.getTransformationMatrix()
+      ),TREE_RADIUS,capsulePointA,capsulePointB,capsuleRadius );
       if(collisionData) return collisionData;
     }
     return false;
