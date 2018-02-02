@@ -61,8 +61,8 @@ capuslePoint0, capsulePoint1, capsuleRadius){
   let dist;
   if(point0ToSphereAngle < Math.PI/2 &&
     point1ToSphereAngle < Math.PI/2){
-    dist =  MathUtils.vectorMagnitude(point0ToSpherOrigin) * Math.sin(point0ToSphereAngle);
-    if(dist <= maxDist){
+    dist =  MathUtils.vectorMag(point0ToSpherOrigin) * Math.sin(point0ToSphereAngle);
+    if(dist <= maxDist){l
       const rotationMatrix = MathUtils.axisAngleToMatrix(
         MathUtils.vectorCross(point0ToSphereOrigin, capsuleVector),
         Math.PI/2 
