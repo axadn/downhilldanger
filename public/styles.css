@@ -28,13 +28,16 @@ body{
     color: white;
     -webkit-text-stroke-width: 2px;
     -webkit-text-stroke-color: black;
-    font-family: 'Rubik', sans-serif;
+    font-family: 'PT Mono', monospace;
     font-weight: 900;
   }
   .hud-speed_val{
     margin-left: 40px;
     margin-right: 28px;
     width: 0;
+    display: inline-block;
+  }
+  .hud-time_val{
     display: inline-block;
   }
   .hud-points_val{

@@ -137,6 +137,8 @@ export default class Character extends GameObject{
         collisionData.normal),
       this.restitution
     );
+    // this.velocity = MathUtils.scaleVector(MathUtils.vectorNormalize(collisionData.normal),
+    // MathUtils.vectorMag(this.velocity)); 
     
     // let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
     // pushBackVector = MathUtils.scaleVector(pushBackVector, 2);
