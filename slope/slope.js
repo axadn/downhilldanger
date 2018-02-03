@@ -80,7 +80,7 @@ export default class Slope extends GameObject{
     this.sideGeometry = [];
     this.currentSideGeometryType = TREE_SEGMENT;
     this.treesCreatedSinceStart = 0;
-    treeMesh.textureBuffer = this.rasterizer.bufferTexture("assets/tree.png");
+    treeMesh.textureBuffer = this.rasterizer.bufferTexture("tree.png");
     treeMesh.textured = true;
     this.treeMesh= new Mesh(treeMesh);
     this.treeMesh.buffers = this.rasterizer.sendMeshToGPU(this.treeMesh);

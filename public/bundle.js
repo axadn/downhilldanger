@@ -1949,7 +1949,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     this.sideGeometry = [];
     this.currentSideGeometryType = TREE_SEGMENT;
     this.treesCreatedSinceStart = 0;
-    __WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */].textureBuffer = this.rasterizer.bufferTexture("assets/tree.png");
+    __WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */].textureBuffer = this.rasterizer.bufferTexture("tree.png");
     __WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */].textured = true;
     this.treeMesh= new __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__tree_js__["a" /* default */]);
     this.treeMesh.buffers = this.rasterizer.sendMeshToGPU(this.treeMesh);
