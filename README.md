@@ -1,6 +1,6 @@
 ## Downhill Hazard
 
-[Downhill Hazard](https://axadn.github.io/downhill-hazard/) is a 3D snowboarding game with physics built from scratch using JavaScript.
+[Downhill Hazard](https://axadn.github.io/downhill-hazard/public) is a 3D snowboarding game with physics built from scratch using JavaScript.
 
 
 ### Features and Overview
