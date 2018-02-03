@@ -23,7 +23,7 @@ const BALLOON_FLOAT_HEIGHT = 6;
 const BALLOON_RADIUS = 4;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
-
+const CLIFF_PROBABILITY = 0.05;
 
 import treeMesh from "../tree.js";
 import balloonMesh from "../balloon";
@@ -428,6 +428,9 @@ export default class Slope extends GameObject{
       pos[0], pos[1], pos[2]
     );
     let xRot = MathUtils.xRotationMatrix(this.segmentRotation[0]);
+    if(Math.random()<= CLIFF_PROBABILITY){
+      xRot = MathUtils.xRotationMatrix(-Math.PI/3);
+    }
     let yRot = MathUtils.yRotationMatrix(this.segmentRotation[1]);
     let zRot = MathUtils.zRotationMatrix(this.segmentRotation[2]);
     transformationMatrix = MathUtils.mat_4_multiply(

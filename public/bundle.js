@@ -1829,7 +1829,7 @@ const BALLOON_FLOAT_HEIGHT = 6;
 const BALLOON_RADIUS = 4;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
-
+const CLIFF_PROBABILITY = 0.05;
 
 
 
@@ -2234,6 +2234,9 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       pos[0], pos[1], pos[2]
     );
     let xRot = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["xRotationMatrix"](this.segmentRotation[0]);
+    if(Math.random()<= CLIFF_PROBABILITY){
+      xRot = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["xRotationMatrix"](-Math.PI/3);
+    }
     let yRot = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["yRotationMatrix"](this.segmentRotation[1]);
     let zRot = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["zRotationMatrix"](this.segmentRotation[2]);
     transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["mat_4_multiply"](
