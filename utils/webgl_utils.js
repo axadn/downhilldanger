@@ -254,6 +254,9 @@ export class ObjectsRasterizer{
   }
   positionCamera(){
     this.camera.setPosition(this.cameraTarget.transformPoint([0, -18, 6]));
+    const newPos = this.camera.getPosition();
+    newPos[2] = this.cameraTarget.getPosition()[2] + 10;
+    this.camera.setPosition(newPos);
     let rotation = this.cameraTarget.getRotation();
     const upLocal = this.cameraTarget.inverseTransformDirection([0,0,1]);
     const angleToUp = MathUtils.angleBetweenVectors([0,0,1], upLocal);

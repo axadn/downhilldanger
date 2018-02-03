@@ -15,24 +15,69 @@ export default class GameObject {
   }
 
   update(timestamp){
+    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
+      debugger;
+    }
     this._applyVelocityStep();
+    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
+      debugger;
+    }
     this._applyAngularVelocityStep();
+    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
+      debugger;
+    }
     let localVelocity = this.inverseTransformDirection(this.velocity);
+    if(this.name == "snowboarder" && isNaN(localVelocity[0])){
+      debugger;
+    }
+    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
+      debugger;
+    }
     this._applyDragStep();
+    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
+      debugger;
+    }
     this._applyAngularDragStep();
+    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
+      debugger;
+    }
     this.velocity = this.transformDirection(localVelocity);
+    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
+      debugger;
+    } 
   }
 
   _applyVelocityStep(){
     this.setPosition(MathUtils.addVectors(this._position, this.velocity));
+    if(this.name == "snowboarder" &&isNaN(this.getPosition()[0])){
+      debugger;
+    }
   }
   _applyAngularVelocityStep(){
+    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
+      debugger;
+    }
     this.setRotation(MathUtils.multiplyQuaternions(this.angularVelocity,this.getRotation()));
+    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
+      debugger;
+    }
   }
   addAngularVelocity(quat){
+    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
+      debugger;
+    }
     quat = MathUtils.vectorNormalize(quat);
+    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
+      debugger;
+    }
     this.angularVelocity =  MathUtils.multiplyQuaternions(this.angularVelocity, quat);
+    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
+      debugger;
+    }
     this.angularVelocity = MathUtils.vectorNormalize(this.angularVelocity);
+    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
+      debugger;
+    }
   }
   _applyDragStep(){
     for(let i = 0; i < this.velocity.length; ++i){
@@ -40,7 +85,13 @@ export default class GameObject {
     }
   }
   _applyAngularDragStep(){
+    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
+      debugger;
+    }
     this.angularVelocity = MathUtils.scaleQuaternion(this.angularVelocity, 1 - ANGULAR_DRAG);
+    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
+      debugger;
+    }
   }
 
   transformPoint(point){

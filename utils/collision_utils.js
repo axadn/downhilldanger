@@ -1,5 +1,6 @@
 import * as MathUtils from "./math_utils";
 import { angleBetweenVectors } from "./math_utils";
+export const COLLISION_REJECTION = 0.05;
 
 export const movingBoxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1, moveVector) =>{
   const colliderPoint = boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1) || 
@@ -70,7 +71,10 @@ capsulePoint0, capsulePoint1, capsuleRadius){
         MathUtils.vectorCross(point0ToSphereOrigin, capsuleVector),
         Math.PI/2
       );
-      const capsuleNormal = MathUtils.multiplyVec4ByMatrix4(rotationMatrix, capsuleVector);
+      const capsuleNormal = MathUtils.multiplyVec4ByMatrix4(rotationMatrix, capsuleVector.concat(0)).slice(0,3);
+      if(isNaN(capsuleNormal[0])){
+        debugger;
+      }
       return {capsuleNormal,
       sphereNormal: MathUtils.scaleVector(capsuleNormal, -1),
       penetration: maxDist - dist};

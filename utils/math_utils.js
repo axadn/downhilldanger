@@ -32,8 +32,6 @@ export const scaleMatrix =(x,y,z) => ([
   0,0,0,1
 ]);
 
-
-
 export const xRotationMatrix = radians =>{
   const s = Math.sin(radians);
   const c = Math.cos(radians);
@@ -241,6 +239,10 @@ export const scaleVector = (vec, scale)=>{
 };
 
 export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
+  if(vec.length < 4){
+    debugger;
+    vec = vec.concat(0);
+  }
   const result = [];
   for(let i = 0; i < 4; ++i){
     let colResult = 0;
@@ -266,7 +268,9 @@ export const vectorMag = (vector)=>{
 };
 
 export const vectorNormalize = (vector)=>{
-  return scaleVector(vector, 1/vectorMag(vector));
+  const mag = vectorMag(vector);
+  if(mag === 0) return vector;
+  return scaleVector(vector, 1/mag);
 };
 export const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
   const normal = vectorCross(subtractVectors(t1, t2),
@@ -341,6 +345,7 @@ export const angleBetweenVectors = (to, from)=>{
   if(Math.abs(dot) <0.005 || Math.abs(dot) > 1){
     return 0;
   }
+  if(isNaN(Math.acos(dot))) debugger;
   return Math.acos(dot);
 }
 export const multiplyQuaternions = (q1, q2) => [

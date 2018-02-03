@@ -8,6 +8,8 @@ const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
 const BREAK_FRICTION = [0.187,0.12,0.187];
 import * as MathUtils from "../utils/math_utils";
+window.MathUtils = MathUtils;
+import * as CollisionUtils from "../utils/collision_utils";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
 export default class Character extends GameObject{
   constructor(mesh, boundingBox, slope, transformationMatrix = MathUtils.identityMatrix4){
@@ -26,27 +28,63 @@ export default class Character extends GameObject{
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
     this.setPosition([0,0,16]);
+    this.name = "snowboarder";
+
+    window.character = this;
 
   }
 
   update(){
+    if(isNaN(this.velocity[0])){
+      debugger;
+    }
     this._ensureAboveSurface();
+    if(isNaN(this.velocity[0])){
+      debugger;
+    }
     this._handleControls();
+    if(isNaN(this.velocity[0])){
+      debugger;
+    }
     this._getSurfaceData();
+    if(isNaN(this.velocity[0])){
+      debugger;
+    }
     this._moveForward();
+    if(isNaN(this.velocity[0])){
+      debugger;
+    }
     const surfaceOffset = MathUtils.subtractVectors
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
 
     this.velocity[2] -= this.fallSpeed;
     if(distanceFromSurface < SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
+      if(isNaN(this.velocity[0])){
+        debugger;
+      }
       this._planeAlign();
+      if(isNaN(this.velocity[0])){
+        debugger;
+      }
       this.velocity = MathUtils.projectVectorOntoPlane(this.velocity, this.transformDirection([0,0,1]));
+      if(isNaN(this.velocity[0])){
+        debugger;
+      }
       let localVelocity = this.inverseTransformDirection(this.velocity);
       this._applyFriction(localVelocity);
       this.velocity = this.transformDirection(localVelocity);
+      if(isNaN(this.velocity[0])){
+        debugger;
+      }
+    }
+    if(isNaN(this.velocity[0])){
+      debugger;
     }
     super.update();
+    if(isNaN(this.velocity[0])){
+      debugger;
+    }
   }
   
   _getSurfaceData(){
@@ -124,37 +162,43 @@ export default class Character extends GameObject{
     }
   }
   _handleCollision(collisionData){
+  
     this.velocity = MathUtils.scaleVector(
       MathUtils.bounceVectorOffPlane(this.velocity,
         collisionData.normal),
       this.restitution
-    ).concat([0]);
-    let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
-    pushBackVector = MathUtils.scaleVector(pushBackVector, 2);
-    this.setPosition(MathUtils.addVectors(this.getPosition(),
-      pushBackVector));
-    const collisionOffsetVector = MathUtils.subtractVectors(
-      collisionData.colliderPoint.slice(0,3),
-      this.getPosition()
     );
-    let addAngularVelocAngle = MathUtils.angleBetweenVectors(
-      MathUtils.scaleVector(collisionData.normal, -1),
-      collisionOffsetVector
+    
+    // let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
+    // pushBackVector = MathUtils.scaleVector(pushBackVector, 2);
+    // this.setPosition(MathUtils.addVectors(this.getPosition(),
+    //   pushBackVector));
+    // const collisionOffsetVector = MathUtils.subtractVectors(
+    //   collisionData.colliderPoint.slice(0,3),
+    //   this.getPosition()
+    // );
+     let addAngularVelocAngle = MathUtils.angleBetweenVectors(
+      this.velocity,
+       MathUtils.scaleVector(collisionData.normal, -1)
     );
-    addAngularVelocAngle /= 6.8;
-    addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
-    const addAngularVelocAxis = MathUtils.vectorCross(
-      collisionData.normal,
-      collisionOffsetVector
-    );
-    this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
-      addAngularVelocAxis, addAngularVelocAngle)
-    );
+    if(isNaN(addAngularVelocAngle)) debugger;
+     addAngularVelocAngle /= 15;
+     if(isNaN(addAngularVelocAngle)) debugger;
+     addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
+     if(isNaN(addAngularVelocAngle)) debugger;
+     const addAngularVelocAxis = MathUtils.vectorCross(
+      this.velocity,
+      MathUtils.scaleVector(collisionData.normal, -1)
+     );
+     this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+       addAngularVelocAxis, addAngularVelocAngle)
+     );
   }
   _handleEdgeCollision(collisionData){
    this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){
+    collisionData.normal = collisionData.sphereNormal;
     this._handleCollision(collisionData);
   }
   _moveForward(){
