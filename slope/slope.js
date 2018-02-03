@@ -12,7 +12,7 @@ const TREE_COLLIDER = "TREE_COLLIDER";
 const TREE_COLLIDER_HEIGHT = 30;
 const TREE_COLLIDER_WIDTH = 0.7;
 const TREE_COLLIDER_DEPTH = 0.7;
-const TREE_RADIUS = 1.5;
+const TREE_RADIUS = 3;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
 const TREE_PROBABILITY_LENGTHWISE = 0.58
@@ -20,7 +20,7 @@ const TREE_MAX_DENSITY_WIDTHWISE = 4;
 const BALLOON_PROBABILITY_LENGTHWISE = 0.22;
 const BALLOON_DENSITY_WIDTHWISE = 2;
 const BALLOON_FLOAT_HEIGHT = 6;
-const BALLON_COLLIDER_SQRD_RADIUS = 1;
+const BALLOON_RADIUS = 4;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 
@@ -169,7 +169,7 @@ export default class Slope extends GameObject{
     this.obstacles.push(obstacleSegment);
   }
   _addBalloonsSegment(){
-    const balloonSegment = [];
+    const balloonSegment = {};
     let transformationMatrix, newBalloon, id;
     if(Math.random() < BALLOON_PROBABILITY_LENGTHWISE){
       for(let i = 0; i <= Math.floor(Math.random() * BALLOON_DENSITY_WIDTHWISE); ++ i){
@@ -181,7 +181,7 @@ export default class Slope extends GameObject{
         newBalloon = new GameObject(this.balloonMesh, transformationMatrix);
         id = `balloon${this.balloonsCreatedSinceStart}`;
         newBalloon.id = id;
-        balloonSegment.push(newBalloon);
+        balloonSegment[i] = newBalloon;
         this.rasterizer.objects[id] = newBalloon;
         ++this.balloonsCreatedSinceStart;
       }
@@ -196,9 +196,9 @@ export default class Slope extends GameObject{
   }
   _deleteBalloonSegment(){
     const deletedSegment = this.balloons.shift();
-    for(let i = 0; i < deletedSegment.length; ++i){
-      delete this.rasterizer.objects[deletedSegment[i].id];
-    }
+    Object.keys(deletedSegment).forEach(key=>{
+      delete this.rasterizer.objects[deletedSegment[key].id];
+    });
   }
   createEdgeLoop(){
     const vertices = [];
@@ -294,10 +294,14 @@ export default class Slope extends GameObject{
   capsuleCollidesWithBalloons(capsulePointA, capsulePointB, capsuleRadius, segment_number){
     let points = 0;
     let balloon;
-    for(let i = 0; i < this.balloons[segment_number].length; ++i){
-      balloon = this.balloons[segment_number][i];
-      if(CollisionUtils.sphereCollidesCapsule(ballon)){}
-    }
+    Object.keys(this.balloons[segment_number]).forEach(key=>{
+      if(CollisionUtils.sphereCollidesCapsule(this.balloons[segment_number][key].getPosition(),
+       BALLOON_RADIUS,capsulePointA, capsulePointB,capsuleRadius)){
+        ++points;
+        delete this.rasterizer.objects[this.balloons[segment_number][key].id];
+        delete this.balloons[segment_number][key];
+      }
+    });
     return points;
   }
 

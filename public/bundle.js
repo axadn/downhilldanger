@@ -1593,6 +1593,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
+    this.capsuleRadius = 2;
     this.setPosition([0,0,16]);
     this.name = "snowboarder";
 
@@ -1773,8 +1774,9 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     const capsulePoint0 = this.getPosition();
     const capsulePoint1 = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["addVectors"](this.getPosition(), this.velocity);
     const obstacleCollisionData = this.slope.capsuleCollidesWithObstacle(capsulePoint0,
-    capsulePoint1,this.boxDimensions[1],this.currentSegmentNumber);
-    const balloonCount = this.slope.capsuleCollidesWithBalloons(capsulePoint0, capsulePoint1);
+    capsulePoint1,this.capsuleRadius,this.currentSegmentNumber);
+    const balloonCount = this.slope.capsuleCollidesWithBalloons(capsulePoint0, capsulePoint1,
+      this.capsuleRadius,this.currentSegmentNumber);
     if(balloonCount > 0){
       __WEBPACK_IMPORTED_MODULE_2__hud_hud__["a" /* addPoints */](balloonCount);
     }
@@ -1837,7 +1839,7 @@ const TREE_COLLIDER = "TREE_COLLIDER";
 const TREE_COLLIDER_HEIGHT = 30;
 const TREE_COLLIDER_WIDTH = 0.7;
 const TREE_COLLIDER_DEPTH = 0.7;
-const TREE_RADIUS = 1.5;
+const TREE_RADIUS = 3;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
 const TREE_PROBABILITY_LENGTHWISE = 0.58
@@ -1845,7 +1847,7 @@ const TREE_MAX_DENSITY_WIDTHWISE = 4;
 const BALLOON_PROBABILITY_LENGTHWISE = 0.22;
 const BALLOON_DENSITY_WIDTHWISE = 2;
 const BALLOON_FLOAT_HEIGHT = 6;
-const BALLON_COLLIDER_SQRD_RADIUS = 1;
+const BALLOON_RADIUS = 4;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 
@@ -1994,7 +1996,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     this.obstacles.push(obstacleSegment);
   }
   _addBalloonsSegment(){
-    const balloonSegment = [];
+    const balloonSegment = {};
     let transformationMatrix, newBalloon, id;
     if(Math.random() < BALLOON_PROBABILITY_LENGTHWISE){
       for(let i = 0; i <= Math.floor(Math.random() * BALLOON_DENSITY_WIDTHWISE); ++ i){
@@ -2006,7 +2008,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
         newBalloon = new __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */](this.balloonMesh, transformationMatrix);
         id = `balloon${this.balloonsCreatedSinceStart}`;
         newBalloon.id = id;
-        balloonSegment.push(newBalloon);
+        balloonSegment[i] = newBalloon;
         this.rasterizer.objects[id] = newBalloon;
         ++this.balloonsCreatedSinceStart;
       }
@@ -2021,9 +2023,9 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
   }
   _deleteBalloonSegment(){
     const deletedSegment = this.balloons.shift();
-    for(let i = 0; i < deletedSegment.length; ++i){
-      delete this.rasterizer.objects[deletedSegment[i].id];
-    }
+    Object.keys(deletedSegment).forEach(key=>{
+      delete this.rasterizer.objects[deletedSegment[key].id];
+    });
   }
   createEdgeLoop(){
     const vertices = [];
@@ -2119,10 +2121,14 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
   capsuleCollidesWithBalloons(capsulePointA, capsulePointB, capsuleRadius, segment_number){
     let points = 0;
     let balloon;
-    for(let i = 0; i < this.balloons[segment_number].length; ++i){
-      balloon = this.balloons[segment_number][i];
-      if(__WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["c" /* sphereCollidesCapsule */](ballon)){}
-    }
+    Object.keys(this.balloons[segment_number]).forEach(key=>{
+      if(__WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["c" /* sphereCollidesCapsule */](this.balloons[segment_number][key].getPosition(),
+       BALLOON_RADIUS,capsulePointA, capsulePointB,capsuleRadius)){
+        ++points;
+        delete this.rasterizer.objects[this.balloons[segment_number][key].id];
+        delete this.balloons[segment_number][key];
+      }
+    });
     return points;
   }
 

@@ -28,6 +28,7 @@ export default class Character extends GameObject{
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
+    this.capsuleRadius = 2;
     this.setPosition([0,0,16]);
     this.name = "snowboarder";
 
@@ -208,8 +209,9 @@ export default class Character extends GameObject{
     const capsulePoint0 = this.getPosition();
     const capsulePoint1 = MathUtils.addVectors(this.getPosition(), this.velocity);
     const obstacleCollisionData = this.slope.capsuleCollidesWithObstacle(capsulePoint0,
-    capsulePoint1,this.boxDimensions[1],this.currentSegmentNumber);
-    const balloonCount = this.slope.capsuleCollidesWithBalloons(capsulePoint0, capsulePoint1);
+    capsulePoint1,this.capsuleRadius,this.currentSegmentNumber);
+    const balloonCount = this.slope.capsuleCollidesWithBalloons(capsulePoint0, capsulePoint1,
+      this.capsuleRadius,this.currentSegmentNumber);
     if(balloonCount > 0){
       HUD.addPoints(balloonCount);
     }
