@@ -11,7 +11,7 @@ import Mesh from "./game_object/mesh";
 document.addEventListener("DOMContentLoaded", main);
 function main(){
   const rasterizer = new WebGLUtils.ObjectsRasterizer();
-  const slope = new Slope(MathUtils.translationMatrix(0,-3,-4), rasterizer, "assets/snow.jpg");
+  const slope = new Slope(MathUtils.translationMatrix(0,-3,-4), rasterizer, "snow.jpg");
   window.slope = slope;
 
   //boxManMesh.skinned = true;
@@ -20,7 +20,7 @@ function main(){
   const boxMan = new Character(new Mesh(boxManMesh), undefined, slope);
   //boxMan.playAnimation("rest");
   rasterizer.objects.boxMan = boxMan;
-  SkyBox.img_src = "assets/skybox.jpg";
+  SkyBox.img_src = "skybox.jpg";
   SkyBox.textured = true;
   SkyBox.rasterizer = rasterizer;
   let skyMesh = new Mesh(SkyBox);

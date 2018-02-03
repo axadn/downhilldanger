@@ -952,7 +952,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 document.addEventListener("DOMContentLoaded", main);
 function main(){
   const rasterizer = new __WEBPACK_IMPORTED_MODULE_1__utils_webgl_utils__["a" /* ObjectsRasterizer */]();
-  const slope = new __WEBPACK_IMPORTED_MODULE_8__slope_slope__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["translationMatrix"](0,-3,-4), rasterizer, "assets/snow.jpg");
+  const slope = new __WEBPACK_IMPORTED_MODULE_8__slope_slope__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["translationMatrix"](0,-3,-4), rasterizer, "snow.jpg");
   window.slope = slope;
 
   //boxManMesh.skinned = true;
@@ -961,7 +961,7 @@ function main(){
   const boxMan = new __WEBPACK_IMPORTED_MODULE_7__character_character__["a" /* default */](new __WEBPACK_IMPORTED_MODULE_9__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_4__boxMan_js__["a" /* default */]), undefined, slope);
   //boxMan.playAnimation("rest");
   rasterizer.objects.boxMan = boxMan;
-  __WEBPACK_IMPORTED_MODULE_6__skybox_json___default.a.img_src = "assets/skybox.jpg";
+  __WEBPACK_IMPORTED_MODULE_6__skybox_json___default.a.img_src = "skybox.jpg";
   __WEBPACK_IMPORTED_MODULE_6__skybox_json___default.a.textured = true;
   __WEBPACK_IMPORTED_MODULE_6__skybox_json___default.a.rasterizer = rasterizer;
   let skyMesh = new __WEBPACK_IMPORTED_MODULE_9__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_6__skybox_json___default.a);
