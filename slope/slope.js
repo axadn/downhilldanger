@@ -24,6 +24,7 @@ const BALLON_COLLIDER_SQRD_RADIUS = 1;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 
+
 import treeMesh from "../tree.js";
 import balloonMesh from "../balloon";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
@@ -73,7 +74,6 @@ export default class Slope extends GameObject{
     for(let i = 0; i < SLOPE_BUFFER_AMOUNT + BACK_BUFFER_ANOUNT ; ++i ){
       this.generateSegment();
     }
-    this._addUvsSegment();
 
   }
   _setupTreeMesh(){
@@ -463,8 +463,8 @@ export default class Slope extends GameObject{
     //this.segmentPosition =
     //  MathUtils.mat4TranslationComponent(segmentMatrix);
     this.segmentMatrices.push(transformationMatrix);
-    this.uvH += SEGMENT_LENGTH/SEGMENT_WIDTH * TILES_PER_SEGMENT;
     this._addUvsSegment();
+    this.uvH += SEGMENT_LENGTH/SEGMENT_WIDTH;
   }
 
   _addSegment(vertices){

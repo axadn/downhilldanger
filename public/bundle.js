@@ -1900,6 +1900,7 @@ const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 
 
 
+
 class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */]{
 
   constructor(transformationMatrix = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["identityMatrix4"], rasterizer, img_src = "snow.jpg"){
@@ -1942,7 +1943,6 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     for(let i = 0; i < SLOPE_BUFFER_AMOUNT + BACK_BUFFER_ANOUNT ; ++i ){
       this.generateSegment();
     }
-    this._addUvsSegment();
 
   }
   _setupTreeMesh(){
@@ -2332,8 +2332,8 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     //this.segmentPosition =
     //  MathUtils.mat4TranslationComponent(segmentMatrix);
     this.segmentMatrices.push(transformationMatrix);
-    this.uvH += SEGMENT_LENGTH/SEGMENT_WIDTH * TILES_PER_SEGMENT;
     this._addUvsSegment();
+    this.uvH += SEGMENT_LENGTH/SEGMENT_WIDTH;
   }
 
   _addSegment(vertices){
