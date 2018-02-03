@@ -1780,6 +1780,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     if(balloonCount > 0){
       __WEBPACK_IMPORTED_MODULE_2__hud_hud__["a" /* addPoints */](balloonCount);
     }
+    __WEBPACK_IMPORTED_MODULE_2__hud_hud__["b" /* updateSpeed */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorMag"](this.velocity)*8);
     // this.slope.boxCollidesWithObstacle(
     //   this.getTransformationMatrix(), this.boxDimensions,
     //   this.velocity, this.currentSegmentNumber);
@@ -1825,8 +1826,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__ = __webpack_require__(3);
-const SEGMENT_WIDTH = 70;
-const SEGMENT_LENGTH = 40;
+const SEGMENT_WIDTH = 90;
+const SEGMENT_LENGTH = 50;
 const EDGE_LOOP_RESOLUTION = 5;
 const SLOPE_BUFFER_AMOUNT = 30;
 const BACK_BUFFER_ANOUNT = 10;
@@ -2400,8 +2401,9 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = addPoints;
 /* unused harmony export updateTime */
+/* harmony export (immutable) */ __webpack_exports__["b"] = updateSpeed;
 const state = {currentTime: 0,
-bestTime: 0, points: 0}
+bestTime: 0, points: 0, speed: 0}
 
 function addPoints(points){
     state.points += points;
@@ -2412,13 +2414,23 @@ function updateTime(time){
     renderTime();
 };
 
+function updateSpeed(speed){
+    state.speed = Math.round(speed);
+    renderSpeed();
+}
+
 function renderPoints(){
-    document.querySelector(".hud-points").innerHTML = `POINTS ${state.points}`;
+    document.querySelector(".hud-points_val").innerHTML = `${state.points}`;
 };
+
+function renderSpeed(){
+    document.querySelector(".hud-speed_val").innerHTML = `${state.speed}`;
+}
 
 function renderTime(){
 
 }
+
 
 /***/ })
 /******/ ]);

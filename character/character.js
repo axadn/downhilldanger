@@ -215,6 +215,7 @@ export default class Character extends GameObject{
     if(balloonCount > 0){
       HUD.addPoints(balloonCount);
     }
+    HUD.updateSpeed(MathUtils.vectorMag(this.velocity)*8);
     // this.slope.boxCollidesWithObstacle(
     //   this.getTransformationMatrix(), this.boxDimensions,
     //   this.velocity, this.currentSegmentNumber);

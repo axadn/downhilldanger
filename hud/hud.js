@@ -1,5 +1,5 @@
 const state = {currentTime: 0,
-bestTime: 0, points: 0}
+bestTime: 0, points: 0, speed: 0}
 
 export function addPoints(points){
     state.points += points;
@@ -10,9 +10,18 @@ export function updateTime(time){
     renderTime();
 };
 
+export function updateSpeed(speed){
+    state.speed = Math.round(speed);
+    renderSpeed();
+}
+
 function renderPoints(){
-    document.querySelector(".hud-points").innerHTML = `POINTS ${state.points}`;
+    document.querySelector(".hud-points_val").innerHTML = `${state.points}`;
 };
+
+function renderSpeed(){
+    document.querySelector(".hud-speed_val").innerHTML = `${state.speed}`;
+}
 
 function renderTime(){
 
