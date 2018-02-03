@@ -22,6 +22,7 @@ const BALLOON_DENSITY_WIDTHWISE = 2;
 const BALLOON_FLOAT_HEIGHT = 6;
 const BALLON_COLLIDER_SQRD_RADIUS = 1;
 const BOX_COLLIDER = "BOX_COLLIDER";
+const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 
 import treeMesh from "../tree.js";
 import balloonMesh from "../balloon";
@@ -60,6 +61,7 @@ export default class Slope extends GameObject{
     const firstLoop = this.createEdgeLoop();
     let unpackedVertices;
 
+    this.segmentsSinceStart = 0;
     for(let i = 0; i< firstLoop.length; i+=3){
       unpackedVertices = MathUtils.multiplyVec4ByMatrix4(
         transformationMatrix,
@@ -143,7 +145,7 @@ export default class Slope extends GameObject{
     MathUtils.mat_4_multiply(
       MathUtils.translationMatrix(0, -SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
       this.segmentMatrices[this.segmentMatrices.length -1]);
-    if(Math.random() < TREE_PROBABILITY_LENGTHWISE){
+    if(this.segmentsSinceStart > BEGINNING_NO_OBSTACLE_SEGMENTS && Math.random() < TREE_PROBABILITY_LENGTHWISE){
         const segment = 0;
         const widthWiseCount = Math.floor(Math.random()*
           TREE_MAX_DENSITY_WIDTHWISE);
@@ -490,6 +492,7 @@ export default class Slope extends GameObject{
       */
     }
     this.mesh.setDirty();
+    ++this.segmentsSinceStart;
   }
   deleteSegment(){
     //values per vertex is 3

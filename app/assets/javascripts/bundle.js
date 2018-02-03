@@ -1760,6 +1760,7 @@ const BALLOON_DENSITY_WIDTHWISE = 2;
 const BALLOON_FLOAT_HEIGHT = 6;
 const BALLON_COLLIDER_SQRD_RADIUS = 1;
 const BOX_COLLIDER = "BOX_COLLIDER";
+const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 
 
 
@@ -1798,6 +1799,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     const firstLoop = this.createEdgeLoop();
     let unpackedVertices;
 
+    this.segmentsSinceStart = 0;
     for(let i = 0; i< firstLoop.length; i+=3){
       unpackedVertices = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["multiplyVec4ByMatrix4"](
         transformationMatrix,
@@ -1881,7 +1883,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["mat_4_multiply"](
       __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["translationMatrix"](0, -SEGMENT_LENGTH/TREES_PER_SEGMENT, 0,1),
       this.segmentMatrices[this.segmentMatrices.length -1]);
-    if(Math.random() < TREE_PROBABILITY_LENGTHWISE){
+    if(this.segmentsSinceStart > BEGINNING_NO_OBSTACLE_SEGMENTS && Math.random() < TREE_PROBABILITY_LENGTHWISE){
         const segment = 0;
         const widthWiseCount = Math.floor(Math.random()*
           TREE_MAX_DENSITY_WIDTHWISE);
@@ -2228,6 +2230,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       */
     }
     this.mesh.setDirty();
+    ++this.segmentsSinceStart;
   }
   deleteSegment(){
     //values per vertex is 3
