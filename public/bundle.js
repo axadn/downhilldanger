@@ -2019,7 +2019,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       delete this.rasterizer.objects[deletedSegment[i].id];
     }
   }
-  _deleteBallonSegment(){
+  _deleteBalloonSegment(){
     const deletedSegment = this.balloons.shift();
     for(let i = 0; i < deletedSegment.length; ++i){
       delete this.rasterizer.objects[deletedSegment[i].id];
@@ -2119,7 +2119,6 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
   capsuleCollidesWithBalloons(capsulePointA, capsulePointB, capsuleRadius, segment_number){
     let points = 0;
     let balloon;
-    return points;
     for(let i = 0; i < this.balloons[segment_number].length; ++i){
       balloon = this.balloons[segment_number][i];
       if(__WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["c" /* sphereCollidesCapsule */](ballon)){}
@@ -2148,20 +2147,6 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
          transformedPosition[2] < dimensions[2]){
            return true;
          }
-    }
-    return false;
-  }
-
-  positionCollidesWithBalloon(pos, segment_number){
-    const balloons = this.balloons[segment_number];
-    let balloonPos;
-    for(let i = 0; i < ballons.length; ++i){
-      balloonPos = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["mat4TranslationComponent"](balloons[i].transformationMatrix);
-      if(vectorSquareMag(
-          __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](pos, balloonPos)
-        ) <=  BALLON_COLLIDER_SQRD_RADIUS){
-            return balloons[i];
-      }
     }
     return false;
   }
@@ -2342,7 +2327,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     this._deleteUvsSegment();
     this._deleteSideGeometrySegment();
     this._deleteObstacleSegment();
-    this._deleteBallonSegment();
+    this._deleteBalloonSegment();
     this.mesh.setDirty();
   }
 }

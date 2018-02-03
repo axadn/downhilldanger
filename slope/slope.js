@@ -194,7 +194,7 @@ export default class Slope extends GameObject{
       delete this.rasterizer.objects[deletedSegment[i].id];
     }
   }
-  _deleteBallonSegment(){
+  _deleteBalloonSegment(){
     const deletedSegment = this.balloons.shift();
     for(let i = 0; i < deletedSegment.length; ++i){
       delete this.rasterizer.objects[deletedSegment[i].id];
@@ -294,7 +294,6 @@ export default class Slope extends GameObject{
   capsuleCollidesWithBalloons(capsulePointA, capsulePointB, capsuleRadius, segment_number){
     let points = 0;
     let balloon;
-    return points;
     for(let i = 0; i < this.balloons[segment_number].length; ++i){
       balloon = this.balloons[segment_number][i];
       if(CollisionUtils.sphereCollidesCapsule(ballon)){}
@@ -323,20 +322,6 @@ export default class Slope extends GameObject{
          transformedPosition[2] < dimensions[2]){
            return true;
          }
-    }
-    return false;
-  }
-
-  positionCollidesWithBalloon(pos, segment_number){
-    const balloons = this.balloons[segment_number];
-    let balloonPos;
-    for(let i = 0; i < ballons.length; ++i){
-      balloonPos = MathUtils.mat4TranslationComponent(balloons[i].transformationMatrix);
-      if(vectorSquareMag(
-          MathUtils.subtractVectors(pos, balloonPos)
-        ) <=  BALLON_COLLIDER_SQRD_RADIUS){
-            return balloons[i];
-      }
     }
     return false;
   }
@@ -517,7 +502,7 @@ export default class Slope extends GameObject{
     this._deleteUvsSegment();
     this._deleteSideGeometrySegment();
     this._deleteObstacleSegment();
-    this._deleteBallonSegment();
+    this._deleteBalloonSegment();
     this.mesh.setDirty();
   }
 }
