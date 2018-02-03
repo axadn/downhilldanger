@@ -581,69 +581,24 @@ class GameObject {
   }
 
   update(timestamp){
-    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
-      debugger;
-    }
     this._applyVelocityStep();
-    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
-      debugger;
-    }
     this._applyAngularVelocityStep();
-    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
-      debugger;
-    }
     let localVelocity = this.inverseTransformDirection(this.velocity);
-    if(this.name == "snowboarder" && isNaN(localVelocity[0])){
-      debugger;
-    }
-    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
-      debugger;
-    }
     this._applyDragStep();
-    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
-      debugger;
-    }
     this._applyAngularDragStep();
-    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
-      debugger;
-    }
     this.velocity = this.transformDirection(localVelocity);
-    if(this.name == "snowboarder" && isNaN(this.velocity[0])){
-      debugger;
-    } 
   }
 
   _applyVelocityStep(){
     this.setPosition(__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["addVectors"](this._position, this.velocity));
-    if(this.name == "snowboarder" &&isNaN(this.getPosition()[0])){
-      debugger;
-    }
   }
   _applyAngularVelocityStep(){
-    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
-      debugger;
-    }
     this.setRotation(__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyQuaternions"](this.angularVelocity,this.getRotation()));
-    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
-      debugger;
-    }
   }
   addAngularVelocity(quat){
-    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
-      debugger;
-    }
     quat = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["vectorNormalize"](quat);
-    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
-      debugger;
-    }
     this.angularVelocity =  __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyQuaternions"](this.angularVelocity, quat);
-    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
-      debugger;
-    }
     this.angularVelocity = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["vectorNormalize"](this.angularVelocity);
-    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
-      debugger;
-    }
   }
   _applyDragStep(){
     for(let i = 0; i < this.velocity.length; ++i){
@@ -651,13 +606,7 @@ class GameObject {
     }
   }
   _applyAngularDragStep(){
-    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
-      debugger;
-    }
     this.angularVelocity = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["scaleQuaternion"](this.angularVelocity, 1 - ANGULAR_DRAG);
-    if(this.name == "snowboarder" && isNaN(this.angularVelocity[0])|| isNaN(this.getRotation()[0])){
-      debugger;
-    }
   }
 
   transformPoint(point){
@@ -1612,7 +1561,8 @@ module.exports = {"vertices":[-1000,999.999939,-1000.000122,-1000,1000.000122,99
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_collision_utils__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__hud_hud__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_collision_utils__ = __webpack_require__(2);
 
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
@@ -1622,6 +1572,7 @@ const STEER_SPEED = 0.02;
 const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
 const BREAK_FRICTION = [0.187,0.12,0.187];
+
 
 window.MathUtils = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__;
 
@@ -1819,9 +1770,14 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
   _moveForward(){
     const edgeCollisionData = this.slope.boxIsBeyondEdge(
       this.getTransformationMatrix(), this.boxDimensions, this.currentSegmentNumber);
-    const obstacleCollisionData = this.slope.capsuleCollidesWithObstacle(this.getPosition(),
-    __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["addVectors"](this.getPosition(), this.velocity),this.boxDimensions[1],this.currentSegmentNumber);
-    
+    const capsulePoint0 = this.getPosition();
+    const capsulePoint1 = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["addVectors"](this.getPosition(), this.velocity);
+    const obstacleCollisionData = this.slope.capsuleCollidesWithObstacle(capsulePoint0,
+    capsulePoint1,this.boxDimensions[1],this.currentSegmentNumber);
+    const balloonCount = this.slope.capsuleCollidesWithBalloons(capsulePoint0, capsulePoint1);
+    if(balloonCount > 0){
+      __WEBPACK_IMPORTED_MODULE_2__hud_hud__["a" /* addPoints */](balloonCount);
+    }
     // this.slope.boxCollidesWithObstacle(
     //   this.getTransformationMatrix(), this.boxDimensions,
     //   this.velocity, this.currentSegmentNumber);
@@ -2160,6 +2116,16 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     }
     return false;
   }
+  capsuleCollidesWithBalloons(capsulePointA, capsulePointB, capsuleRadius, segment_number){
+    let points = 0;
+    let balloon;
+    return points;
+    for(let i = 0; i < this.balloons[segment_number].length; ++i){
+      balloon = this.balloons[segment_number][i];
+      if(__WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["c" /* sphereCollidesCapsule */](ballon)){}
+    }
+    return points;
+  }
 
   positionCollidesWithObstacle(pos, segment_number){
     let transformedPosition;
@@ -2435,6 +2401,33 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     "animations": {}
 });
 
+
+/***/ }),
+/* 14 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = addPoints;
+/* unused harmony export updateTime */
+const state = {currentTime: 0,
+bestTime: 0, points: 0}
+
+function addPoints(points){
+    state.points += points;
+    renderPoints();
+};
+function updateTime(time){
+    state.time = time;
+    renderTime();
+};
+
+function renderPoints(){
+    document.querySelector(".hud-points").innerHTML = `POINTS ${state.points}`;
+};
+
+function renderTime(){
+
+}
 
 /***/ })
 /******/ ]);

@@ -291,6 +291,16 @@ export default class Slope extends GameObject{
     }
     return false;
   }
+  capsuleCollidesWithBalloons(capsulePointA, capsulePointB, capsuleRadius, segment_number){
+    let points = 0;
+    let balloon;
+    return points;
+    for(let i = 0; i < this.balloons[segment_number].length; ++i){
+      balloon = this.balloons[segment_number][i];
+      if(CollisionUtils.sphereCollidesCapsule(ballon)){}
+    }
+    return points;
+  }
 
   positionCollidesWithObstacle(pos, segment_number){
     let transformedPosition;

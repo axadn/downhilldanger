@@ -8,6 +8,7 @@ const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
 const BREAK_FRICTION = [0.187,0.12,0.187];
 import * as MathUtils from "../utils/math_utils";
+import * as HUD from "../hud/hud";
 window.MathUtils = MathUtils;
 import * as CollisionUtils from "../utils/collision_utils";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
@@ -204,9 +205,14 @@ export default class Character extends GameObject{
   _moveForward(){
     const edgeCollisionData = this.slope.boxIsBeyondEdge(
       this.getTransformationMatrix(), this.boxDimensions, this.currentSegmentNumber);
-    const obstacleCollisionData = this.slope.capsuleCollidesWithObstacle(this.getPosition(),
-    MathUtils.addVectors(this.getPosition(), this.velocity),this.boxDimensions[1],this.currentSegmentNumber);
-    
+    const capsulePoint0 = this.getPosition();
+    const capsulePoint1 = MathUtils.addVectors(this.getPosition(), this.velocity);
+    const obstacleCollisionData = this.slope.capsuleCollidesWithObstacle(capsulePoint0,
+    capsulePoint1,this.boxDimensions[1],this.currentSegmentNumber);
+    const balloonCount = this.slope.capsuleCollidesWithBalloons(capsulePoint0, capsulePoint1);
+    if(balloonCount > 0){
+      HUD.addPoints(balloonCount);
+    }
     // this.slope.boxCollidesWithObstacle(
     //   this.getTransformationMatrix(), this.boxDimensions,
     //   this.velocity, this.currentSegmentNumber);
