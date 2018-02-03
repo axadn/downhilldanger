@@ -756,6 +756,9 @@ function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
 function sphereCollidesCapsule(sphereOrigin, sphereRadius,
 capsulePoint0, capsulePoint1, capsuleRadius){
   const capsuleVector = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint1, capsulePoint0);
+  if (capsuleVector[0] === 0 && capsuleVector[1] === 0 && capsuleVector[2] === 0){
+    capsuleVector[0] = 0.01;
+  }
   const point0ToSphereOrigin = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint0);
   const point0ToSphereAngle = __WEBPACK_IMPORTED_MODULE_0__math_utils__["angleBetweenVectors"](point0ToSphereOrigin, capsuleVector);
   const point1ToSphereOrigin = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint1);
@@ -1604,7 +1607,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
-    this.capsuleRadius = 2;
+    this.capsuleRadius = 2.2;
     this.setPosition([0,0,16]);
     this.name = "snowboarder";
 
@@ -1826,7 +1829,7 @@ const TREE_MAX_DENSITY_WIDTHWISE = 4;
 const BALLOON_PROBABILITY_LENGTHWISE = 0.22;
 const BALLOON_DENSITY_WIDTHWISE = 2;
 const BALLOON_FLOAT_HEIGHT = 6;
-const BALLOON_RADIUS = 4;
+const BALLOON_RADIUS = 4.2;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 const CLIFF_PROBABILITY = 0.05;

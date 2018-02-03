@@ -55,6 +55,9 @@ export function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
 export function sphereCollidesCapsule(sphereOrigin, sphereRadius,
 capsulePoint0, capsulePoint1, capsuleRadius){
   const capsuleVector = MathUtils.subtractVectors(capsulePoint1, capsulePoint0);
+  if (capsuleVector[0] === 0 && capsuleVector[1] === 0 && capsuleVector[2] === 0){
+    capsuleVector[0] = 0.01;
+  }
   const point0ToSphereOrigin = MathUtils.subtractVectors(sphereOrigin, capsulePoint0);
   const point0ToSphereAngle = MathUtils.angleBetweenVectors(point0ToSphereOrigin, capsuleVector);
   const point1ToSphereOrigin = MathUtils.subtractVectors(sphereOrigin, capsulePoint1);
