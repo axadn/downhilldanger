@@ -126,7 +126,7 @@ export class ObjectsRasterizer{
       }
       else{
         return this.defaultProgram;
-      }Obj
+      }
     }
   }
 
@@ -302,7 +302,6 @@ export class ObjectsRasterizer{
       obj.lastTimeStamp = timestamp;
       this.draw(obj);
     }
-    window.requestAnimationFrame(this.drawObjects.bind(this));
   }
 }
 // create a rasterization program from a vertex and fragment shader

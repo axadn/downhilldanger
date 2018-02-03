@@ -10,6 +10,11 @@ import Slope from "./slope/slope";
 import Mesh from "./game_object/mesh";
 import * as HUD from "./hud/hud";
 document.addEventListener("DOMContentLoaded", main);
+function gameLoop(timestamp){
+  HUD.updateTime(timestamp);
+  rasterizer.drawObjects.bind(rasterizer)(timestamp);
+  window.requestAnimationFrame(gameLoop);
+}
 function main(){
   const rasterizer = new WebGLUtils.ObjectsRasterizer();
   const slope = new Slope(MathUtils.translationMatrix(0,-3,-4), rasterizer, "snow.jpg");
@@ -28,11 +33,7 @@ function main(){
   skyMesh.buffers = rasterizer.sendMeshToGPU(skyMesh);
   rasterizer.skyBox = new GameObject(skyMesh);
   HUD.setStartTime(Date.now());
-  window.requestAnimationFrame(()=>{
-    debugger;
-    HUD.updateTime(Date.now());
-    rasterizer.drawObjects.bind(rasterizer)();
-  });
+  window.requestAnimationFrame(gameLoop);
 //  window.requestAnimationFrame(
 //    () => rasterizer.draw(boxMan));
 

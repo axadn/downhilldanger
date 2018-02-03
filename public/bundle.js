@@ -901,6 +901,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 document.addEventListener("DOMContentLoaded", main);
+function gameLoop(timestamp){
+  __WEBPACK_IMPORTED_MODULE_10__hud_hud__["d" /* updateTime */](timestamp);
+  rasterizer.drawObjects.bind(rasterizer)(timestamp);
+  window.requestAnimationFrame(gameLoop);
+}
 function main(){
   const rasterizer = new __WEBPACK_IMPORTED_MODULE_1__utils_webgl_utils__["a" /* ObjectsRasterizer */]();
   const slope = new __WEBPACK_IMPORTED_MODULE_8__slope_slope__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["translationMatrix"](0,-3,-4), rasterizer, "snow.jpg");
@@ -919,11 +924,7 @@ function main(){
   skyMesh.buffers = rasterizer.sendMeshToGPU(skyMesh);
   rasterizer.skyBox = new __WEBPACK_IMPORTED_MODULE_5__game_object_game_object__["a" /* default */](skyMesh);
   __WEBPACK_IMPORTED_MODULE_10__hud_hud__["b" /* setStartTime */](Date.now());
-  window.requestAnimationFrame(()=>{
-    debugger;
-    __WEBPACK_IMPORTED_MODULE_10__hud_hud__["d" /* updateTime */](Date.now());
-    rasterizer.drawObjects.bind(rasterizer)();
-  });
+  window.requestAnimationFrame(gameLoop);
 //  window.requestAnimationFrame(
 //    () => rasterizer.draw(boxMan));
 
@@ -1113,7 +1114,7 @@ class ObjectsRasterizer{
       }
       else{
         return this.defaultProgram;
-      }Obj
+      }
     }
   }
 
@@ -1289,7 +1290,6 @@ class ObjectsRasterizer{
       obj.lastTimeStamp = timestamp;
       this.draw(obj);
     }
-    window.requestAnimationFrame(this.drawObjects.bind(this));
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = ObjectsRasterizer;
@@ -2410,13 +2410,11 @@ function renderSpeed(){
 
 function renderTime(){
     const elapsed = state.time - state.startTime;
-    debugger;
     document.querySelector(".hud-time_val").innerHTML =
     `${renderMinutes(elapsed)}'${renderSeconds(elapsed)}"${renderMilliseconds(elapsed)}`;
 }
 
 function renderMinutes(milliseconds){
-    debugger;
     const minutes = Math.floor(milliseconds/60000);
     return `${minutes < 10 ? "0": ""}${minutes}`
 }

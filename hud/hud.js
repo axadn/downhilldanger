@@ -27,13 +27,11 @@ function renderSpeed(){
 
 function renderTime(){
     const elapsed = state.time - state.startTime;
-    debugger;
     document.querySelector(".hud-time_val").innerHTML =
     `${renderMinutes(elapsed)}'${renderSeconds(elapsed)}"${renderMilliseconds(elapsed)}`;
 }
 
 function renderMinutes(milliseconds){
-    debugger;
     const minutes = Math.floor(milliseconds/60000);
     return `${minutes < 10 ? "0": ""}${minutes}`
 }
