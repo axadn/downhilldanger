@@ -2,6 +2,8 @@ const DEFAULT_CAMERA_DIST = 1;
 
 import * as MathUtils from "./math_utils";
 import GameObject from "../game_object/game_object";
+import * as HUD from "../hud/hud";
+
 export class ObjectsRasterizer{
   constructor(scale= 0.5, swapYZ = true){
     const canvas = document.querySelector("#glCanvas");
@@ -278,6 +280,7 @@ export class ObjectsRasterizer{
   }
 
   drawObjects(timestamp){
+    HUD.updateTime(Date.now());
     this.adjustToCanvas();
     this.gl.clearColor(0.8, 0.8, 0.81, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);

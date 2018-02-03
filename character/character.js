@@ -37,56 +37,23 @@ export default class Character extends GameObject{
   }
 
   update(){
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
     this._ensureAboveSurface();
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
     this._handleControls();
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
     this._getSurfaceData();
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
     this._moveForward();
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
     const surfaceOffset = MathUtils.subtractVectors
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
 
     this.velocity[2] -= this.fallSpeed;
     if(distanceFromSurface < SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
-      if(isNaN(this.velocity[0])){
-        debugger;
-      }
       this._planeAlign();
-      if(isNaN(this.velocity[0])){
-        debugger;
-      }
       this.velocity = MathUtils.projectVectorOntoPlane(this.velocity, this.transformDirection([0,0,1]));
-      if(isNaN(this.velocity[0])){
-        debugger;
-      }
       let localVelocity = this.inverseTransformDirection(this.velocity);
       this._applyFriction(localVelocity);
       this.velocity = this.transformDirection(localVelocity);
-      if(isNaN(this.velocity[0])){
-        debugger;
-      }
-    }
-    if(isNaN(this.velocity[0])){
-      debugger;
     }
     super.update();
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
   }
   
   _getSurfaceData(){

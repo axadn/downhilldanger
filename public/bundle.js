@@ -888,6 +888,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__character_character__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__slope_slope__ = __webpack_require__(11);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__game_object_mesh__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__hud_hud__ = __webpack_require__(14);
+
 
 
 
@@ -916,7 +918,12 @@ function main(){
   let skyMesh = new __WEBPACK_IMPORTED_MODULE_9__game_object_mesh__["a" /* default */](__WEBPACK_IMPORTED_MODULE_6__skybox_json___default.a);
   skyMesh.buffers = rasterizer.sendMeshToGPU(skyMesh);
   rasterizer.skyBox = new __WEBPACK_IMPORTED_MODULE_5__game_object_game_object__["a" /* default */](skyMesh);
-  window.requestAnimationFrame(rasterizer.drawObjects.bind(rasterizer));
+  __WEBPACK_IMPORTED_MODULE_10__hud_hud__["b" /* setStartTime */](Date.now());
+  window.requestAnimationFrame(()=>{
+    debugger;
+    __WEBPACK_IMPORTED_MODULE_10__hud_hud__["d" /* updateTime */](Date.now());
+    rasterizer.drawObjects.bind(rasterizer)();
+  });
 //  window.requestAnimationFrame(
 //    () => rasterizer.draw(boxMan));
 
@@ -977,7 +984,10 @@ const handleKeyDown = rasterizer => e => {
 /* unused harmony export compileShader */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__hud_hud__ = __webpack_require__(14);
 const DEFAULT_CAMERA_DIST = 1;
+
+
 
 
 
@@ -1257,6 +1267,7 @@ class ObjectsRasterizer{
   }
 
   drawObjects(timestamp){
+    __WEBPACK_IMPORTED_MODULE_2__hud_hud__["d" /* updateTime */](Date.now());
     this.adjustToCanvas();
     this.gl.clearColor(0.8, 0.8, 0.81, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
@@ -1602,56 +1613,23 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
   }
 
   update(){
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
     this._ensureAboveSurface();
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
     this._handleControls();
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
     this._getSurfaceData();
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
     this._moveForward();
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
     const surfaceOffset = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["subtractVectors"]
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorSquareMag"](surfaceOffset);
 
     this.velocity[2] -= this.fallSpeed;
     if(distanceFromSurface < SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
-      if(isNaN(this.velocity[0])){
-        debugger;
-      }
       this._planeAlign();
-      if(isNaN(this.velocity[0])){
-        debugger;
-      }
       this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlane"](this.velocity, this.transformDirection([0,0,1]));
-      if(isNaN(this.velocity[0])){
-        debugger;
-      }
       let localVelocity = this.inverseTransformDirection(this.velocity);
       this._applyFriction(localVelocity);
       this.velocity = this.transformDirection(localVelocity);
-      if(isNaN(this.velocity[0])){
-        debugger;
-      }
-    }
-    if(isNaN(this.velocity[0])){
-      debugger;
     }
     super.update();
-    if(isNaN(this.velocity[0])){
-      debugger;
-    }
   }
   
   _getSurfaceData(){
@@ -1780,7 +1758,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     if(balloonCount > 0){
       __WEBPACK_IMPORTED_MODULE_2__hud_hud__["a" /* addPoints */](balloonCount);
     }
-    __WEBPACK_IMPORTED_MODULE_2__hud_hud__["b" /* updateSpeed */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorMag"](this.velocity)*8);
+    __WEBPACK_IMPORTED_MODULE_2__hud_hud__["c" /* updateSpeed */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorMag"](this.velocity)*8);
     // this.slope.boxCollidesWithObstacle(
     //   this.getTransformationMatrix(), this.boxDimensions,
     //   this.velocity, this.currentSegmentNumber);
@@ -2400,25 +2378,28 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = addPoints;
-/* unused harmony export updateTime */
-/* harmony export (immutable) */ __webpack_exports__["b"] = updateSpeed;
-const state = {currentTime: 0,
+/* harmony export (immutable) */ __webpack_exports__["c"] = updateSpeed;
+/* harmony export (immutable) */ __webpack_exports__["d"] = updateTime;
+/* harmony export (immutable) */ __webpack_exports__["b"] = setStartTime;
+const state = {time: 0, startTime: 0,
 bestTime: 0, points: 0, speed: 0}
 
 function addPoints(points){
     state.points += points;
     renderPoints();
 };
-function updateTime(time){
-    state.time = time;
-    renderTime();
-};
 
 function updateSpeed(speed){
     state.speed = Math.round(speed);
     renderSpeed();
 }
-
+function updateTime(time){
+    state.time = time;
+    renderTime();
+}
+function setStartTime(time){
+    state.startTime = time;
+}
 function renderPoints(){
     document.querySelector(".hud-points_val").innerHTML = `${state.points}`;
 };
@@ -2428,9 +2409,28 @@ function renderSpeed(){
 }
 
 function renderTime(){
-
+    const elapsed = state.time - state.startTime;
+    debugger;
+    document.querySelector(".hud-time_val").innerHTML =
+    `${renderMinutes(elapsed)}'${renderSeconds(elapsed)}"${renderMilliseconds(elapsed)}`;
 }
 
+function renderMinutes(milliseconds){
+    debugger;
+    const minutes = Math.floor(milliseconds/60000);
+    return `${minutes < 10 ? "0": ""}${minutes}`
+}
+function renderSeconds(milliseconds){
+    const seconds = Math.floor((milliseconds% 60000)/1000);
+    return `${seconds < 10 ? "0": ""}${seconds}`
+}
+
+function renderMilliseconds(milliseconds){
+    const m = milliseconds % 1000;
+    if(m < 10) return`00${m}`;
+    else if(m < 100) return `0${m}`;
+    else return `${m}`;
+}
 
 /***/ })
 /******/ ]);

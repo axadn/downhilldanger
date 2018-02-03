@@ -8,6 +8,7 @@ import SkyBox from "./skybox.json";
 import Character from "./character/character";
 import Slope from "./slope/slope";
 import Mesh from "./game_object/mesh";
+import * as HUD from "./hud/hud";
 document.addEventListener("DOMContentLoaded", main);
 function main(){
   const rasterizer = new WebGLUtils.ObjectsRasterizer();
@@ -26,7 +27,12 @@ function main(){
   let skyMesh = new Mesh(SkyBox);
   skyMesh.buffers = rasterizer.sendMeshToGPU(skyMesh);
   rasterizer.skyBox = new GameObject(skyMesh);
-  window.requestAnimationFrame(rasterizer.drawObjects.bind(rasterizer));
+  HUD.setStartTime(Date.now());
+  window.requestAnimationFrame(()=>{
+    debugger;
+    HUD.updateTime(Date.now());
+    rasterizer.drawObjects.bind(rasterizer)();
+  });
 //  window.requestAnimationFrame(
 //    () => rasterizer.draw(boxMan));
 
