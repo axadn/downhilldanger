@@ -1,3 +1,3 @@
 class RootController < ApplicationController
-  render :show
+  render file: Rails.public_path.join("index.html"), layout: false
 end

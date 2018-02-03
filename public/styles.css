@@ -1,0 +1,36 @@
+html{
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  .game-display{
+      position: relative;
+  }
+  .hud{
+    width: 100%;
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    top: 25px;
+    box-sizing: border-box;
+    font-size: 31px;
+    color: white;
+    -webkit-text-stroke-width: 2px;
+    -webkit-text-stroke-color: black;
+    font-family: 'Rubik', sans-serif;
+    font-weight: 900;
+  }
+  canvas{
+    width: 720px;
+    height: 526px;
+  }
+  

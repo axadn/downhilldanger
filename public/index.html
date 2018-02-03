@@ -1,14 +1,36 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="test.css">
+    <link rel="stylesheet" href="styles.css">
     <meta charset="utf-8">
     <script type="text/javascript" src="bundle.js"></script>
-    <title></title>
+    <link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
+    <title>
+      Downhill Hazard
+    </title>
   </head>
   <body>
-    <canvas id="glCanvas"></cavas>
-
+    <div class="game-display">
+        <div class="hud">
+          <div class = "hud-left">
+            <div class = "hud-time">
+              TIME 00:00:00
+            </div>
+            <div class = "hud-best-time">
+              BEST 00:00:00
+            </div>
+          </div>
+          <div class = "hud-right">
+            <div class= "hud-speed">
+              SPEED 0 Km/h
+            </div>
+            <div class= "hud-points">
+              POINTS 0
+            </div>
+          </div>
+        </div>
+        <canvas id="glCanvas"></cavas>
+    </div>
       <script id="default-vertex-shader" type="glsl">
       attribute vec4 a_pos; // input position
       uniform mat4 view_matrix; //perspective/scale matrix
