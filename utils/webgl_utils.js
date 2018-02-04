@@ -3,11 +3,15 @@ const DEFAULT_CAMERA_DIST = 1;
 import * as MathUtils from "./math_utils";
 import GameObject from "../game_object/game_object";
 import * as HUD from "../hud/hud";
+import { vectorMag } from "./math_utils";
 
 export class ObjectsRasterizer{
   constructor(scale= 0.5, swapYZ = true){
+    window.rasterizer = this;
     const canvas = document.querySelector("#glCanvas");
+    const canvas2 = document.querySelector("#flat-canvas");
     this.gl = canvas.getContext("webgl");
+    this.ctx = canvas2.getContext('2d');
     if(!this.gl){
       alert("Unable to initialize WebGL. Your browser or machine may not support it");
       return;
@@ -174,6 +178,32 @@ export class ObjectsRasterizer{
     this.skyBox.setPosition(this.camera.getPosition());
     this.draw(this.skyBox);
   }
+  clipSpaceToFlatCanvasCoords(x,y){
+    const canvas = document.querySelector("#flat-canvas");
+    x*= canvas.width/2; 
+    x+= canvas.width/2;
+    y*= -canvas.height/2;
+    y+= canvas.height/2;
+    return [x,y];
+  }
+  debugLine(start, end){
+    debugger;
+    start = MathUtils.multiplyVec4ByMatrix4(this.viewMatrix, start.concat(1));
+    start = MathUtils.scaleVector(start, 1/start[3]);
+    start = this.clipSpaceToFlatCanvasCoords(start[0],start[1]);
+    end = MathUtils.multiplyVec4ByMatrix4(this.viewMatrix, end.concat(1));
+    end = MathUtils.scaleVector(end, 1/end[3]);
+    end = this.clipSpaceToFlatCanvasCoords(end[0], end[1]);
+    this.ctx.beginPath();
+    this.ctx.moveTo(start[0],start[1]);
+    this.ctx.lineTo(end[0],end[1]);
+    this.ctx.stroke();
+  }
+  debugCircle(pos, radius){
+    pos = MathUtils.multiplyVec4ByMatrix4(this.viewMatrix, pos.concat(0));
+    this.ctx.arc(pos[0], pos[1], radius, 0, Math.PI * 2);
+    this.ctx.stroke();
+  }
   draw(obj){
     const program = this.determineProgram(obj.mesh.skinned,
         obj.mesh.textured, obj.mesh.colored);
@@ -253,6 +283,33 @@ export class ObjectsRasterizer{
     this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
 
     this.gl.drawElements(this.gl.TRIANGLES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
+  }
+  test(){
+    const vertexBuffer = this.gl.createBuffer();
+    const vertices = [
+      -1,1,0.0,
+      -1,-1,0.0,
+      1,-1,0.0, 
+   ];
+
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertexBuffer);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+
+
+    const indicesBuffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
+    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0,1,2]),this.gl.STATIC_DRAW);
+    this.gl.useProgram(this.defaultProgram);
+
+
+    const viewMatrixUniformLocation = this.gl.getUniformLocation(this.defaultProgram, "view_matrix");
+    const viewMatrix = MathUtils.identityMatrix4;
+    this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
+
+    const posAttrIndex = this.gl.getAttribLocation(this.defaultProgram, "a_pos");
+    this.gl.vertexAttribPointer(posAttrIndex, 3, this.gl.FLOAT, false, 0, 0);
+    this.gl.clearColor(0.5, 0.5, 0.5, 0.9);
+    this.gl.drawElements(this.gl.TRIANGLES, 3, this.gl.UNSIGNED_SHORT,0);
   }
   positionCamera(){
     this.camera.setPosition(this.cameraTarget.transformPoint([0, -18, 6]));

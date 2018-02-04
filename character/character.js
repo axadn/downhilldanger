@@ -46,7 +46,7 @@ export default class Character extends GameObject{
     const distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
 
     this.velocity[2] -= this.fallSpeed;
-    if(distanceFromSurface < SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
+    if(distanceFromSurface < this.capsuleRadius){
       this._planeAlign();
       this.velocity = MathUtils.projectVectorOntoPlane(this.velocity, this.transformDirection([0,0,1]));
       let localVelocity = this.inverseTransformDirection(this.velocity);
@@ -152,11 +152,9 @@ export default class Character extends GameObject{
       this.velocity,
        MathUtils.scaleVector(collisionData.normal, -1)
     );
-    if(isNaN(addAngularVelocAngle)) debugger;
+
      addAngularVelocAngle /= 15;
-     if(isNaN(addAngularVelocAngle)) debugger;
      addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
-     if(isNaN(addAngularVelocAngle)) debugger;
      const addAngularVelocAxis = MathUtils.vectorCross(
       this.velocity,
       MathUtils.scaleVector(collisionData.normal, -1)

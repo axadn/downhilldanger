@@ -240,7 +240,6 @@ export const scaleVector = (vec, scale)=>{
 
 export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   if(vec.length < 4){
-    debugger;
     vec = vec.concat(0);
   }
   const result = [];
@@ -345,7 +344,6 @@ export const angleBetweenVectors = (to, from)=>{
   if(Math.abs(dot) <0.005 || Math.abs(dot) > 1){
     return 0;
   }
-  if(isNaN(Math.acos(dot))) debugger;
   return Math.acos(dot);
 }
 export const multiplyQuaternions = (q1, q2) => [

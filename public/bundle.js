@@ -360,7 +360,6 @@ const scaleVector = (vec, scale)=>{
 
 const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   if(vec.length < 4){
-    debugger;
     vec = vec.concat(0);
   }
   const result = [];
@@ -483,7 +482,6 @@ const angleBetweenVectors = (to, from)=>{
   if(Math.abs(dot) <0.005 || Math.abs(dot) > 1){
     return 0;
   }
-  if(isNaN(Math.acos(dot))) debugger;
   return Math.acos(dot);
 }
 /* harmony export (immutable) */ __webpack_exports__["angleBetweenVectors"] = angleBetweenVectors;
@@ -995,10 +993,14 @@ const DEFAULT_CAMERA_DIST = 1;
 
 
 
+
 class ObjectsRasterizer{
   constructor(scale= 0.5, swapYZ = true){
+    window.rasterizer = this;
     const canvas = document.querySelector("#glCanvas");
+    const canvas2 = document.querySelector("#flat-canvas");
     this.gl = canvas.getContext("webgl");
+    this.ctx = canvas2.getContext('2d');
     if(!this.gl){
       alert("Unable to initialize WebGL. Your browser or machine may not support it");
       return;
@@ -1165,6 +1167,32 @@ class ObjectsRasterizer{
     this.skyBox.setPosition(this.camera.getPosition());
     this.draw(this.skyBox);
   }
+  clipSpaceToFlatCanvasCoords(x,y){
+    const canvas = document.querySelector("#flat-canvas");
+    x*= canvas.width/2; 
+    x+= canvas.width/2;
+    y*= -canvas.height/2;
+    y+= canvas.height/2;
+    return [x,y];
+  }
+  debugLine(start, end){
+    debugger;
+    start = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](this.viewMatrix, start.concat(1));
+    start = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](start, 1/start[3]);
+    start = this.clipSpaceToFlatCanvasCoords(start[0],start[1]);
+    end = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](this.viewMatrix, end.concat(1));
+    end = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](end, 1/end[3]);
+    end = this.clipSpaceToFlatCanvasCoords(end[0], end[1]);
+    this.ctx.beginPath();
+    this.ctx.moveTo(start[0],start[1]);
+    this.ctx.lineTo(end[0],end[1]);
+    this.ctx.stroke();
+  }
+  debugCircle(pos, radius){
+    pos = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](this.viewMatrix, pos.concat(0));
+    this.ctx.arc(pos[0], pos[1], radius, 0, Math.PI * 2);
+    this.ctx.stroke();
+  }
   draw(obj){
     const program = this.determineProgram(obj.mesh.skinned,
         obj.mesh.textured, obj.mesh.colored);
@@ -1244,6 +1272,33 @@ class ObjectsRasterizer{
     this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
 
     this.gl.drawElements(this.gl.TRIANGLES, obj.mesh.faces.length, this.gl.UNSIGNED_SHORT,0);
+  }
+  test(){
+    const vertexBuffer = this.gl.createBuffer();
+    const vertices = [
+      -1,1,0.0,
+      -1,-1,0.0,
+      1,-1,0.0, 
+   ];
+
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertexBuffer);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), this.gl.STATIC_DRAW);
+
+
+    const indicesBuffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
+    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0,1,2]),this.gl.STATIC_DRAW);
+    this.gl.useProgram(this.defaultProgram);
+
+
+    const viewMatrixUniformLocation = this.gl.getUniformLocation(this.defaultProgram, "view_matrix");
+    const viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["identityMatrix4"];
+    this.gl.uniformMatrix4fv(viewMatrixUniformLocation,false, viewMatrix);
+
+    const posAttrIndex = this.gl.getAttribLocation(this.defaultProgram, "a_pos");
+    this.gl.vertexAttribPointer(posAttrIndex, 3, this.gl.FLOAT, false, 0, 0);
+    this.gl.clearColor(0.5, 0.5, 0.5, 0.9);
+    this.gl.drawElements(this.gl.TRIANGLES, 3, this.gl.UNSIGNED_SHORT,0);
   }
   positionCamera(){
     this.camera.setPosition(this.cameraTarget.transformPoint([0, -18, 6]));
@@ -1625,7 +1680,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     const distanceFromSurface = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorSquareMag"](surfaceOffset);
 
     this.velocity[2] -= this.fallSpeed;
-    if(distanceFromSurface < SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE){
+    if(distanceFromSurface < this.capsuleRadius){
       this._planeAlign();
       this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlane"](this.velocity, this.transformDirection([0,0,1]));
       let localVelocity = this.inverseTransformDirection(this.velocity);
@@ -1731,11 +1786,9 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       this.velocity,
        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](collisionData.normal, -1)
     );
-    if(isNaN(addAngularVelocAngle)) debugger;
+
      addAngularVelocAngle /= 15;
-     if(isNaN(addAngularVelocAngle)) debugger;
      addAngularVelocAngle *= __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorMag"](this.velocity);
-     if(isNaN(addAngularVelocAngle)) debugger;
      const addAngularVelocAxis = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorCross"](
       this.velocity,
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](collisionData.normal, -1)
