@@ -988,6 +988,7 @@ const handleKeyDown = rasterizer => e => {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game_object_game_object__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__hud_hud__ = __webpack_require__(14);
 const DEFAULT_CAMERA_DIST = 1;
+const BONE_INFLUENCES = 2;
 
 
 
@@ -1038,7 +1039,7 @@ class ObjectsRasterizer{
     return createProgram(this.gl, vertexShader, fragmentShader);
   }
   calculateStrideLength(skinned, textured, colored){
-    let strideLength = skinned ?  20: 12;
+    let strideLength = skinned ?  12 + BONE_INFLUENCES * 2 : 12;
     if(textured) strideLength += 8;
     else if (colored) strideLength += 4;
     return strideLength;
@@ -1047,8 +1048,8 @@ class ObjectsRasterizer{
   /*
    create gpu buffer layout:
     pos                   bone weights      bone indexes
-    float*3 = 12 bytes + unsigned byte *4 + unsigned byte *4
-    = 20 bytes per vertex if skinned or 12 if unskinned
+    float*3 = 12 bytes + unsigned byte *2 + unsigned byte *2
+    = 16 bytes per vertex if skinned or 12 if unskinned
 
   add this if textured:
     uvs
@@ -1077,10 +1078,10 @@ class ObjectsRasterizer{
         offset += 4;
       }
       if(mesh.skinned){
-        for(let i= 0; i< 4; ++i){
+        for(let i= 0; i< BONE_INFLUENCES; ++i){
           dataView.setUint8(offset++, mesh.boneWeights[weightIdx++], littleEndian);
         }
-        for(let i = 0; i <4; ++i){
+        for(let i = 0; i <BONE_INFLUENCES; ++i){
           dataView.setUint8(offset++, mesh.boneIndices[boneIdx++], littleEndian);
         }
       }
@@ -1175,8 +1176,8 @@ class ObjectsRasterizer{
     y+= canvas.height/2;
     return [x,y];
   }
+
   debugLine(start, end){
-    debugger;
     start = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](this.viewMatrix, start.concat(1));
     start = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](start, 1/start[3]);
     start = this.clipSpaceToFlatCanvasCoords(start[0],start[1]);
@@ -1188,6 +1189,9 @@ class ObjectsRasterizer{
     this.ctx.lineTo(end[0],end[1]);
     this.ctx.stroke();
   }
+
+
+
   debugCircle(pos, radius){
     pos = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](this.viewMatrix, pos.concat(0));
     this.ctx.arc(pos[0], pos[1], radius, 0, Math.PI * 2);
@@ -1210,12 +1214,12 @@ class ObjectsRasterizer{
     if(obj.mesh.skinned){
       const weightsAttrIndex = this.gl.getAttribLocation(program, "a_weights");
       const boneIndicesIndex = this.gl.getAttribLocation(program, "a_bone_indices");
-      this.gl.vertexAttribPointer(weightsAttrIndex, 4, this.gl.UNSIGNED_BYTE, true, strideLength, offset);
+      this.gl.vertexAttribPointer(weightsAttrIndex, BONE_INFLUENCES, this.gl.UNSIGNED_BYTE, true, strideLength, offset);
       this.gl.enableVertexAttribArray(weightsAttrIndex);
-      offset += 4;
-      this.gl.vertexAttribPointer(boneIndicesIndex, 4, this.gl.UNSIGNED_BYTE, false, strideLength, offset);
+      offset += BONE_INFLUENCES;
+      this.gl.vertexAttribPointer(boneIndicesIndex, BONE_INFLUENCES, this.gl.UNSIGNED_BYTE, false, strideLength, offset);
       this.gl.enableVertexAttribArray(boneIndicesIndex);
-      offset += 4;
+      offset += BONE_INFLUENCES;
 
       //fill the bones with identity matrix
     //  let identities = [];

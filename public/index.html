@@ -94,7 +94,7 @@
     idx = int(a_bone_indices.x);
     vertex = (boneTransforms[idx] * a_pos) * a_weights.x;
 
-    for(int i =0; i < 4; ++i){
+    for(int i =0; i < 2; ++i){
         idx = int(a_bone_indices[i]);
         vertex += (boneTransforms[idx] * a_pos) * a_weights[i];
     }
