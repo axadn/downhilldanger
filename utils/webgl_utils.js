@@ -37,6 +37,7 @@ export class ObjectsRasterizer{
   compileDefaultShaders(){
     this.defaultProgram = this.compileByID("default-vertex-shader", "default-fragment-shader");
     this.coloredProgram = this.compileByID("colored-vertex-shader", "colored-fragment-shader");
+    this.skinnedColoredProgram = this.compileByID("skinned-colored-vertex-shader", "colored-fragment-shader");
     this.skinnedTexturedProgram = this.compileByID("skinned-textured-vertex-shader",
      "textured-fragment-shader");
      this.texturedProgram = this.compileByID("textured-vertex-shader",
@@ -68,7 +69,7 @@ export class ObjectsRasterizer{
 
   or add this if using vertex colors instead of textures:
     colors
-    unsigned_short * 4 = 8 bytes
+    byte * 4 = 4 bytes
 
   */
   meshToArrayBuffer(mesh){
@@ -90,7 +91,7 @@ export class ObjectsRasterizer{
       }
       if(mesh.skinned){
         for(let i= 0; i< BONE_INFLUENCES; ++i){
-          dataView.setUint8(offset++, mesh.boneWeights[weightIdx++], littleEndian);
+          dataView.setUint8(offset++, mesh.boneWeights[weightIdx++]*255, littleEndian);
         }
         for(let i = 0; i <BONE_INFLUENCES; ++i){
           dataView.setUint8(offset++, mesh.boneIndices[boneIdx++], littleEndian);
@@ -208,6 +209,7 @@ export class ObjectsRasterizer{
     this.ctx.arc(pos[0], pos[1], radius, 0, Math.PI * 2);
     this.ctx.stroke();
   }
+
   draw(obj){
     const program = this.determineProgram(obj.mesh.skinned,
         obj.mesh.textured, obj.mesh.colored);
@@ -237,7 +239,6 @@ export class ObjectsRasterizer{
     //  for(let i = 0; i < 20; ++i){
       //  identities = identities.concat(MathUtils.identityMatrix4);
     //  }
-  //  debugger;
         // let composed = [];
          const boneTransforms = obj.mesh.animations[obj.currentAnimation][obj.currentAnimationFrame];
         // for(let i = 0; i < boneTransforms.length; ++i){
@@ -249,13 +250,13 @@ export class ObjectsRasterizer{
         //     composed.push(boneTransforms[i]);
         //   }
         // }
-        let unBound = [];
-        for(let i = 0; i < boneTransforms.length; ++i){
-          unBound = unBound.concat(MathUtils.mat_4_multiply(
-            boneTransforms[i],
-            MathUtils.inverse_mat4_rot_pos(obj.mesh.bones[i].bindPose)
-            ));
-        }
+        // let unBound = [];
+        // for(let i = 0; i < boneTransforms.length; ++i){
+        //   unBound = unBound.concat(MathUtils.mat_4_multiply(
+        //     boneTransforms[i],
+        //     MathUtils.inverse_mat4_rot_pos(obj.mesh.bones[i].bindPose)
+        //     ));
+        // }
         //for(let i = 0; i < boneTransforms.length; ++i){
         //  inverselyBound = inverselyBound.concat(
         //    MathUtils.mat_4_multiply(
@@ -264,7 +265,7 @@ export class ObjectsRasterizer{
         //    ));
         //}
         const boneTransformsLocation = this.gl.getUniformLocation(program, "boneTransforms");
-        this.gl.uniformMatrix4fv(boneTransformsLocation, false, unBound);
+        this.gl.uniformMatrix4fv(boneTransformsLocation, false, boneTransforms);
     }
 
     if(obj.mesh.textured){

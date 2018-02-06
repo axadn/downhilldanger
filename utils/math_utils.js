@@ -64,7 +64,15 @@ export const zRotationMatrix = radians => {
     0, 0, 0, 1
   ];
 };
-
+export const mat_4_transpose = mat =>{
+  const new_mat = [];
+  for(let i = 0; i < 4; ++i){
+    for(let j = 0; j < 4; ++j){
+      new_mat.push(mat[i + j * 4]);
+    }
+  }
+  return new_mat;
+}
 export const inverse_mat4_rot_pos = mat=>{
   /*invert a matrix that contains only rot and pos :
   * break down the matrix into a rotation and position component

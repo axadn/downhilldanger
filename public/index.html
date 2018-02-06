@@ -49,6 +49,27 @@
       }
     </script>
 
+    <script id="skinned-colored-vertex-shader" type="glsl">
+      attribute vec4 a_pos;
+      attribute vec4 vColor;
+      attribute vec2 a_bone_indices;
+      attribute vec2 a_weights;
+
+      varying vec4 v_color;
+      uniform mat4 view_matrix;
+      uniform mat4 boneTransforms[20];
+      void main() {
+        vec4 newVertex;
+        int index;
+        index = int(a_bone_indices.x);
+        newVertex = (boneTransforms[index] * a_pos) * a_weights.x;
+        index = int(a_bone_indices.y);
+        newVertex = (boneTransforms[index] * a_pos) * a_weights.y + newVertex;
+        gl_Position = view_matrix * vec4(newVertex.xyz, 1);
+        v_color = vColor;
+      }
+
+    </script>
     <script id="colored-vertex-shader" type="glsl">
     attribute vec4 a_pos;
     attribute vec4 vColor;
@@ -58,6 +79,7 @@
       gl_Position = view_matrix * a_pos;
       v_color = vColor;
     }
+     
   </script>
   <script id="colored-fragment-shader" type="glsl">
     varying lowp vec4 v_color;

@@ -28,10 +28,11 @@ export default class Character extends GameObject{
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
-    this.capsuleRadius = 2.2;
+    this.capsuleRadius = 2;
     this.setPosition([0,0,16]);
     this.name = "snowboarder";
-
+    this.currentAnimation = "right";
+    this.currentAnimationFrame = 0;
     window.character = this;
 
   }
