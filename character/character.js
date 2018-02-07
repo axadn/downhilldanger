@@ -128,7 +128,7 @@ export default class Character extends GameObject{
       }
     }
     else{
-      this.currentAnimation = "neutral";
+      this.currentAnimation = "root";
     }
     if(this.input.back){
       this.friction = BREAK_FRICTION

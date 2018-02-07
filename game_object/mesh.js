@@ -35,18 +35,43 @@ export default class Mesh {
       });
       this.vertices = data.vertexPositions;
       this.faces = data.vertexPositionIndices;
+      if(colored){
+        this.colors = Array(this.vertices.length);
+        data.vertexColorIndices.forEach((colorIdx, positionInArray)=>{
+          const outputPosition = this.faces[positionInArray] * 3;
+          for(let i = 0; i < 3; ++i){
+            this.colors[outputPosition + i] = data.vertexColors[colorIdx*3 + i];
+          }
+        });
+      }
+
+      const nameToAnimPosition = {};
+      Object.keys(action_file.jointNameIndices).forEach(jointName=>{
+        nameToAnimPosition[jointName.replace(".", "_")] = action_file.jointNameIndices[jointName];
+      });
+
+      const boneOrder = Object.entries(data.jointNamePositionIndex).sort(
+        (nameIndex0, nameIndex1) => nameIndex0[1] < nameIndex1[1] ? -1 : 1
+      ).map(entry=>
+        nameToAnimPosition[entry[0]]
+      );
+
       let frame, newAction, matrix;
       Object.keys(action_file.actions).forEach(actionName=>{
-        debugger;
         newAction = [];
         Object.keys(action_file.actions[actionName]).forEach(keyFrame=>{
           frame = [];
-          action_file.actions[actionName][keyFrame].forEach((boneMat,boneIdx)=>{
-            matrix = 
-            MathUtils.mat_4_transpose(
+          boneOrder.forEach(animBoneIdx =>{
+            if(animBoneIdx === undefined){
+              matrix = MathUtils.identityMatrix4;
+            }
+            else{
+              matrix = action_file.actions[actionName][keyFrame][animBoneIdx];
+            }
+            matrix = MathUtils.mat_4_transpose(
               MathUtils.mat_4_multiply(
-                boneMat,
-                action_file.inverseBindPoses[boneIdx]
+                matrix,
+                action_file.inverseBindPoses[animBoneIdx]
               )
             );
             matrix.forEach(el=>frame.push(el));
