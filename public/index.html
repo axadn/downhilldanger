@@ -57,15 +57,71 @@
 
       varying vec4 v_color;
       uniform mat4 view_matrix;
-      uniform mat4 boneTransforms[20];
+      uniform vec4 boneTransforms[40];
       void main() {
-        vec4 newVertex;
-        int index;
-        index = int(a_bone_indices.x);
-        newVertex = (boneTransforms[index] * a_pos) * a_weights.x;
-        index = int(a_bone_indices.y);
-        newVertex = (boneTransforms[index] * a_pos) * a_weights.y + newVertex;
-        gl_Position = view_matrix * vec4(newVertex.xyz, 1);
+      vec4 weightedQuat0 = 
+        boneTransforms[int(a_bone_indices.x)* 2] * a_weights.x +
+        boneTransforms[int(a_bone_indices.y)* 2] * a_weights.y;
+
+      vec4 weightedQuat1 =
+        boneTransforms[int(a_bone_indices.x)* 2 + 1] * a_weights.x +
+        boneTransforms[int(a_bone_indices.y)* 2 + 1] * a_weights.y;
+
+
+      float xR = weightedQuat0[0];
+      float yR = weightedQuat0[1];
+      float zR = weightedQuat0[2];
+      float wR = weightedQuat0[3];
+      float xT = weightedQuat1[0];
+      float yT = weightedQuat1[1];
+      float zT = weightedQuat1[2];
+      float wT = weightedQuat1[3];
+      float t0 = 2.0 * (-wT * xR + xT * wR - yT * zR + zT * yR);
+      float t1 = 2.0 * (-wT * yR + xT * zR + yT * wR - zT * xR);
+      float t2 = 2.0 * (-wT * zR - xT * yR + yT * xR + zT * wR);
+      mat4 weightedJointMatrix = mat4(
+        1.0 - (2.0 * yR * yR) - (2.0 * zR * zR),
+        (2.0 * xR * yR) + (2.0 * wR * zR),
+        (2.0 * xR * zR) - (2.0 * wR * yR),
+        0,
+        (2.0 * xR * yR) - (2.0 * wR * zR),
+        1.0 - (2.0 * xR * xR) - (2.0 * zR * zR),
+        (2.0 * yR * zR) + (2.0 * wR * xR),
+        0,
+        (2.0 * xR * zR) + (2.0 * wR * yR),
+        (2.0 * yR * zR) - (2.0 * wR * xR),
+        1.0 - (2.0 * xR * xR) - (2.0 * yR * yR),
+        0,
+        t0,
+        t1,
+        t2,
+        1
+        );
+
+        float xRot = weightedQuat0[0];
+        float yRot = weightedQuat0[1];
+        float zRot = weightedQuat0[2];
+        float wRot = weightedQuat0[3];
+
+        float quat0Magnitude = sqrt(xRot * xRot + yRot * yRot
+          + zRot * zRot + wRot * wRot);
+
+        xRot = weightedQuat1[0];
+        yRot = weightedQuat1[1];
+        zRot = weightedQuat1[2];
+        wRot = weightedQuat1[3];
+
+        float quat1Magnitude = sqrt(xRot * xRot + yRot * yRot
+          + zRot * zRot + wRot * wRot);
+
+        weightedQuat0 = weightedQuat0 / quat0Magnitude;
+        weightedQuat1 = weightedQuat1 / quat1Magnitude;
+
+      //  vec3 position = a_pos.xyz + 2.0*cross(weightedQuat0.yzw, cross(weightedQuat0.yzw, a_pos.xyz) + weightedQuat0.x*a_pos.xyz);
+	     // vec3 trans = 2.0*(weightedQuat0.x*weightedQuat1.yzw - weightedQuat1.x*weightedQuat0.yzw + cross(weightedQuat0.yzw, weightedQuat1.yzw));
+      //	position += trans;
+        vec4 position = weightedJointMatrix * a_pos;
+        gl_Position = view_matrix * vec4(position.xyz, 1);
         v_color = vColor;
       }
 
@@ -107,7 +163,7 @@
   attribute vec4 a_bone_indices;
 
   uniform mat4 view_matrix;
-  uniform mat4 boneTransforms[20];
+  uniform vec4 boneTransforms[40];
   varying vec2 v_uvs;
   void main() {
     vec4 vertex= vec4(0.0, 0.0, 0.0, 0.0);

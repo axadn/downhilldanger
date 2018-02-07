@@ -3,7 +3,7 @@ import * as WebGLUtils from "./utils/webgl_utils";
 import * as Input from "./input.js";
 import monkeyData from "./untitled.js";
 import snowboarder_data from "./snowboarder";
-import snowboardActions from "./snowboard_actions";
+import snowboardActions from "./actions";
 import GameObject from "./game_object/game_object";
 import SkyBox from "./skybox.json";
 import Character from "./character/character";

@@ -4,6 +4,7 @@
   "description": "",
   "main": "downhill_hazard",
   "dependencies": {
+    "mat4-to-dual-quat": "^1.0.0",
     "webpack": "^3.10.0"
   },
   "devDependencies": {}

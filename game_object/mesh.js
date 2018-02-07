@@ -1,3 +1,5 @@
+const mat4ToDualQuat = require('mat4-to-dual-quat');
+
 import * as MathUtils from "../utils/math_utils";
 function isZeroQuat(quat){
   return quat[0]=== 0 && quat[1] === 0 && quat[2] === 0 && quat[3] === 1;
@@ -74,7 +76,7 @@ export default class Mesh {
                 action_file.inverseBindPoses[animBoneIdx]
               )
             );
-            matrix.forEach(el=>frame.push(el));
+            mat4ToDualQuat(matrix).forEach(el=>frame.push(el));
           });
           newAction.push(frame);
         });

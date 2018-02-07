@@ -31,7 +31,7 @@ export default class Character extends GameObject{
     this.capsuleRadius = 2;
     this.setPosition([0,0,16]);
     this.name = "snowboarder";
-    this.currentAnimation = "neutral";
+    this.currentAnimation = "idle";
     this.currentAnimationFrame = 0;
     window.character = this;
 
@@ -128,7 +128,7 @@ export default class Character extends GameObject{
       }
     }
     else{
-      this.currentAnimation = "root";
+      this.currentAnimation = "neutral";
     }
     if(this.input.back){
       this.friction = BREAK_FRICTION

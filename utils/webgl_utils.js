@@ -225,7 +225,6 @@ export class ObjectsRasterizer{
     this.gl.enableVertexAttribArray(posAttrIndex);
     offset += 12;
     if(obj.mesh.skinned){
-      debugger;
       const weightsAttrIndex = this.gl.getAttribLocation(program, "a_weights");
       const boneIndicesIndex = this.gl.getAttribLocation(program, "a_bone_indices");
       this.gl.vertexAttribPointer(weightsAttrIndex, BONE_INFLUENCES, this.gl.UNSIGNED_BYTE, true, strideLength, offset);
@@ -242,6 +241,7 @@ export class ObjectsRasterizer{
     //  }
         // let composed = [];
          const boneTransforms = obj.mesh.animations[obj.currentAnimation][obj.currentAnimationFrame];
+         debugger;
         // for(let i = 0; i < boneTransforms.length; ++i){
         //   if(obj.mesh.bones[i].parent !== -1){
         //     composed.push(MathUtils.mat_4_multiply(
@@ -266,7 +266,7 @@ export class ObjectsRasterizer{
         //    ));
         //}
         const boneTransformsLocation = this.gl.getUniformLocation(program, "boneTransforms");
-        this.gl.uniformMatrix4fv(boneTransformsLocation, false, boneTransforms);
+        this.gl.uniform4fv(boneTransformsLocation, boneTransforms);
     }
 
     if(obj.mesh.textured){
