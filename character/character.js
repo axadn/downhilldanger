@@ -31,7 +31,7 @@ export default class Character extends GameObject{
     this.capsuleRadius = 2;
     this.setPosition([0,0,16]);
     this.name = "snowboarder";
-    this.currentAnimation = "idle";
+    this.currentAnimation = "neutral";
     this.currentAnimationFrame = 0;
     window.character = this;
 

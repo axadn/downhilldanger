@@ -1645,7 +1645,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.capsuleRadius = 2;
     this.setPosition([0,0,16]);
     this.name = "snowboarder";
-    this.currentAnimation = "idle";
+    this.currentAnimation = "neutral";
     this.currentAnimationFrame = 0;
     window.character = this;
 
