@@ -2,7 +2,7 @@ import * as MathUtils from "./utils/math_utils";
 import * as WebGLUtils from "./utils/webgl_utils";
 import * as Input from "./input.js";
 import monkeyData from "./untitled.js";
-import boxManMesh from "./boxman";
+import snowboarder_data from "./snowboarder";
 import snowboardActions from "./snowboard_actions";
 import GameObject from "./game_object/game_object";
 import SkyBox from "./skybox.json";
@@ -21,12 +21,8 @@ function main(){
   const slope = new Slope(MathUtils.translationMatrix(0,-3,-4), rasterizer, "snow.jpg");
   window.slope = slope;
 
-  boxManMesh.skinned = true;
-  boxManMesh.colored = true;
-  boxManMesh.mode2 = true;
-  boxManMesh.action_file = snowboardActions;
-  //boxManMesh.textured = true;
-  const boxMan = new Character(new Mesh(boxManMesh), undefined, slope);
+  const boxMan = new Character(new Mesh({data:snowboarder_data,
+        action_file: snowboardActions, mode2: true,colored: true, skinned: true}), undefined, slope);
   boxMan.mesh.name = "boxy";
   //boxMan.playAnimation("rest");
   rasterizer.objects.boxMan = boxMan;

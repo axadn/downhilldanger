@@ -17,26 +17,36 @@ export default class Mesh {
     this.boneIndices = skinIndices;
     this.animations ={};
     if(mode2){
-      const indices = faces;
-      this.faces = [];
-      
-       for(let i = 0; i <indices.length;i+=10){
-         this.faces.push(indices[i+1]);
-         this.faces.push(indices[i+2]);
-         this.faces.push(indices[i+3]);
-       }
-
+      this.boneWeights = [];
+      this.boneIndices = [];
+      let boneIndices;
+      data.vertexJointWeights.forEach((weights, vertexIdx)=>{
+        boneIndices = Object.keys(weights);
+        this.boneWeights.push(weights[boneIndices[0]]);
+        this.boneIndices.push(parseInt(boneIndices[0]));
+        if(boneIndices[1]){
+          this.boneWeights.push(weights[boneIndices[1]]);
+          this.boneIndices.push(parseInt(boneIndices[1]));
+        }
+        else{
+          this.boneWeights.push(0);
+          this.boneIndices.push(0);
+        }
+      });
+      this.vertices = data.vertexPositions;
+      this.faces = data.vertexPositionIndices;
       let frame, newAction, matrix;
       Object.keys(action_file.actions).forEach(actionName=>{
+        debugger;
         newAction = [];
         Object.keys(action_file.actions[actionName]).forEach(keyFrame=>{
           frame = [];
-          bones.forEach(bone=>{
+          action_file.actions[actionName][keyFrame].forEach((boneMat,boneIdx)=>{
             matrix = 
             MathUtils.mat_4_transpose(
               MathUtils.mat_4_multiply(
-                action_file.actions[actionName][keyFrame][action_file.jointNameIndices[bone.name]],
-                action_file.inverseBindPoses[action_file.jointNameIndices[bone.name]]
+                boneMat,
+                action_file.inverseBindPoses[boneIdx]
               )
             );
             matrix.forEach(el=>frame.push(el));

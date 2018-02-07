@@ -225,6 +225,7 @@ export class ObjectsRasterizer{
     this.gl.enableVertexAttribArray(posAttrIndex);
     offset += 12;
     if(obj.mesh.skinned){
+      debugger;
       const weightsAttrIndex = this.gl.getAttribLocation(program, "a_weights");
       const boneIndicesIndex = this.gl.getAttribLocation(program, "a_bone_indices");
       this.gl.vertexAttribPointer(weightsAttrIndex, BONE_INFLUENCES, this.gl.UNSIGNED_BYTE, true, strideLength, offset);

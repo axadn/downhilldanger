@@ -31,7 +31,7 @@ export default class Character extends GameObject{
     this.capsuleRadius = 2;
     this.setPosition([0,0,16]);
     this.name = "snowboarder";
-    this.currentAnimation = "right";
+    this.currentAnimation = "neutral";
     this.currentAnimationFrame = 0;
     window.character = this;
 
@@ -108,6 +108,7 @@ export default class Character extends GameObject{
     }
   }
   _steer(direction){
+
     this.addAngularVelocity(
       MathUtils.axisAngleToQuaternion(
         this.transformDirection([0,0,1]),
@@ -118,11 +119,16 @@ export default class Character extends GameObject{
   _handleControls(){
     if(this.input.left ? !this.input.right : this.input.right){
       if(this.input.right){
+        this.currentAnimation = "right";
         this._steer(-1);
       }
       else{
+        this.currentAnimation = "left";
         this._steer(1);
       }
+    }
+    else{
+      this.currentAnimation = "neutral";
     }
     if(this.input.back){
       this.friction = BREAK_FRICTION
