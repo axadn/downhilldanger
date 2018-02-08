@@ -240,8 +240,13 @@ export class ObjectsRasterizer{
       //  identities = identities.concat(MathUtils.identityMatrix4);
     //  }
         // let composed = [];
-         const boneTransforms = obj.mesh.animations[obj.currentAnimation][obj.currentAnimationFrame];
-         debugger;
+        // let
+        // const boneTransforms = obj.keys(currentAnimations).reduce(
+        //   (accum, anim)=>{
+
+        //   }
+        // );
+         const boneTransforms = obj.mixedAnimations;
         // for(let i = 0; i < boneTransforms.length; ++i){
         //   if(obj.mesh.bones[i].parent !== -1){
         //     composed.push(MathUtils.mat_4_multiply(

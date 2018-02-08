@@ -2,7 +2,8 @@ import GameObject from "../game_object/game_object";
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
-const STEER_SPEED = 0.02;
+const STEER_SPEED = 0.015;
+const STEER_ANIMATION_LERP_SPEED = 0.07;
 
 const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
@@ -31,10 +32,14 @@ export default class Character extends GameObject{
     this.capsuleRadius = 2;
     this.setPosition([0,0,16]);
     this.name = "snowboarder";
-    this.currentAnimation = "neutral";
+    this.currentAnimations = {
+      "neutral":{influence: 1},
+      "left":{influence: 0},
+      "right":{influence: 0}
+    };
     this.currentAnimationFrame = 0;
     window.character = this;
-
+    this.mixedAnimations = Array(this.mesh.numBones * 8);
   }
 
   update(){
@@ -54,6 +59,8 @@ export default class Character extends GameObject{
       this._applyFriction(localVelocity);
       this.velocity = this.transformDirection(localVelocity);
     }
+    this.normalizeAnimationInfluence();
+    this._mixAnimations();
     super.update();
   }
   
@@ -115,20 +122,84 @@ export default class Character extends GameObject{
       -1 * direction * STEER_SPEED)
     );
   }
-
+  _mixAnimations(){
+    const currentKeys = Object.keys(this.currentAnimations);
+    //first fill the lerped transform with the first animation we find,
+    // which does not have influence 0, * its influence
+    let firstAnimIndex;
+    for(let i = 0; i < currentKeys.length; ++i){
+      if(this.currentAnimations[currentKeys[i]].influence !== 0){
+        firstAnimIndex = i;
+        break;
+      }
+    }
+    debugger;
+    console.log(this.currentAnimations);
+    console.log(firstAnimIndex);
+    let anim = this.mesh.animations[currentKeys[firstAnimIndex]][0];
+    let influence = this.currentAnimations[currentKeys[firstAnimIndex]].influence;
+    for(let i = 0; i < anim.length; ++i){
+      this.mixedAnimations[i] = anim[i] * influence;
+    }
+    // now add all the other anims * their influence
+    debugger;
+    for(let i = firstAnimIndex + 1; i < currentKeys.length; ++i){
+      if(this.currentAnimations[currentKeys[i]].influence === 0) continue;
+      anim = this.mesh.animations[currentKeys[i]][0];
+      influence = this.currentAnimations[currentKeys[i]].influence;
+      for(let transformIdx = 0; transformIdx < anim.length; ++transformIdx){
+        this.mixedAnimations[transformIdx] += 
+          anim[transformIdx] * influence;
+      }
+    }
+  }
+  normalizeAnimationInfluence(){
+    debugger;
+    const magnitude = Object.values(this.currentAnimations).reduce(
+      (accum,anim)=>accum + anim.influence, 0);
+    Object.values(this.currentAnimations).forEach(
+      animation=>animation.influence /= magnitude);
+  }
+  steerAnimationLeft(){
+    this.fadeOutSteeringInfluence("right");
+    this.fadeOutSteeringInfluence("neutral");
+    this.fadeInSteeringInfluence("left");
+  }
+  steerAnimationRight(){
+    this.fadeOutSteeringInfluence("left");
+    this.fadeOutSteeringInfluence("neutral");
+    this.fadeInSteeringInfluence("right");
+  }
+  steerAnimationNeutral(){
+    this.fadeOutSteeringInfluence("right");
+    this.fadeOutSteeringInfluence("left");
+    this.fadeInSteeringInfluence("neutral");
+  }
+  fadeOutSteeringInfluence(key){
+    this.currentAnimations[key].influence -= STEER_ANIMATION_LERP_SPEED;
+    this.currentAnimations[key].influence = Math.max(
+      this.currentAnimations[key].influence, 0
+    );
+  }
+  fadeInSteeringInfluence(key){
+    this.currentAnimations[key].influence += STEER_ANIMATION_LERP_SPEED;
+    this.currentAnimations[key].influence = Math.min(
+      this.currentAnimations[key].influence, 1
+    )
+  }
   _handleControls(){
     if(this.input.left ? !this.input.right : this.input.right){
       if(this.input.right){
-        this.currentAnimation = "right";
         this._steer(-1);
+        this.steerAnimationRight();
       }
       else{
-        this.currentAnimation = "left";
+        this.steerAnimationLeft();
         this._steer(1);
       }
     }
     else{
-      this.currentAnimation = "neutral";
+      this.steerAnimationNeutral();
     }
     if(this.input.back){
       this.friction = BREAK_FRICTION

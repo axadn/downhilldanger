@@ -22,6 +22,7 @@ export default class Mesh {
       this.boneWeights = [];
       this.boneIndices = [];
       let boneIndices;
+      this.numBones = Object.keys(data.jointNamePositionIndex).length;
       data.vertexJointWeights.forEach((weights, vertexIdx)=>{
         boneIndices = Object.keys(weights);
         this.boneWeights.push(weights[boneIndices[0]]);
