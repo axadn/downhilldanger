@@ -7,7 +7,7 @@ const STEER_ANIMATION_LERP_SPEED = 0.09;
 
 const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
-const BREAK_FRICTION = [0.187,0.12,0.187];
+const BREAK_FRICTION = [0.04,0.16,0.04];
 import * as MathUtils from "../utils/math_utils";
 import * as HUD from "../hud/hud";
 window.MathUtils = MathUtils;
@@ -154,7 +154,6 @@ export default class Character extends GameObject{
     }
   }
   normalizeAnimationInfluence(){
-    debugger;
     const magnitude = Object.values(this.currentAnimations).reduce(
       (accum,anim)=>accum + anim.influence, 0);
     Object.values(this.currentAnimations).forEach(

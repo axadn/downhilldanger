@@ -1627,7 +1627,7 @@ const STEER_ANIMATION_LERP_SPEED = 0.09;
 
 const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
-const BREAK_FRICTION = [0.187,0.12,0.187];
+const BREAK_FRICTION = [0.04,0.16,0.04];
 
 
 window.MathUtils = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__;
@@ -1774,7 +1774,6 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   normalizeAnimationInfluence(){
-    debugger;
     const magnitude = Object.values(this.currentAnimations).reduce(
       (accum,anim)=>accum + anim.influence, 0);
     Object.values(this.currentAnimations).forEach(
