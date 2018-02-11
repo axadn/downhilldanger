@@ -22,7 +22,7 @@ const BALLOON_DENSITY_WIDTHWISE = 2;
 const BALLOON_FLOAT_HEIGHT = 6;
 const BALLOON_RADIUS = 4.2;
 const BOX_COLLIDER = "BOX_COLLIDER";
-const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
+const BEGINNING_NO_OBSTACLE_SEGMENTS = 1;
 const CLIFF_PROBABILITY = 0.05;
 
 import treeMesh from "../tree.js";
@@ -289,6 +289,13 @@ export default class Slope extends GameObject{
       ),TREE_RADIUS,capsulePointA,capsulePointB,capsuleRadius );
       if(collisionData) return collisionData;
     }
+    for(let i = 0; i < this.obstacles[segment_number + 1].length; ++i){
+      obstacle = this.obstacles[segment_number + 1][i];
+      collisionData = CollisionUtils.sphereCollidesCapsule(MathUtils.mat4TranslationComponent(
+        obstacle.getTransformationMatrix()
+      ),TREE_RADIUS,capsulePointA,capsulePointB,capsuleRadius );
+      if(collisionData) return collisionData;
+    }
     return false;
   }
   capsuleCollidesWithBalloons(capsulePointA, capsulePointB, capsuleRadius, segment_number){
@@ -372,6 +379,7 @@ export default class Slope extends GameObject{
       pointBeyondEdge = this._positionIsBeyondEdge(checkPoints[i], segmentNumber,
         toggleLeft);
       if(pointBeyondEdge){
+        debugger;
         return pointBeyondEdge;
       }
     }
@@ -406,12 +414,13 @@ export default class Slope extends GameObject{
       vec1 = [0,0,1];
     }
     else{
-      vec1 = MathUtils.subtractVectors(nextSegPoint, currentSegPoint);
-      vec0 = [0,0,1];
+      vec0 = MathUtils.subtractVectors(nextSegPoint, currentSegPoint);
+      vec1 = [0,0,-1];
     }
-    const edgeNormal = MathUtils.vectorCross(vec0, vec1);
+    const edgeNormal = MathUtils.vectorCross( vec0, vec1);
     const posOffset = MathUtils.subtractVectors(pos, currentSegPoint);
     if(MathUtils.vectorDot(posOffset, edgeNormal) < 0){
+      debugger;
       let edgeVector =  toggleLeft? vec0: vec1;
       return{normal: edgeNormal, colliderPoint: pos,
          vector: edgeVector, edgePoint0: currentSegPoint,

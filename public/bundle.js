@@ -843,12 +843,16 @@ capsulePoint0, capsulePoint1, capsuleRadius){
     return false;
   } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["distance"](capsulePoint0, sphereOrigin)) <= maxDist){
     const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint0);
-    return _getSphereCapsuleCollisionData({sphereOrigin, sphereRadius, point0ToSphereOrigin,
-       capsuleVector, capsuleRadius, dist});
+    let sphereNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint0, sphereOrigin);
+    let penetration = maxDist - dist - capsuleRadius;
+    let spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](sphereNormal), sphereRadius);
+    return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
   } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["distance"](capsulePoint1, sphereOrigin)) <= maxDist){
     const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint1);
-    return _getSphereCapsuleCollisionData({sphereOrigin, sphereRadius, point0ToSphereOrigin,
-       capsuleVector, capsuleRadius, dist});
+    let sphereNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint1, sphereOrigin);
+    let penetration = maxDist - dist - capsuleRadius;
+    let spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](sphereNormal), sphereRadius);
+    return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
   }
   return false;
 }
@@ -863,26 +867,24 @@ function _getSphereCapsuleCollisionData({sphereOrigin,sphereRadius, capsuleRadiu
   penetration = sphereRadius - dist - capsuleRadius;
   const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](rotationMatrix, capsuleVector.concat(0)).slice(0,3);
   spherePoint =
-    __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](
-        __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](
-          sphereOrigin,
+    __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](
+    sphereOrigin,
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
+        __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](
           capsuleNormal
-        )
-      ),
-      sphereRadius - penetration
+        ),
+        sphereRadius - penetration
+      )
     );
-  
   const side2 = 
     __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
       __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](capsuleNormal),
       -1 * Math.sqrt(Math.pow(sphereRadius, 2), Math.pow(sphereRadius - penetration))
     );
-  
   spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](spherePoint, side2);
-  debugger;
   return {capsuleNormal,
-  sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](spherePoint, sphereOrigin),
+  sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](spherePoint, sphereOrigin),-1),
+  sphereOrigin,
   spherePoint,
   penetration};
 }
@@ -1915,12 +1917,14 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _handleCollision(collisionData){
-  
+    debugger;
     this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["bounceVectorOffPlane"](this.velocity,
         collisionData.normal),
       this.restitution
     );
+    this.friction = [0,0,0];
+    setTimeout(()=>this.friction = SNOWBOARD_FRICTION,500);
     // this.velocity = MathUtils.scaleVector(MathUtils.vectorNormalize(collisionData.normal),
     // MathUtils.vectorMag(this.velocity)); 
     
@@ -1932,26 +1936,25 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     //   collisionData.colliderPoint.slice(0,3),
     //   this.getPosition()
     // );
-     let addAngularVelocAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["angleBetweenVectors"](
-      this.velocity,
-       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](collisionData.normal, -1)
-    );
+    //  let addAngularVelocAngle = MathUtils.angleBetweenVectors(
+    //   this.velocity,
+    //    MathUtils.scaleVector(collisionData.normal, -1)
+    // );
 
-     addAngularVelocAngle /= 15;
-     addAngularVelocAngle *= __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorMag"](this.velocity);
-     const addAngularVelocAxis = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorCross"](
-      this.velocity,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](collisionData.normal, -1)
-     );
-     this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisAngleToQuaternion"](
-       addAngularVelocAxis, addAngularVelocAngle)
-     );
+    //  addAngularVelocAngle /= 15;
+    //  addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
+    //  const addAngularVelocAxis = MathUtils.vectorCross(
+    //   this.velocity,
+    //   MathUtils.scaleVector(collisionData.normal, -1)
+    //  );
+    //  this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+    //    addAngularVelocAxis, addAngularVelocAngle)
+    //  );
   }
   _handleEdgeCollision(collisionData){
    this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){
-    debugger;
     collisionData.normal = collisionData.sphereNormal;
     this._handleCollision(collisionData);
   }
@@ -2037,7 +2040,7 @@ const BALLOON_DENSITY_WIDTHWISE = 2;
 const BALLOON_FLOAT_HEIGHT = 6;
 const BALLOON_RADIUS = 4.2;
 const BOX_COLLIDER = "BOX_COLLIDER";
-const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
+const BEGINNING_NO_OBSTACLE_SEGMENTS = 1;
 const CLIFF_PROBABILITY = 0.05;
 
 
@@ -2304,6 +2307,13 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       ),TREE_RADIUS,capsulePointA,capsulePointB,capsuleRadius );
       if(collisionData) return collisionData;
     }
+    for(let i = 0; i < this.obstacles[segment_number + 1].length; ++i){
+      obstacle = this.obstacles[segment_number + 1][i];
+      collisionData = __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__["c" /* sphereCollidesCapsule */](__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["mat4TranslationComponent"](
+        obstacle.getTransformationMatrix()
+      ),TREE_RADIUS,capsulePointA,capsulePointB,capsuleRadius );
+      if(collisionData) return collisionData;
+    }
     return false;
   }
   capsuleCollidesWithBalloons(capsulePointA, capsulePointB, capsuleRadius, segment_number){
@@ -2387,6 +2397,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       pointBeyondEdge = this._positionIsBeyondEdge(checkPoints[i], segmentNumber,
         toggleLeft);
       if(pointBeyondEdge){
+        debugger;
         return pointBeyondEdge;
       }
     }
@@ -2421,12 +2432,13 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       vec1 = [0,0,1];
     }
     else{
-      vec1 = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](nextSegPoint, currentSegPoint);
-      vec0 = [0,0,1];
+      vec0 = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](nextSegPoint, currentSegPoint);
+      vec1 = [0,0,-1];
     }
-    const edgeNormal = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["vectorCross"](vec0, vec1);
+    const edgeNormal = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["vectorCross"]( vec0, vec1);
     const posOffset = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](pos, currentSegPoint);
     if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["vectorDot"](posOffset, edgeNormal) < 0){
+      debugger;
       let edgeVector =  toggleLeft? vec0: vec1;
       return{normal: edgeNormal, colliderPoint: pos,
          vector: edgeVector, edgePoint0: currentSegPoint,

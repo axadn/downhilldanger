@@ -76,12 +76,16 @@ capsulePoint0, capsulePoint1, capsuleRadius){
     return false;
   } else if((dist = MathUtils.distance(capsulePoint0, sphereOrigin)) <= maxDist){
     const capsuleNormal = MathUtils.subtractVectors(sphereOrigin, capsulePoint0);
-    return _getSphereCapsuleCollisionData({sphereOrigin, sphereRadius, point0ToSphereOrigin,
-       capsuleVector, capsuleRadius, dist});
+    let sphereNormal = MathUtils.subtractVectors(capsulePoint0, sphereOrigin);
+    let penetration = maxDist - dist - capsuleRadius;
+    let spherePoint = MathUtils.scaleVector(MathUtils.vectorNormalize(sphereNormal), sphereRadius);
+    return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
   } else if((dist = MathUtils.distance(capsulePoint1, sphereOrigin)) <= maxDist){
     const capsuleNormal = MathUtils.subtractVectors(sphereOrigin, capsulePoint1);
-    return _getSphereCapsuleCollisionData({sphereOrigin, sphereRadius, point0ToSphereOrigin,
-       capsuleVector, capsuleRadius, dist});
+    let sphereNormal = MathUtils.subtractVectors(capsulePoint1, sphereOrigin);
+    let penetration = maxDist - dist - capsuleRadius;
+    let spherePoint = MathUtils.scaleVector(MathUtils.vectorNormalize(sphereNormal), sphereRadius);
+    return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
   }
   return false;
 }
@@ -96,26 +100,24 @@ function _getSphereCapsuleCollisionData({sphereOrigin,sphereRadius, capsuleRadiu
   penetration = sphereRadius - dist - capsuleRadius;
   const capsuleNormal = MathUtils.multiplyVec4ByMatrix4(rotationMatrix, capsuleVector.concat(0)).slice(0,3);
   spherePoint =
-    MathUtils.scaleVector(
-      MathUtils.vectorNormalize(
-        MathUtils.addVectors(
-          sphereOrigin,
+    MathUtils.addVectors(
+    sphereOrigin,
+      MathUtils.scaleVector(
+        MathUtils.vectorNormalize(
           capsuleNormal
-        )
-      ),
-      sphereRadius - penetration
+        ),
+        sphereRadius - penetration
+      )
     );
-  
   const side2 = 
     MathUtils.scaleVector(
       MathUtils.vectorNormalize(capsuleNormal),
       -1 * Math.sqrt(Math.pow(sphereRadius, 2), Math.pow(sphereRadius - penetration))
     );
-  
   spherePoint = MathUtils.addVectors(spherePoint, side2);
-  debugger;
   return {capsuleNormal,
-  sphereNormal: MathUtils.subtractVectors(spherePoint, sphereOrigin),
+  sphereNormal: MathUtils.scaleVector(MathUtils.subtractVectors(spherePoint, sphereOrigin),-1),
+  sphereOrigin,
   spherePoint,
   penetration};
 }

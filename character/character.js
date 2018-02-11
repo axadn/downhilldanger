@@ -204,12 +204,14 @@ export default class Character extends GameObject{
     }
   }
   _handleCollision(collisionData){
-  
+    debugger;
     this.velocity = MathUtils.scaleVector(
       MathUtils.bounceVectorOffPlane(this.velocity,
         collisionData.normal),
       this.restitution
     );
+    this.friction = [0,0,0];
+    setTimeout(()=>this.friction = SNOWBOARD_FRICTION,500);
     // this.velocity = MathUtils.scaleVector(MathUtils.vectorNormalize(collisionData.normal),
     // MathUtils.vectorMag(this.velocity)); 
     
@@ -221,26 +223,25 @@ export default class Character extends GameObject{
     //   collisionData.colliderPoint.slice(0,3),
     //   this.getPosition()
     // );
-     let addAngularVelocAngle = MathUtils.angleBetweenVectors(
-      this.velocity,
-       MathUtils.scaleVector(collisionData.normal, -1)
-    );
+    //  let addAngularVelocAngle = MathUtils.angleBetweenVectors(
+    //   this.velocity,
+    //    MathUtils.scaleVector(collisionData.normal, -1)
+    // );
 
-     addAngularVelocAngle /= 15;
-     addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
-     const addAngularVelocAxis = MathUtils.vectorCross(
-      this.velocity,
-      MathUtils.scaleVector(collisionData.normal, -1)
-     );
-     this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
-       addAngularVelocAxis, addAngularVelocAngle)
-     );
+    //  addAngularVelocAngle /= 15;
+    //  addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
+    //  const addAngularVelocAxis = MathUtils.vectorCross(
+    //   this.velocity,
+    //   MathUtils.scaleVector(collisionData.normal, -1)
+    //  );
+    //  this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+    //    addAngularVelocAxis, addAngularVelocAngle)
+    //  );
   }
   _handleEdgeCollision(collisionData){
    this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){
-    debugger;
     collisionData.normal = collisionData.sphereNormal;
     this._handleCollision(collisionData);
   }
