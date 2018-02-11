@@ -489,7 +489,7 @@ const angleBetweenVectors = (to, from)=>{
   to = vectorNormalize(to);
   from = vectorNormalize(from);
   const dot =vectorDot(to,from)
-  if(Math.abs(dot) <0.005 || Math.abs(dot) > 1){
+  if( Math.abs(dot) > 1){
     return 0;
   }
   return Math.acos(dot);
@@ -841,7 +841,6 @@ capsulePoint0, capsulePoint1, capsuleRadius){
         __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorCross"](point0ToSphereOrigin, capsuleVector),
         Math.PI/2
       );
-      debugger;
       penetration = sphereRadius - dist - capsuleRadius;
       const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](rotationMatrix, capsuleVector.concat(0)).slice(0,3);
       spherePoint =
@@ -862,9 +861,8 @@ capsulePoint0, capsulePoint1, capsuleRadius){
         );
       
       spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](spherePoint, side2);
-     
       return {capsuleNormal,
-      sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](spherePoint - sphereRadius),
+      sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](spherePoint, sphereOrigin),
       spherePoint,
       penetration: maxDist - dist};
     }
@@ -1398,7 +1396,7 @@ class ObjectsRasterizer{
     return [x,y];
   }
 
-  debugLine(start, end){
+  debugLine(start, end, style = "black"){
     start = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](this.viewMatrix, start.concat(1));
     start = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](start, 1/start[3]);
     start = this.clipSpaceToFlatCanvasCoords(start[0],start[1]);
@@ -1408,6 +1406,7 @@ class ObjectsRasterizer{
     this.ctx.beginPath();
     this.ctx.moveTo(start[0],start[1]);
     this.ctx.lineTo(end[0],end[1]);
+    this.ctx.strokeStyle = style;
     this.ctx.stroke();
   }
 

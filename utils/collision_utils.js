@@ -74,7 +74,6 @@ capsulePoint0, capsulePoint1, capsuleRadius){
         MathUtils.vectorCross(point0ToSphereOrigin, capsuleVector),
         Math.PI/2
       );
-      debugger;
       penetration = sphereRadius - dist - capsuleRadius;
       const capsuleNormal = MathUtils.multiplyVec4ByMatrix4(rotationMatrix, capsuleVector.concat(0)).slice(0,3);
       spherePoint =
@@ -95,9 +94,8 @@ capsulePoint0, capsulePoint1, capsuleRadius){
         );
       
       spherePoint = MathUtils.addVectors(spherePoint, side2);
-     
       return {capsuleNormal,
-      sphereNormal: MathUtils.subtractVectors(spherePoint - sphereRadius),
+      sphereNormal: MathUtils.subtractVectors(spherePoint, sphereOrigin),
       spherePoint,
       penetration: maxDist - dist};
     }

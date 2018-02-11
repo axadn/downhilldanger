@@ -189,7 +189,7 @@ export class ObjectsRasterizer{
     return [x,y];
   }
 
-  debugLine(start, end){
+  debugLine(start, end, style = "black"){
     start = MathUtils.multiplyVec4ByMatrix4(this.viewMatrix, start.concat(1));
     start = MathUtils.scaleVector(start, 1/start[3]);
     start = this.clipSpaceToFlatCanvasCoords(start[0],start[1]);
@@ -199,6 +199,7 @@ export class ObjectsRasterizer{
     this.ctx.beginPath();
     this.ctx.moveTo(start[0],start[1]);
     this.ctx.lineTo(end[0],end[1]);
+    this.ctx.strokeStyle = style;
     this.ctx.stroke();
   }
 

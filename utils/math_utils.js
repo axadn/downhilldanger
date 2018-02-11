@@ -349,7 +349,7 @@ export const angleBetweenVectors = (to, from)=>{
   to = vectorNormalize(to);
   from = vectorNormalize(from);
   const dot =vectorDot(to,from)
-  if(Math.abs(dot) <0.005 || Math.abs(dot) > 1){
+  if( Math.abs(dot) > 1){
     return 0;
   }
   return Math.acos(dot);
