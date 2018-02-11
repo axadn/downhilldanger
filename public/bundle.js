@@ -832,55 +832,59 @@ capsulePoint0, capsulePoint1, capsuleRadius){
      __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](capsuleVector, -1)
     );
   const maxDist = sphereRadius + capsuleRadius;
-  let dist, penetration, spherePoint;
+  let dist;
   if(point0ToSphereAngle < Math.PI/2 &&
     point1ToSphereAngle < Math.PI/2){
     dist =  __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorMag"](point0ToSphereOrigin) * Math.sin(point0ToSphereAngle);
     if(dist <= maxDist){
-      const rotationMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["axisAngleToMatrix"](
-        __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorCross"](point0ToSphereOrigin, capsuleVector),
-        Math.PI/2
-      );
-      penetration = sphereRadius - dist - capsuleRadius;
-      const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](rotationMatrix, capsuleVector.concat(0)).slice(0,3);
-      spherePoint =
-        __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
-          __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](
-            __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](
-              sphereOrigin,
-              capsuleNormal
-            )
-          ),
-          sphereRadius - penetration
-        );
-      
-      const side2 = 
-        __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
-          __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](capsuleNormal),
-          -1 * Math.sqrt(Math.pow(sphereRadius, 2), Math.pow(sphereRadius - penetration))
-        );
-      
-      spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](spherePoint, side2);
-      return {capsuleNormal,
-      sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](spherePoint, sphereOrigin),
-      spherePoint,
-      penetration: maxDist - dist};
+      return _getSphereCapsuleCollisionData({sphereOrigin, sphereRadius,
+         point0ToSphereOrigin, capsuleRadius, capsuleVector, dist});
     }
     return false;
   } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["distance"](capsulePoint0, sphereOrigin)) <= maxDist){
     const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint0);
-    return {capsuleNormal,
-      sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](capsuleNormal, -1),
-      penetration: maxDist - dist
-    };
+    return _getSphereCapsuleCollisionData({sphereOrigin, sphereRadius, point0ToSphereOrigin,
+       capsuleVector, capsuleRadius, dist});
   } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["distance"](capsulePoint1, sphereOrigin)) <= maxDist){
     const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint1);
-    return {capsuleNormal,
-      sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](capsuleNormal, -1),
-      penetration: maxDist - dist
-    };
+    return _getSphereCapsuleCollisionData({sphereOrigin, sphereRadius, point0ToSphereOrigin,
+       capsuleVector, capsuleRadius, dist});
   }
   return false;
+}
+
+function _getSphereCapsuleCollisionData({sphereOrigin,sphereRadius, capsuleRadius,
+  point0ToSphereOrigin,capsuleVector,dist}){
+  const rotationMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["axisAngleToMatrix"](
+    __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorCross"](point0ToSphereOrigin, capsuleVector),
+    Math.PI/2
+  );
+  let penetration, spherePoint;
+  penetration = sphereRadius - dist - capsuleRadius;
+  const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](rotationMatrix, capsuleVector.concat(0)).slice(0,3);
+  spherePoint =
+    __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](
+        __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](
+          sphereOrigin,
+          capsuleNormal
+        )
+      ),
+      sphereRadius - penetration
+    );
+  
+  const side2 = 
+    __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](capsuleNormal),
+      -1 * Math.sqrt(Math.pow(sphereRadius, 2), Math.pow(sphereRadius - penetration))
+    );
+  
+  spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](spherePoint, side2);
+  debugger;
+  return {capsuleNormal,
+  sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](spherePoint, sphereOrigin),
+  spherePoint,
+  penetration};
 }
 
 const boxColliderToPoints = (matrix, dimensions) =>{
@@ -1947,6 +1951,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
    this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){
+    debugger;
     collisionData.normal = collisionData.sphereNormal;
     this._handleCollision(collisionData);
   }

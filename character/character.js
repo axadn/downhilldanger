@@ -240,6 +240,7 @@ export default class Character extends GameObject{
    this._handleCollision(collisionData);
   };
   _handleTreeCollision(collisionData){
+    debugger;
     collisionData.normal = collisionData.sphereNormal;
     this._handleCollision(collisionData);
   }
