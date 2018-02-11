@@ -133,16 +133,12 @@ export default class Character extends GameObject{
         break;
       }
     }
-    debugger;
-    console.log(this.currentAnimations);
-    console.log(firstAnimIndex);
     let anim = this.mesh.animations[currentKeys[firstAnimIndex]][0];
     let influence = this.currentAnimations[currentKeys[firstAnimIndex]].influence;
     for(let i = 0; i < anim.length; ++i){
       this.mixedAnimations[i] = anim[i] * influence;
     }
     // now add all the other anims * their influence
-    debugger;
     for(let i = firstAnimIndex + 1; i < currentKeys.length; ++i){
       if(this.currentAnimations[currentKeys[i]].influence === 0) continue;
       anim = this.mesh.animations[currentKeys[i]][0];

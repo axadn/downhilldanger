@@ -65,7 +65,7 @@ capsulePoint0, capsulePoint1, capsuleRadius){
      MathUtils.scaleVector(capsuleVector, -1)
     );
   const maxDist = sphereRadius + capsuleRadius;
-  let dist;
+  let dist, penetration, spherePoint;
   if(point0ToSphereAngle < Math.PI/2 &&
     point1ToSphereAngle < Math.PI/2){
     dist =  MathUtils.vectorMag(point0ToSphereOrigin) * Math.sin(point0ToSphereAngle);
@@ -74,12 +74,31 @@ capsulePoint0, capsulePoint1, capsuleRadius){
         MathUtils.vectorCross(point0ToSphereOrigin, capsuleVector),
         Math.PI/2
       );
+      debugger;
+      penetration = sphereRadius - dist - capsuleRadius;
       const capsuleNormal = MathUtils.multiplyVec4ByMatrix4(rotationMatrix, capsuleVector.concat(0)).slice(0,3);
-      if(isNaN(capsuleNormal[0])){
-        debugger;
-      }
+      spherePoint =
+        MathUtils.scaleVector(
+          MathUtils.vectorNormalize(
+            MathUtils.addVectors(
+              sphereOrigin,
+              capsuleNormal
+            )
+          ),
+          sphereRadius - penetration
+        );
+      
+      const side2 = 
+        MathUtils.scaleVector(
+          MathUtils.vectorNormalize(capsuleNormal),
+          -1 * Math.sqrt(Math.pow(sphereRadius, 2), Math.pow(sphereRadius - penetration))
+        );
+      
+      spherePoint = MathUtils.addVectors(spherePoint, side2);
+     
       return {capsuleNormal,
-      sphereNormal: MathUtils.scaleVector(capsuleNormal, -1),
+      sphereNormal: MathUtils.subtractVectors(spherePoint - sphereRadius),
+      spherePoint,
       penetration: maxDist - dist};
     }
     return false;
