@@ -1936,20 +1936,20 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     //   collisionData.colliderPoint.slice(0,3),
     //   this.getPosition()
     // );
-    //  let addAngularVelocAngle = MathUtils.angleBetweenVectors(
-    //   this.velocity,
-    //    MathUtils.scaleVector(collisionData.normal, -1)
-    // );
+     let addAngularVelocAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["angleBetweenVectors"](
+      this.velocity,
+       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](collisionData.normal, -1)
+    );
 
-    //  addAngularVelocAngle /= 15;
-    //  addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
-    //  const addAngularVelocAxis = MathUtils.vectorCross(
-    //   this.velocity,
-    //   MathUtils.scaleVector(collisionData.normal, -1)
-    //  );
-    //  this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
-    //    addAngularVelocAxis, addAngularVelocAngle)
-    //  );
+     addAngularVelocAngle /= 15;
+     addAngularVelocAngle *= __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorMag"](this.velocity);
+     const addAngularVelocAxis = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorCross"](
+      this.velocity,
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](collisionData.normal, -1)
+     );
+     this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisAngleToQuaternion"](
+       addAngularVelocAxis, addAngularVelocAngle)
+     );
   }
   _handleEdgeCollision(collisionData){
    this._handleCollision(collisionData);
@@ -2040,7 +2040,7 @@ const BALLOON_DENSITY_WIDTHWISE = 2;
 const BALLOON_FLOAT_HEIGHT = 6;
 const BALLOON_RADIUS = 4.2;
 const BOX_COLLIDER = "BOX_COLLIDER";
-const BEGINNING_NO_OBSTACLE_SEGMENTS = 1;
+const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 const CLIFF_PROBABILITY = 0.05;
 
 

@@ -223,20 +223,20 @@ export default class Character extends GameObject{
     //   collisionData.colliderPoint.slice(0,3),
     //   this.getPosition()
     // );
-    //  let addAngularVelocAngle = MathUtils.angleBetweenVectors(
-    //   this.velocity,
-    //    MathUtils.scaleVector(collisionData.normal, -1)
-    // );
+     let addAngularVelocAngle = MathUtils.angleBetweenVectors(
+      this.velocity,
+       MathUtils.scaleVector(collisionData.normal, -1)
+    );
 
-    //  addAngularVelocAngle /= 15;
-    //  addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
-    //  const addAngularVelocAxis = MathUtils.vectorCross(
-    //   this.velocity,
-    //   MathUtils.scaleVector(collisionData.normal, -1)
-    //  );
-    //  this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
-    //    addAngularVelocAxis, addAngularVelocAngle)
-    //  );
+     addAngularVelocAngle /= 15;
+     addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
+     const addAngularVelocAxis = MathUtils.vectorCross(
+      this.velocity,
+      MathUtils.scaleVector(collisionData.normal, -1)
+     );
+     this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+       addAngularVelocAxis, addAngularVelocAngle)
+     );
   }
   _handleEdgeCollision(collisionData){
    this._handleCollision(collisionData);
