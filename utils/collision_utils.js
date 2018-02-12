@@ -77,13 +77,13 @@ capsulePoint0, capsulePoint1, capsuleRadius){
   } else if((dist = MathUtils.distance(capsulePoint0, sphereOrigin)) <= maxDist){
     const capsuleNormal = MathUtils.subtractVectors(sphereOrigin, capsulePoint0);
     let sphereNormal = MathUtils.subtractVectors(capsulePoint0, sphereOrigin);
-    let penetration = maxDist - dist - capsuleRadius;
+    let penetration = sphereRadius - dist + capsuleRadius;
     let spherePoint = MathUtils.scaleVector(MathUtils.vectorNormalize(sphereNormal), sphereRadius);
     return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
   } else if((dist = MathUtils.distance(capsulePoint1, sphereOrigin)) <= maxDist){
     const capsuleNormal = MathUtils.subtractVectors(sphereOrigin, capsulePoint1);
     let sphereNormal = MathUtils.subtractVectors(capsulePoint1, sphereOrigin);
-    let penetration = maxDist - dist - capsuleRadius;
+    let penetration = sphereRadius - dist + capsuleRadius;
     let spherePoint = MathUtils.scaleVector(MathUtils.vectorNormalize(sphereNormal), sphereRadius);
     return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
   }
@@ -116,7 +116,7 @@ function _getSphereCapsuleCollisionData({sphereOrigin,sphereRadius, capsuleRadiu
     );
   spherePoint = MathUtils.addVectors(spherePoint, side2);
   return {capsuleNormal,
-  sphereNormal: MathUtils.scaleVector(MathUtils.subtractVectors(spherePoint, sphereOrigin),-1),
+  sphereNormal: MathUtils.subtractVectors(spherePoint, sphereOrigin),
   sphereOrigin,
   spherePoint,
   penetration};

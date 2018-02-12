@@ -844,13 +844,13 @@ capsulePoint0, capsulePoint1, capsuleRadius){
   } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["distance"](capsulePoint0, sphereOrigin)) <= maxDist){
     const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint0);
     let sphereNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint0, sphereOrigin);
-    let penetration = maxDist - dist - capsuleRadius;
+    let penetration = sphereRadius - dist + capsuleRadius;
     let spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](sphereNormal), sphereRadius);
     return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
   } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["distance"](capsulePoint1, sphereOrigin)) <= maxDist){
     const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint1);
     let sphereNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint1, sphereOrigin);
-    let penetration = maxDist - dist - capsuleRadius;
+    let penetration = sphereRadius - dist + capsuleRadius;
     let spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](sphereNormal), sphereRadius);
     return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
   }
@@ -883,7 +883,7 @@ function _getSphereCapsuleCollisionData({sphereOrigin,sphereRadius, capsuleRadiu
     );
   spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](spherePoint, side2);
   return {capsuleNormal,
-  sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](spherePoint, sphereOrigin),-1),
+  sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](spherePoint, sphereOrigin),
   sphereOrigin,
   spherePoint,
   penetration};
