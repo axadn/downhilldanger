@@ -379,7 +379,7 @@ export default class Slope extends GameObject{
       pointBeyondEdge = this._positionIsBeyondEdge(checkPoints[i], segmentNumber,
         toggleLeft);
       if(pointBeyondEdge){
-        debugger;
+
         return pointBeyondEdge;
       }
     }
@@ -420,10 +420,10 @@ export default class Slope extends GameObject{
     const edgeNormal = MathUtils.vectorCross( vec0, vec1);
     const posOffset = MathUtils.subtractVectors(pos, currentSegPoint);
     if(MathUtils.vectorDot(posOffset, edgeNormal) < 0){
-      debugger;
       let edgeVector =  toggleLeft? vec0: vec1;
       return{normal: edgeNormal, colliderPoint: pos,
          vector: edgeVector, edgePoint0: currentSegPoint,
+         penetration: 2,
         edgePoint1: nextSegPoint, toggleLeft};
     }
     return false;

@@ -1917,12 +1917,19 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _handleCollision(collisionData){
-    debugger;
     this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["bounceVectorOffPlane"](this.velocity,
         collisionData.normal),
       this.restitution
     );
+    this.setPosition ( 
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["addVectors"](
+        this.getPosition(),
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](
+        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorNormalize"](collisionData.normal),
+        collisionData.penetration
+      )
+    ));
     this.friction = [0,0,0];
     setTimeout(()=>this.friction = SNOWBOARD_FRICTION,500);
     // this.velocity = MathUtils.scaleVector(MathUtils.vectorNormalize(collisionData.normal),
@@ -1936,20 +1943,20 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     //   collisionData.colliderPoint.slice(0,3),
     //   this.getPosition()
     // );
-     let addAngularVelocAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["angleBetweenVectors"](
-      this.velocity,
-       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](collisionData.normal, -1)
-    );
+    //  let addAngularVelocAngle = MathUtils.angleBetweenVectors(
+    //   this.velocity,
+    //    MathUtils.scaleVector(collisionData.normal, -1)
+    // );
 
-     addAngularVelocAngle /= 15;
-     addAngularVelocAngle *= __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorMag"](this.velocity);
-     const addAngularVelocAxis = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorCross"](
-      this.velocity,
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](collisionData.normal, -1)
-     );
-     this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisAngleToQuaternion"](
-       addAngularVelocAxis, addAngularVelocAngle)
-     );
+    //  addAngularVelocAngle /= 15;
+    //  addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
+    //  const addAngularVelocAxis = MathUtils.vectorCross(
+    //   this.velocity,
+    //   MathUtils.scaleVector(collisionData.normal, -1)
+    //  );
+    //  this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+    //    addAngularVelocAxis, addAngularVelocAngle)
+    //  );
   }
   _handleEdgeCollision(collisionData){
    this._handleCollision(collisionData);
@@ -2397,7 +2404,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       pointBeyondEdge = this._positionIsBeyondEdge(checkPoints[i], segmentNumber,
         toggleLeft);
       if(pointBeyondEdge){
-        debugger;
+
         return pointBeyondEdge;
       }
     }
@@ -2438,10 +2445,10 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     const edgeNormal = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["vectorCross"]( vec0, vec1);
     const posOffset = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](pos, currentSegPoint);
     if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["vectorDot"](posOffset, edgeNormal) < 0){
-      debugger;
       let edgeVector =  toggleLeft? vec0: vec1;
       return{normal: edgeNormal, colliderPoint: pos,
          vector: edgeVector, edgePoint0: currentSegPoint,
+         penetration: 2,
         edgePoint1: nextSegPoint, toggleLeft};
     }
     return false;
