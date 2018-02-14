@@ -2141,11 +2141,13 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
         );
         let tree;
         for(let i = 0; i < TREES_PER_SEGMENT; ++i){
+
           transformationMatrix =
           __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["mat_4_multiply"](
             __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["translationMatrix"](0, SEGMENT_LENGTH * i / TREES_PER_SEGMENT, 0,1),
             transformationMatrix );
-          tree = this.treePool.pullTree(this.treesCreatedSinceStart, transformationMatrix);
+          tree = this.treePool.pullTree(this.treesCreatedSinceStart);
+          tree.setPosition(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["mat4TranslationComponent"](transformationMatrix));
           this.rasterizer.objects[tree.id] = tree;
           ++this.treesCreatedSinceStart;
           trees.push(tree);
@@ -2181,7 +2183,8 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
              Math.random()* SEGMENT_LENGTH, 0),
              transformationMatrix
           );
-          tree = this.treePool.pullTree(this.treesCreatedSinceStart, treeTransformation);
+          tree = this.treePool.pullTree(this.treesCreatedSinceStart);
+          tree.setPosition(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["mat4TranslationComponent"](treeTransformation));
           obstacleSegment.push(tree);
           this.rasterizer.objects[tree.id] = tree;
           ++this.treesCreatedSinceStart;

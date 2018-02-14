@@ -110,11 +110,13 @@ export default class Slope extends GameObject{
         );
         let tree;
         for(let i = 0; i < TREES_PER_SEGMENT; ++i){
+
           transformationMatrix =
           MathUtils.mat_4_multiply(
             MathUtils.translationMatrix(0, SEGMENT_LENGTH * i / TREES_PER_SEGMENT, 0,1),
             transformationMatrix );
-          tree = this.treePool.pullTree(this.treesCreatedSinceStart, transformationMatrix);
+          tree = this.treePool.pullTree(this.treesCreatedSinceStart);
+          tree.setPosition(MathUtils.mat4TranslationComponent(transformationMatrix));
           this.rasterizer.objects[tree.id] = tree;
           ++this.treesCreatedSinceStart;
           trees.push(tree);
@@ -150,7 +152,8 @@ export default class Slope extends GameObject{
              Math.random()* SEGMENT_LENGTH, 0),
              transformationMatrix
           );
-          tree = this.treePool.pullTree(this.treesCreatedSinceStart, treeTransformation);
+          tree = this.treePool.pullTree(this.treesCreatedSinceStart);
+          tree.setPosition(MathUtils.mat4TranslationComponent(treeTransformation));
           obstacleSegment.push(tree);
           this.rasterizer.objects[tree.id] = tree;
           ++this.treesCreatedSinceStart;
