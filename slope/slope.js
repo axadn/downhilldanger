@@ -9,9 +9,6 @@ const GRADUAL_TURN = 0.14;
 const TILES_PER_SEGMENT = 1;
 const TREES_PER_SEGMENT = 2;
 const TREE_COLLIDER = "TREE_COLLIDER";
-const TREE_COLLIDER_HEIGHT = 30;
-const TREE_COLLIDER_WIDTH = 0.7;
-const TREE_COLLIDER_DEPTH = 0.7;
 const TREE_RADIUS = 3;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
@@ -25,8 +22,8 @@ const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 const CLIFF_PROBABILITY = 0.05;
 
-import treeMesh from "../tree.js";
 import balloonMesh from "../balloon";
+import TreePool from "./object_pools/tree_pool";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
 import * as MathUtils from "../utils/math_utils";
 import * as CollisionUtils from "../utils/collision_utils";
@@ -77,13 +74,10 @@ export default class Slope extends GameObject{
 
   }
   _setupTreeMesh(){
+    this.treePool = new TreePool(this.rasterizer);
     this.sideGeometry = [];
     this.currentSideGeometryType = TREE_SEGMENT;
     this.treesCreatedSinceStart = 0;
-    treeMesh.textureBuffer = this.rasterizer.bufferTexture("tree.png");
-    treeMesh.textured = true;
-    this.treeMesh= new Mesh(treeMesh);
-    this.treeMesh.buffers = this.rasterizer.sendMeshToGPU(this.treeMesh);
   }
   _setupBalloonMesh(){
     this.balloonMesh = new Mesh(balloonMesh);
@@ -114,17 +108,16 @@ export default class Slope extends GameObject{
           MathUtils.translationMatrix(leftRightToggle * SEGMENT_WIDTH/2, 0, 0),
           transformationMatrix
         );
-        let treeObject;
+        let tree;
         for(let i = 0; i < TREES_PER_SEGMENT; ++i){
           transformationMatrix =
           MathUtils.mat_4_multiply(
             MathUtils.translationMatrix(0, SEGMENT_LENGTH * i / TREES_PER_SEGMENT, 0,1),
             transformationMatrix );
-          treeObject = new GameObject(this.treeMesh,transformationMatrix);
-          treeObject.id = `tree${this.treesCreatedSinceStart}`;
-          this.rasterizer.objects[treeObject.id] = treeObject;
+          tree = this.treePool.pullTree(this.treesCreatedSinceStart, transformationMatrix);
+          this.rasterizer.objects[tree.id] = tree;
           ++this.treesCreatedSinceStart;
-          trees.push(treeObject);
+          trees.push(tree);
         }
         leftRightToggle *= -1;
       }
@@ -135,6 +128,7 @@ export default class Slope extends GameObject{
     if(this.sideGeometry[0].type === TREE_SEGMENT){
       const treesSeg = this.sideGeometry.shift();
       for(let i = 0; i < treesSeg.trees.length; ++i){
+        this.treePool.releaseTree(treesSeg.trees[i]);
         delete this.rasterizer.objects[treesSeg.trees[i].id];
       }
     }
@@ -149,20 +143,16 @@ export default class Slope extends GameObject{
         const segment = 0;
         const widthWiseCount = Math.floor(Math.random()*
           TREE_MAX_DENSITY_WIDTHWISE);
-        let id, gameObject, treeTransformation;
+        let tree, treeTransformation;
         for(let i = 0; i < widthWiseCount; ++i){
           treeTransformation = MathUtils.mat_4_multiply(
             MathUtils.translationMatrix((Math.random() * 0.8 + 0.1) * SEGMENT_WIDTH -SEGMENT_WIDTH/2,
              Math.random()* SEGMENT_LENGTH, 0),
              transformationMatrix
           );
-          gameObject = new GameObject(this.treeMesh, treeTransformation);
-          id = `treeObstacle${this.treesCreatedSinceStart}`;
-          gameObject.id = id;
-          gameObject.collider = {type: BOX_COLLIDER, dimensions:[
-            TREE_COLLIDER_WIDTH, TREE_COLLIDER_DEPTH, TREE_COLLIDER_HEIGHT,]};
-          obstacleSegment.push(gameObject);
-          this.rasterizer.objects[id] = gameObject;
+          tree = this.treePool.pullTree(this.treesCreatedSinceStart, treeTransformation);
+          obstacleSegment.push(tree);
+          this.rasterizer.objects[tree.id] = tree;
           ++this.treesCreatedSinceStart;
         }
     }
@@ -191,6 +181,7 @@ export default class Slope extends GameObject{
   _deleteObstacleSegment(){
     const deletedSegment = this.obstacles.shift();
     for(let i = 0; i< deletedSegment.length; ++i){
+      this.treePool.releaseTree(deletedSegment[i]);
       delete this.rasterizer.objects[deletedSegment[i].id];
     }
   }

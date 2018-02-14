@@ -4,13 +4,14 @@ const ANGULAR_DRAG = 0.3;
 const DRAG = 0.4;
 import * as MathUtils from "../utils/math_utils";
 export default class GameObject {
-  constructor(mesh, transformationMatrix = MathUtils.identityMatrix4){
+  constructor(mesh, transformationMatrix = MathUtils.identityMatrix4, isStatic = false){
     this.mesh = mesh;
+    this.isStatic = isStatic;
     this._transformationMatrix = transformationMatrix.slice(0,16);
     this._position = MathUtils.mat4TranslationComponent(transformationMatrix);
     this._rotation = MathUtils.IdentityQuaternion;
     this.velocity = [0,0,0];
-    setInterval(this.update.bind(this), UPDATE_INTERVAL);
+    if(!this.isStatic)setInterval(this.update.bind(this), UPDATE_INTERVAL);
     this.angularVelocity = MathUtils.IdentityQuaternion;
   }
 
@@ -91,6 +92,11 @@ export default class GameObject {
   }
   getTransformationMatrix(){
     return this._transformationMatrix;
+  }
+  setTransformationMatrix(transform){
+    for(let i = 0; i < 16; ++i){
+      this._transformationMatrix[i] = transform[i];
+    }
   }
   playAnimation(name, loop = true){
     this.isPlayingAnimation = true;
