@@ -18,7 +18,8 @@ requires setting up a server due to the browser treating loading an image from a
 
 
 ### Moving forward
-- Add debugging functions the rasterizer class 
-- Implement an object pool for the trees to help slowdowns due to garbage collection
-- Help garbage collecion by doing as many physics and math operations as possible in place instead of creating new objects
-- Add skeletal animation and texturing to the player
+- [x] Add debugging functions the rasterizer class 
+- [x] Implement an object pool for the trees to help slowdowns due to garbage collection
+- [ ] Do more math and physics operations in place to create less garbage
+- [x] Add skeletal animation support
+- [ ] texture the player
