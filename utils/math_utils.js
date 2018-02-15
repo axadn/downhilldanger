@@ -413,7 +413,7 @@ export const scaleVector = (vec, scale)=>{
 };
 
 export function scaleVectorInPlace(vector, scale){
-  for(let i = 0; i < vec.length; ++i){
+  for(let i = 0; i < vector.length; ++i){
     vector[i] *= scale;
   }
   return vector;

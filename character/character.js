@@ -27,6 +27,7 @@ export default class Character extends GameObject{
     this.input = {left: false, right: false, back: false}
     this.velocity = [0,1,0];
     this.localVelocity = [0,0,0];
+    this.localUp = [0,0,1];
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
@@ -52,9 +53,10 @@ export default class Character extends GameObject{
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
     this.velocity[2] -= this.fallSpeed;
+    this.transformDirectionInPlace([0,0,1], this.localUp);
     if(distanceFromSurface < this.capsuleRadius){
       this._planeAlign();
-      MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.transformDirection([0,0,1]), this.velocity);
+      MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.localUp, this.velocity);
       this.inverseTransformDirectionInPlace(this.velocity, this.localVelocity);
       this._applyFriction(this.localVelocity);
       this.transformDirectionInPlace(this.localVelocity, this.velocity);
@@ -112,7 +114,7 @@ export default class Character extends GameObject{
   _steer(direction){
     this.addAngularVelocity(
       MathUtils.axisAngleToQuaternion(
-        this.transformDirection([0,0,1]),
+        this.localUp,
       -1 * direction * STEER_SPEED)
     );
   }

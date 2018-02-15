@@ -552,7 +552,7 @@ const scaleVector = (vec, scale)=>{
 
 
 function scaleVectorInPlace(vector, scale){
-  for(let i = 0; i < vec.length; ++i){
+  for(let i = 0; i < vector.length; ++i){
     vector[i] *= scale;
   }
   return vector;
@@ -762,7 +762,7 @@ class GameObject {
   addAngularVelocity(quat){
     quat = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["vectorNormalize"](quat);
     this.angularVelocity =  __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyQuaternions"](this.angularVelocity, quat);
-    this.angularVelocity = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["vectorNormalize"](this.angularVelocity);
+    __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["vectorNormalizeInPlace"](this.angularVelocity);
   }
   _applyDragStep(){
     for(let i = 0; i < this.velocity.length; ++i){
@@ -1925,6 +1925,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.input = {left: false, right: false, back: false}
     this.velocity = [0,1,0];
     this.localVelocity = [0,0,0];
+    this.localUp = [0,0,1];
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
@@ -1950,9 +1951,10 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorSquareMag"](surfaceOffset);
     this.velocity[2] -= this.fallSpeed;
+    this.transformDirectionInPlace([0,0,1], this.localUp);
     if(distanceFromSurface < this.capsuleRadius){
       this._planeAlign();
-      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlaneInPlace"](this.velocity, this.transformDirection([0,0,1]), this.velocity);
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlaneInPlace"](this.velocity, this.localUp, this.velocity);
       this.inverseTransformDirectionInPlace(this.velocity, this.localVelocity);
       this._applyFriction(this.localVelocity);
       this.transformDirectionInPlace(this.localVelocity, this.velocity);
@@ -2010,7 +2012,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
   _steer(direction){
     this.addAngularVelocity(
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisAngleToQuaternion"](
-        this.transformDirection([0,0,1]),
+        this.localUp,
       -1 * direction * STEER_SPEED)
     );
   }

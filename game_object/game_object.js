@@ -36,7 +36,7 @@ export default class GameObject {
   addAngularVelocity(quat){
     quat = MathUtils.vectorNormalize(quat);
     this.angularVelocity =  MathUtils.multiplyQuaternions(this.angularVelocity, quat);
-    this.angularVelocity = MathUtils.vectorNormalize(this.angularVelocity);
+    MathUtils.vectorNormalizeInPlace(this.angularVelocity);
   }
   _applyDragStep(){
     for(let i = 0; i < this.velocity.length; ++i){
