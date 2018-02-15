@@ -257,11 +257,21 @@ export function projectVectorInPlace(vector, onto, result){
   for(let i = 0; i < 3; ++i){
     result[i] = onto[i] * scaleAmount;
   }
+  return result;
 }
 
 export const projectVectorOntoPlane = (vector, planeNormal)=>{
   return subtractVectors(vector.slice(0,3), projectVector(vector, planeNormal));
 };
+
+
+export function projectVectorOntoPlaneInPlace(vector, planeNormal, result){
+  return subtractVectorsInPlace(
+    vector,
+    projectVectorInPlace(vector, planeNormal, result),
+    result
+  );
+}
 
 export const planeNormal = (t0, t1, t2) =>{
   let vectorA = subtractVectors(t1, t2);
