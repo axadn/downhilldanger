@@ -260,12 +260,14 @@ export function projectVectorInPlace(vector, onto, result){
   return result;
 }
 
-
-export const projectVectorOntoPlane = (vector, planeNormal)=>{
-  return subtractVectors(vector.slice(0,3), projectVector(vector, planeNormal));
-};
-
+//----------------------------
 const projectedAlongNormal = [0,0,0];
+export function projectVectorOntoPlane(vector, planeNormal){
+  return subtractVectors(
+    vector,
+    projectVectorInPlace(vector, planeNormal, projectedAlongNormal)
+  );
+}
 export function projectVectorOntoPlaneInPlace(vector, planeNormal, result){
   return subtractVectorsInPlace(
     vector,
@@ -273,7 +275,7 @@ export function projectVectorOntoPlaneInPlace(vector, planeNormal, result){
     result
   );
 }
-
+//---------------------------------
 export const planeNormal = (t0, t1, t2) =>{
   let vectorA = subtractVectors(t1, t2);
   let vectorB = subtractVectors(t1, t0);

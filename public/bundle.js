@@ -74,6 +74,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["subtractVectorsInPlace"] = subtractVectorsInPlace;
 /* harmony export (immutable) */ __webpack_exports__["vectorCrossInPlace"] = vectorCrossInPlace;
 /* harmony export (immutable) */ __webpack_exports__["projectVectorInPlace"] = projectVectorInPlace;
+/* harmony export (immutable) */ __webpack_exports__["projectVectorOntoPlane"] = projectVectorOntoPlane;
 /* harmony export (immutable) */ __webpack_exports__["projectVectorOntoPlaneInPlace"] = projectVectorOntoPlaneInPlace;
 /* harmony export (immutable) */ __webpack_exports__["planeNormalInPlace"] = planeNormalInPlace;
 /* harmony export (immutable) */ __webpack_exports__["scaleVectorInPlace"] = scaleVectorInPlace;
@@ -383,14 +384,14 @@ function projectVectorInPlace(vector, onto, result){
   return result;
 }
 
-
-const projectVectorOntoPlane = (vector, planeNormal)=>{
-  return subtractVectors(vector.slice(0,3), projectVector(vector, planeNormal));
-};
-/* harmony export (immutable) */ __webpack_exports__["projectVectorOntoPlane"] = projectVectorOntoPlane;
-
-
+//----------------------------
 const projectedAlongNormal = [0,0,0];
+function projectVectorOntoPlane(vector, planeNormal){
+  return subtractVectors(
+    vector,
+    projectVectorInPlace(vector, planeNormal, projectedAlongNormal)
+  );
+}
 function projectVectorOntoPlaneInPlace(vector, planeNormal, result){
   return subtractVectorsInPlace(
     vector,
@@ -398,7 +399,7 @@ function projectVectorOntoPlaneInPlace(vector, planeNormal, result){
     result
   );
 }
-
+//---------------------------------
 const planeNormal = (t0, t1, t2) =>{
   let vectorA = subtractVectors(t1, t2);
   let vectorB = subtractVectors(t1, t0);
@@ -1885,9 +1886,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.velocity[2] -= this.fallSpeed;
     if(distanceFromSurface < this.capsuleRadius){
       this._planeAlign();
-      debugger;
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlaneInPlace"](this.velocity, this.transformDirection([0,0,1]), this.velocity);
-      //this.velocity = MathUtils.projectVectorOntoPlane(this.velocity, this.transformDirection([0,0,1]));
       let localVelocity = this.inverseTransformDirection(this.velocity);
       this._applyFriction(localVelocity);
       this.velocity = this.transformDirection(localVelocity);
@@ -2109,8 +2108,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     else if(obstacleCollisionData){
       this._handleTreeCollision(obstacleCollisionData);
     }
-    let nextWorldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["addVectors"](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlane"](
-      this.velocity, this.surfacePlaneNormal), this.getPosition());
+    let nextWorldPos = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlane"](this.velocity, this.surfacePlaneNormal);
+    __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["addVectorsInPlace"](this.getPosition(),nextWorldPos,nextWorldPos);
     if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
       slope.positionIsPastSegmentStart(nextWorldPos,
       this.currentSegmentNumber + 1)){
