@@ -79,9 +79,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["projectVectorOntoPlane"] = projectVectorOntoPlane;
 /* harmony export (immutable) */ __webpack_exports__["projectVectorOntoPlaneInPlace"] = projectVectorOntoPlaneInPlace;
 /* harmony export (immutable) */ __webpack_exports__["planeNormalInPlace"] = planeNormalInPlace;
-/* harmony export (immutable) */ __webpack_exports__["scaleVectorInPlace"] = scaleVectorInPlace;
 /* harmony export (immutable) */ __webpack_exports__["multiplyVec3ByMatrix4InPlace"] = multiplyVec3ByMatrix4InPlace;
 /* harmony export (immutable) */ __webpack_exports__["rotateVec3byMatrix4InPlace"] = rotateVec3byMatrix4InPlace;
+/* harmony export (immutable) */ __webpack_exports__["vectorNormalize"] = vectorNormalize;
+/* harmony export (immutable) */ __webpack_exports__["vectorNormalizeInPlace"] = vectorNormalizeInPlace;
+/* harmony export (immutable) */ __webpack_exports__["scaleVectorInPlace"] = scaleVectorInPlace;
 /* harmony export (immutable) */ __webpack_exports__["distance"] = distance;
 const tempVector3 = [0,0,0];
 const tempVector3_1 = [0,0,0];
@@ -471,25 +473,7 @@ const triangleContainsPoint =  (p, triangle) =>{
 /* harmony export (immutable) */ __webpack_exports__["triangleContainsPoint"] = triangleContainsPoint;
 
 
-const scaleVector = (vec, scale)=>{
-  const newVec = [];
-  for(let i = 0; i < vec.length; ++i){
-    newVec.push(vec[i] *scale);
-  }
-  return newVec;
-};
-/* harmony export (immutable) */ __webpack_exports__["scaleVector"] = scaleVector;
-
-
-function scaleVectorInPlace(vector, scale){
-  for(let i = 0; i < vec.length; ++i){
-    vector[i] *= scale;
-  }
-  return vector;
-}
-
-
-//----------------------------------------------------------//
+//--------------------------matrix multiplication--------------------------------//
 const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   if(vec.length < 4){
     vec = vec.concat(0);
@@ -539,20 +523,42 @@ function rotateVec3byMatrix4InPlace(matrix, vec, result){
   return result;
 };
 
-//------------------------------------------------------------------------//
+//---------------------------vector magnitude---------------------------------------------//
 const vectorMag = (vector)=>{
   return Math.sqrt(vectorSquareMag(vector));
 };
 /* harmony export (immutable) */ __webpack_exports__["vectorMag"] = vectorMag;
 
 
-const vectorNormalize = (vector)=>{
+function vectorNormalize(vector){
   const mag = vectorMag(vector);
   if(mag === 0) return vector;
   return scaleVector(vector, 1/mag);
 };
-/* harmony export (immutable) */ __webpack_exports__["vectorNormalize"] = vectorNormalize;
 
+function vectorNormalizeInPlace(vector){
+  const mag = vectorMag(vector);
+  if(mag === 0) return vector;
+  return scaleVectorInPlace(vector, 1/mag);
+}
+const scaleVector = (vec, scale)=>{
+  const newVec = [];
+  for(let i = 0; i < vec.length; ++i){
+    newVec.push(vec[i] *scale);
+  }
+  return newVec;
+};
+/* harmony export (immutable) */ __webpack_exports__["scaleVector"] = scaleVector;
+
+
+function scaleVectorInPlace(vector, scale){
+  for(let i = 0; i < vec.length; ++i){
+    vector[i] *= scale;
+  }
+  return vector;
+}
+
+//-------------------------------------------------------------------------//
 const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
   const normal = vectorCross(subtractVectors(t1, t2),
   subtractVectors(t1, t0));

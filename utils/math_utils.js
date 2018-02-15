@@ -340,23 +340,7 @@ export const triangleContainsPoint =  (p, triangle) =>{
   return true;
 };
 
-export const scaleVector = (vec, scale)=>{
-  const newVec = [];
-  for(let i = 0; i < vec.length; ++i){
-    newVec.push(vec[i] *scale);
-  }
-  return newVec;
-};
-
-export function scaleVectorInPlace(vector, scale){
-  for(let i = 0; i < vec.length; ++i){
-    vector[i] *= scale;
-  }
-  return vector;
-}
-
-
-//----------------------------------------------------------//
+//--------------------------matrix multiplication--------------------------------//
 export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   if(vec.length < 4){
     vec = vec.concat(0);
@@ -404,16 +388,38 @@ export function rotateVec3byMatrix4InPlace(matrix, vec, result){
   return result;
 };
 
-//------------------------------------------------------------------------//
+//---------------------------vector magnitude---------------------------------------------//
 export const vectorMag = (vector)=>{
   return Math.sqrt(vectorSquareMag(vector));
 };
 
-export const vectorNormalize = (vector)=>{
+export function vectorNormalize(vector){
   const mag = vectorMag(vector);
   if(mag === 0) return vector;
   return scaleVector(vector, 1/mag);
 };
+
+export function vectorNormalizeInPlace(vector){
+  const mag = vectorMag(vector);
+  if(mag === 0) return vector;
+  return scaleVectorInPlace(vector, 1/mag);
+}
+export const scaleVector = (vec, scale)=>{
+  const newVec = [];
+  for(let i = 0; i < vec.length; ++i){
+    newVec.push(vec[i] *scale);
+  }
+  return newVec;
+};
+
+export function scaleVectorInPlace(vector, scale){
+  for(let i = 0; i < vec.length; ++i){
+    vector[i] *= scale;
+  }
+  return vector;
+}
+
+//-------------------------------------------------------------------------//
 export const vectorTriangleIntersection = (origin, direction, t0, t1, t2)=>{
   const normal = vectorCross(subtractVectors(t1, t2),
   subtractVectors(t1, t0));
