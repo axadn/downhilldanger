@@ -69,7 +69,16 @@
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (immutable) */ __webpack_exports__["mat4MultipyInPlace"] = mat4MultipyInPlace;
+/* harmony export (immutable) */ __webpack_exports__["addVectorsInPlace"] = addVectorsInPlace;
+/* harmony export (immutable) */ __webpack_exports__["subtractVectorsInPlace"] = subtractVectorsInPlace;
+/* harmony export (immutable) */ __webpack_exports__["vectorCrossInPlace"] = vectorCrossInPlace;
+/* harmony export (immutable) */ __webpack_exports__["planeNormalInPlace"] = planeNormalInPlace;
 /* harmony export (immutable) */ __webpack_exports__["distance"] = distance;
+const tempVector3 = [0,0,0];
+const tempVector3_1 = [0,0,0];
+const tempVector3_2 = [0,0,0];
+const tempVector3_3 = [0,0,0];
 const mat_4_multiply = (matrix0, matrix1)=>{
   const result = [];
   let sum = 0;
@@ -86,6 +95,21 @@ const mat_4_multiply = (matrix0, matrix1)=>{
 };
 /* harmony export (immutable) */ __webpack_exports__["mat_4_multiply"] = mat_4_multiply;
 
+
+function mat4MultipyInPlace(matrix0, matrix1, result){
+  const result = [];
+  let sum = 0;
+  for(let i = 0; i < 4; ++i){
+    for(let j= 0; j < 4; ++j){
+      sum = 0;
+      for(let k=0; k < 4; ++k){
+        sum += matrix0[i*4 + k] * matrix1[k*4 + j];
+      }
+      result[i*4 + j] = sum;
+    }
+  }
+  return result;
+}
 
 const identityMatrix4 = [
   1,0,0,0,
@@ -258,6 +282,20 @@ const addVectors = (vector1, vector2)=>{
 /* harmony export (immutable) */ __webpack_exports__["addVectors"] = addVectors;
 
 
+function addVectorsInPlace(vector1, vector2, result, length = 3, resultStartIdx = 0){
+  for(let i = 0; i < length; ++i){
+    result[resultStartIdx + i] = vector1[i] + vector2[i];
+  }
+  return result;
+}
+
+function subtractVectorsInPlace(vector1, vector2, result, length = 3, resultStartIdx = 0){
+  for(let i = 0; i < length; ++i){
+    result[resultStartIdx + i] = vector1[i] - vector2[i];
+  }
+  return result;
+}
+
 const vectorCross = (vector1, vector2)=>([
   vector1[1] * vector2[2] - vector1[2] * vector2[1],
   vector1[2] * vector2[0] - vector1[0] * vector2[2],
@@ -265,6 +303,12 @@ const vectorCross = (vector1, vector2)=>([
 ]);
 /* harmony export (immutable) */ __webpack_exports__["vectorCross"] = vectorCross;
 
+
+function vectorCrossInPlace(vector1, vector2, result, resultStart = 0){
+  result[resultStart] = vector1[1] * vector2[2] - vector1[2] * vector2[1];
+  result[resultStart + 1] = vector1[2] * vector2[0] - vector1[0] * vector2[2];
+  result[resultStart + 2] = vector1[0] * vector2[1] - vector1[1] * vector2[0];
+}
 
 const subtractVectors = (vector1, vector2)=>{
   const newVector = [];
@@ -341,18 +385,28 @@ const planeNormal = (t0, t1, t2) =>{
 /* harmony export (immutable) */ __webpack_exports__["planeNormal"] = planeNormal;
 
 
-const triangleContainsPoint =  (p, p0, p1, p2) =>{
-  const n = planeNormal(p0,p1,p2);
+
+const planeNormalVectorA = [0,0,0];
+const planeNormalVectorB = [0,0,0];
+function planeNormalInPlace(triangle, result, resultStart = 0){
+  subtractVectorsInPlace(triangle[1], triangle[2], planeNormalVectorA);
+  subtractVectorsInPlace(triangle[1], triangle[0], planeNormalVectorB);
+  return vectorCrossInPlace(planeNormalVectorA, planeNormalVectorB, result, resultStart)
+}
+
+const planeNormalTemp = [0,0,0];
+const triangleContainsPoint =  (p, triangle) =>{
+  planeNormalInPlace(triangle, planeNormalTemp);
   return(
   vectorDot(
-    vectorCross(subtractVectors(p1, p0), subtractVectors(p, p0)),
-    n) >= 0 &&
+    vectorCross(subtractVectors(triangle[1], triangle[0]), subtractVectors(p, triangle[0])),
+    planeNormalTemp) >= 0 &&
     vectorDot(
-      vectorCross(subtractVectors(p2, p1), subtractVectors(p, p1)),
-      n) >= 0 &&
+      vectorCross(subtractVectors(triangle[2], triangle[1]), subtractVectors(p, triangle[1])),
+      planeNormalTemp) >= 0 &&
       vectorDot(
-        vectorCross(subtractVectors(p0, p2), subtractVectors(p, p2)),
-        n) >= 0);
+        vectorCross(subtractVectors(triangle[0], triangle[2]), subtractVectors(p, triangle[2])),
+        planeNormalTemp) >= 0);
 
 };
 /* harmony export (immutable) */ __webpack_exports__["triangleContainsPoint"] = triangleContainsPoint;
@@ -1818,8 +1872,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       surfaceNormalLocal.slice(0,3), [0,0,1]);
     const planeAlignAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["angleBetweenVectors"]([0,0,1],
       surfaceNormalLocal.slice(0,3));
-      this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisAngleToQuaternion"](
-        planeAlignAxis, planeAlignAngle/5));
+    this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisAngleToQuaternion"](
+      planeAlignAxis, planeAlignAngle/5));
   }
   _applyFriction(localVelocity){
     let signFlip;
@@ -2389,8 +2443,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
           vertex(this.mesh.faces[i+j]).concat(1))
         );
       }
-      if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["triangleContainsPoint"](transformedPosition, transformedTriangle[0],
-        transformedTriangle[1],transformedTriangle[2])){
+      if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["triangleContainsPoint"](transformedPosition, transformedTriangle)){
           return [vertex(this.mesh.faces[i]),
             vertex(this.mesh.faces[i + 1]), vertex(this.mesh.faces[i + 2])];
       }

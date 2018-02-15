@@ -1,3 +1,7 @@
+const tempVector3 = [0,0,0];
+const tempVector3_1 = [0,0,0];
+const tempVector3_2 = [0,0,0];
+const tempVector3_3 = [0,0,0];
 export const mat_4_multiply = (matrix0, matrix1)=>{
   const result = [];
   let sum = 0;
@@ -12,6 +16,21 @@ export const mat_4_multiply = (matrix0, matrix1)=>{
   }
   return result;
 };
+
+export function mat4MultipyInPlace(matrix0, matrix1, result){
+  const result = [];
+  let sum = 0;
+  for(let i = 0; i < 4; ++i){
+    for(let j= 0; j < 4; ++j){
+      sum = 0;
+      for(let k=0; k < 4; ++k){
+        sum += matrix0[i*4 + k] * matrix1[k*4 + j];
+      }
+      result[i*4 + j] = sum;
+    }
+  }
+  return result;
+}
 
 export const identityMatrix4 = [
   1,0,0,0,
@@ -158,11 +177,31 @@ export const addVectors = (vector1, vector2)=>{
   return newVector;
 }
 
+export function addVectorsInPlace(vector1, vector2, result, length = 3, resultStartIdx = 0){
+  for(let i = 0; i < length; ++i){
+    result[resultStartIdx + i] = vector1[i] + vector2[i];
+  }
+  return result;
+}
+
+export function subtractVectorsInPlace(vector1, vector2, result, length = 3, resultStartIdx = 0){
+  for(let i = 0; i < length; ++i){
+    result[resultStartIdx + i] = vector1[i] - vector2[i];
+  }
+  return result;
+}
+
 export const vectorCross = (vector1, vector2)=>([
   vector1[1] * vector2[2] - vector1[2] * vector2[1],
   vector1[2] * vector2[0] - vector1[0] * vector2[2],
   vector1[0] * vector2[1] - vector1[1] * vector2[0]
 ]);
+
+export function vectorCrossInPlace(vector1, vector2, result, resultStart = 0){
+  result[resultStart] = vector1[1] * vector2[2] - vector1[2] * vector2[1];
+  result[resultStart + 1] = vector1[2] * vector2[0] - vector1[0] * vector2[2];
+  result[resultStart + 2] = vector1[0] * vector2[1] - vector1[1] * vector2[0];
+}
 
 export const subtractVectors = (vector1, vector2)=>{
   const newVector = [];
@@ -223,18 +262,28 @@ export const planeNormal = (t0, t1, t2) =>{
   return vectorCross(vectorA, vectorB);
 };
 
-export const triangleContainsPoint =  (p, p0, p1, p2) =>{
-  const n = planeNormal(p0,p1,p2);
+
+const planeNormalVectorA = [0,0,0];
+const planeNormalVectorB = [0,0,0];
+export function planeNormalInPlace(triangle, result, resultStart = 0){
+  subtractVectorsInPlace(triangle[1], triangle[2], planeNormalVectorA);
+  subtractVectorsInPlace(triangle[1], triangle[0], planeNormalVectorB);
+  return vectorCrossInPlace(planeNormalVectorA, planeNormalVectorB, result, resultStart)
+}
+
+const planeNormalTemp = [0,0,0];
+export const triangleContainsPoint =  (p, triangle) =>{
+  planeNormalInPlace(triangle, planeNormalTemp);
   return(
   vectorDot(
-    vectorCross(subtractVectors(p1, p0), subtractVectors(p, p0)),
-    n) >= 0 &&
+    vectorCross(subtractVectors(triangle[1], triangle[0]), subtractVectors(p, triangle[0])),
+    planeNormalTemp) >= 0 &&
     vectorDot(
-      vectorCross(subtractVectors(p2, p1), subtractVectors(p, p1)),
-      n) >= 0 &&
+      vectorCross(subtractVectors(triangle[2], triangle[1]), subtractVectors(p, triangle[1])),
+      planeNormalTemp) >= 0 &&
       vectorDot(
-        vectorCross(subtractVectors(p0, p2), subtractVectors(p, p2)),
-        n) >= 0);
+        vectorCross(subtractVectors(triangle[0], triangle[2]), subtractVectors(p, triangle[2])),
+        planeNormalTemp) >= 0);
 
 };
 

@@ -358,8 +358,7 @@ export default class Slope extends GameObject{
           vertex(this.mesh.faces[i+j]).concat(1))
         );
       }
-      if(MathUtils.triangleContainsPoint(transformedPosition, transformedTriangle[0],
-        transformedTriangle[1],transformedTriangle[2])){
+      if(MathUtils.triangleContainsPoint(transformedPosition, transformedTriangle)){
           return [vertex(this.mesh.faces[i]),
             vertex(this.mesh.faces[i + 1]), vertex(this.mesh.faces[i + 2])];
       }

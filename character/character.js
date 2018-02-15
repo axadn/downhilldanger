@@ -99,8 +99,8 @@ export default class Character extends GameObject{
       surfaceNormalLocal.slice(0,3), [0,0,1]);
     const planeAlignAngle = MathUtils.angleBetweenVectors([0,0,1],
       surfaceNormalLocal.slice(0,3));
-      this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
-        planeAlignAxis, planeAlignAngle/5));
+    this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+      planeAlignAxis, planeAlignAngle/5));
   }
   _applyFriction(localVelocity){
     let signFlip;
