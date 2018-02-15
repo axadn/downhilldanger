@@ -97,31 +97,6 @@ export const inverse_mat4_rot_pos = mat=>{
   * break down the matrix into a rotation and position component
   * transpose the rotation component
   * recombine them in reverse order (translation then rotation)
-  *
-
-  mat (indices) =
-  0  1  2  3
-  4  5  6  7
-  8  9  10 11
-  12 13 14 15
-
-  inverse translation =
-  1 0 0 -tx
-  0 1 0 -ty
-  0 0 1 -tz
-  0 0 0  1
-
-  rotation =
-  ux vx wx 0
-  uy vy vy 0
-  uz vz wz 0
-  0  0  0  1
-
-  therefore, inverse rotation indexes =
-  0  4  8
-  1  5  9
-  2  6  10
-
 */
   return mat_4_multiply(
     [
@@ -137,6 +112,24 @@ export const inverse_mat4_rot_pos = mat=>{
       0,      0,     0,       1
     ],
   );
+}
+const inverseRotComponentMap = [
+  0, 4, 8, 0,
+  1, 5, 9, 0,
+  2, 6, 10, 0
+];
+const inverseTranslationComponent = Array(16);
+export function inverseMat4InPlace(mat, result){
+  for(let i = 0; i < 3; ++i){
+    for(let j = 0; j< 3; ++j){
+      result[i*4 + j] = mat[inverseRotComponentMap[i*4 + j]];
+    }
+  }
+  for(let i = 0; i < 4; ++i){
+     result[12 + i] = mat[i]* -1 * mat[12] -  
+                      mat[4 + i] * mat[13] - 
+                      mat[8 + i] * mat[14];
+  }
 }
 
 export const swapYZMatrix =[

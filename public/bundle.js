@@ -70,6 +70,7 @@
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["mat4MultipyInPlace"] = mat4MultipyInPlace;
+/* harmony export (immutable) */ __webpack_exports__["inverseMat4InPlace"] = inverseMat4InPlace;
 /* harmony export (immutable) */ __webpack_exports__["addVectorsInPlace"] = addVectorsInPlace;
 /* harmony export (immutable) */ __webpack_exports__["subtractVectorsInPlace"] = subtractVectorsInPlace;
 /* harmony export (immutable) */ __webpack_exports__["vectorCrossInPlace"] = vectorCrossInPlace;
@@ -197,31 +198,6 @@ const inverse_mat4_rot_pos = mat=>{
   * break down the matrix into a rotation and position component
   * transpose the rotation component
   * recombine them in reverse order (translation then rotation)
-  *
-
-  mat (indices) =
-  0  1  2  3
-  4  5  6  7
-  8  9  10 11
-  12 13 14 15
-
-  inverse translation =
-  1 0 0 -tx
-  0 1 0 -ty
-  0 0 1 -tz
-  0 0 0  1
-
-  rotation =
-  ux vx wx 0
-  uy vy vy 0
-  uz vz wz 0
-  0  0  0  1
-
-  therefore, inverse rotation indexes =
-  0  4  8
-  1  5  9
-  2  6  10
-
 */
   return mat_4_multiply(
     [
@@ -240,6 +216,24 @@ const inverse_mat4_rot_pos = mat=>{
 }
 /* harmony export (immutable) */ __webpack_exports__["inverse_mat4_rot_pos"] = inverse_mat4_rot_pos;
 
+const inverseRotComponentMap = [
+  0, 4, 8, 0,
+  1, 5, 9, 0,
+  2, 6, 10, 0
+];
+const inverseTranslationComponent = Array(16);
+function inverseMat4InPlace(mat, result){
+  for(let i = 0; i < 3; ++i){
+    for(let j = 0; j< 3; ++j){
+      result[i*4 + j] = mat[inverseRotComponentMap[i*4 + j]];
+    }
+  }
+  for(let i = 0; i < 4; ++i){
+     result[12 + i] = mat[i]* -1 * mat[12] -  
+                      mat[4 + i] * mat[13] - 
+                      mat[8 + i] * mat[14];
+  }
+}
 
 const swapYZMatrix =[
 //x,y,z,w
@@ -729,11 +723,14 @@ const UPDATE_INTERVAL = 33;
 const ANGULAR_DRAG = 0.3;
 const DRAG = 0.4;
 
+
 class GameObject {
   constructor(mesh, transformationMatrix = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["identityMatrix4"], isStatic = false){
     this.mesh = mesh;
     this.isStatic = isStatic;
     this._transformationMatrix = transformationMatrix.slice(0,16);
+    this._transformationMatrixInverse = Array(16);
+    this._inverseValid = false;
     this._position = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["mat4TranslationComponent"](transformationMatrix);
     this._rotation = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["IdentityQuaternion"];
     this.velocity = [0,0,0];
@@ -773,7 +770,6 @@ class GameObject {
   transformPoint(point){
     return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyVec4ByMatrix4"](
       this._transformationMatrix, point.concat([1])).slice(0,3);
-
   }
   transformDirection(direction){
     return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyVec4ByMatrix4"](
@@ -787,19 +783,36 @@ class GameObject {
       result
     );
   }
+  _calculateInverse(){
+    __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["inverseMat4InPlace"](this._transformationMatrix, this._transformationMatrixInverse);
+    this._inverseValid = true;
+  }
   inverseTransformPoint(point){
+    if(!this._inverseValid) this._calculateInverse();
     return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyVec4ByMatrix4"](
-      __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["inverse_mat4_rot_pos"](this._transformationMatrix),
+      this._transformationMatrixInverse,
       point.concat([1])
     ).slice(0,3);
   }
   inverseTransformDirection(direction){
-    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyVec4ByMatrix4"](
-      __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["inverse_mat4_rot_pos"](
-        __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["mat4RotationComponent"](this._transformationMatrix)
-      ),
-      direction.concat([1])
-    ).slice(0,3);
+    if(!this._inverseValid) this._calculateInverse();
+    const transformed = [0,0,0];
+    return Object(__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["rotateVec3byMatrix4InPlace"])(
+      this._transformationMatrixInverse,
+      direction,
+      transformed
+    )
+  }
+  inverseTransformDirectionInPlace(direction, result){
+    if(!this._inverseValid) this._calculateInverse();
+    return Object(__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["rotateVec3byMatrix4InPlace"])(
+      this._transformationMatrixInverse,
+      direction,
+      result
+    )
+  }
+  inverseTransformPointInPlace(direction, result){
+    if(!this._inverseValid) this._calculateInverse();
   }
   /*
    0  1   2  3
@@ -812,6 +825,7 @@ class GameObject {
     this._transformationMatrix[12] = position[0];
     this._transformationMatrix[13] = position[1];
     this._transformationMatrix[14] = position[2];
+    this._inverseValid = false;
   }
   getRotation(){
     return this._rotation;
@@ -822,6 +836,7 @@ class GameObject {
   setRotation(rotQuat){
     this._rotation = __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["vectorNormalize"](rotQuat);
     __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["setMatrixRotInPlace"](this._transformationMatrix,this._rotation);
+    this._inverseValid = false;
   }
   getTransformationMatrix(){
     return this._transformationMatrix;

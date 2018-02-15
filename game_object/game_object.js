@@ -3,11 +3,14 @@ export const UPDATE_INTERVAL = 33;
 const ANGULAR_DRAG = 0.3;
 const DRAG = 0.4;
 import * as MathUtils from "../utils/math_utils";
+import { rotateVec3byMatrix4InPlace } from "../utils/math_utils";
 export default class GameObject {
   constructor(mesh, transformationMatrix = MathUtils.identityMatrix4, isStatic = false){
     this.mesh = mesh;
     this.isStatic = isStatic;
     this._transformationMatrix = transformationMatrix.slice(0,16);
+    this._transformationMatrixInverse = Array(16);
+    this._inverseValid = false;
     this._position = MathUtils.mat4TranslationComponent(transformationMatrix);
     this._rotation = MathUtils.IdentityQuaternion;
     this.velocity = [0,0,0];
@@ -47,7 +50,6 @@ export default class GameObject {
   transformPoint(point){
     return MathUtils.multiplyVec4ByMatrix4(
       this._transformationMatrix, point.concat([1])).slice(0,3);
-
   }
   transformDirection(direction){
     return MathUtils.multiplyVec4ByMatrix4(
@@ -61,19 +63,36 @@ export default class GameObject {
       result
     );
   }
+  _calculateInverse(){
+    MathUtils.inverseMat4InPlace(this._transformationMatrix, this._transformationMatrixInverse);
+    this._inverseValid = true;
+  }
   inverseTransformPoint(point){
+    if(!this._inverseValid) this._calculateInverse();
     return MathUtils.multiplyVec4ByMatrix4(
-      MathUtils.inverse_mat4_rot_pos(this._transformationMatrix),
+      this._transformationMatrixInverse,
       point.concat([1])
     ).slice(0,3);
   }
   inverseTransformDirection(direction){
-    return MathUtils.multiplyVec4ByMatrix4(
-      MathUtils.inverse_mat4_rot_pos(
-        MathUtils.mat4RotationComponent(this._transformationMatrix)
-      ),
-      direction.concat([1])
-    ).slice(0,3);
+    if(!this._inverseValid) this._calculateInverse();
+    const transformed = [0,0,0];
+    return rotateVec3byMatrix4InPlace(
+      this._transformationMatrixInverse,
+      direction,
+      transformed
+    )
+  }
+  inverseTransformDirectionInPlace(direction, result){
+    if(!this._inverseValid) this._calculateInverse();
+    return rotateVec3byMatrix4InPlace(
+      this._transformationMatrixInverse,
+      direction,
+      result
+    )
+  }
+  inverseTransformPointInPlace(direction, result){
+    if(!this._inverseValid) this._calculateInverse();
   }
   /*
    0  1   2  3
@@ -86,6 +105,7 @@ export default class GameObject {
     this._transformationMatrix[12] = position[0];
     this._transformationMatrix[13] = position[1];
     this._transformationMatrix[14] = position[2];
+    this._inverseValid = false;
   }
   getRotation(){
     return this._rotation;
@@ -96,6 +116,7 @@ export default class GameObject {
   setRotation(rotQuat){
     this._rotation = MathUtils.vectorNormalize(rotQuat);
     MathUtils.setMatrixRotInPlace(this._transformationMatrix,this._rotation);
+    this._inverseValid = false;
   }
   getTransformationMatrix(){
     return this._transformationMatrix;
