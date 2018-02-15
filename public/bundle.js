@@ -1943,14 +1943,13 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     const surfaceOffset = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["subtractVectors"]
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorSquareMag"](surfaceOffset);
-
     this.velocity[2] -= this.fallSpeed;
     if(distanceFromSurface < this.capsuleRadius){
       this._planeAlign();
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlaneInPlace"](this.velocity, this.transformDirection([0,0,1]), this.velocity);
-      let localVelocity = this.inverseTransformDirection(this.velocity);
-      this._applyFriction(localVelocity);
-      this.transformDirectionInPlace(localVelocity, this.velocity);
+      this.inverseTransformDirectionInPlace(this.velocity, this.localVelocity);
+      this._applyFriction(this.localVelocity);
+      this.transformDirectionInPlace(this.localVelocity, this.velocity);
     }
     this.normalizeAnimationInfluence();
     this._mixAnimations();
@@ -1982,16 +1981,11 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _planeAlign(){
-    const surfaceNormalLocal = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["multiplyVec4ByMatrix4"](
-        __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["inverse_mat4_rot_pos"](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["mat4RotationComponent"](
-          this.getTransformationMatrix()
-        )),
-        this.surfacePlaneNormal.concat(1)
-    );
+    const surfaceNormalLocal = this.inverseTransformDirection(this.surfacePlaneNormal);
     const planeAlignAxis = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorCross"](
-      surfaceNormalLocal.slice(0,3), [0,0,1]);
+      surfaceNormalLocal, [0,0,1]);
     const planeAlignAngle = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["angleBetweenVectors"]([0,0,1],
-      surfaceNormalLocal.slice(0,3));
+      surfaceNormalLocal);
     this.addAngularVelocity(__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisAngleToQuaternion"](
       planeAlignAxis, planeAlignAngle/5));
   }

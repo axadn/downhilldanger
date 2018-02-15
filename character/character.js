@@ -51,14 +51,13 @@ export default class Character extends GameObject{
     const surfaceOffset = MathUtils.subtractVectors
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
-
     this.velocity[2] -= this.fallSpeed;
     if(distanceFromSurface < this.capsuleRadius){
       this._planeAlign();
       MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.transformDirection([0,0,1]), this.velocity);
-      let localVelocity = this.inverseTransformDirection(this.velocity);
-      this._applyFriction(localVelocity);
-      this.transformDirectionInPlace(localVelocity, this.velocity);
+      this.inverseTransformDirectionInPlace(this.velocity, this.localVelocity);
+      this._applyFriction(this.localVelocity);
+      this.transformDirectionInPlace(this.localVelocity, this.velocity);
     }
     this.normalizeAnimationInfluence();
     this._mixAnimations();
@@ -90,16 +89,11 @@ export default class Character extends GameObject{
     }
   }
   _planeAlign(){
-    const surfaceNormalLocal = MathUtils.multiplyVec4ByMatrix4(
-        MathUtils.inverse_mat4_rot_pos(MathUtils.mat4RotationComponent(
-          this.getTransformationMatrix()
-        )),
-        this.surfacePlaneNormal.concat(1)
-    );
+    const surfaceNormalLocal = this.inverseTransformDirection(this.surfacePlaneNormal);
     const planeAlignAxis = MathUtils.vectorCross(
-      surfaceNormalLocal.slice(0,3), [0,0,1]);
+      surfaceNormalLocal, [0,0,1]);
     const planeAlignAngle = MathUtils.angleBetweenVectors([0,0,1],
-      surfaceNormalLocal.slice(0,3));
+      surfaceNormalLocal);
     this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
       planeAlignAxis, planeAlignAngle/5));
   }
