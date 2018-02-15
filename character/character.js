@@ -26,8 +26,7 @@ export default class Character extends GameObject{
     this.currentSegmentNumber = 0;
     this.input = {left: false, right: false, back: false}
     this.velocity = [0,1,0];
-    this.angularVelocityAxis = [0,0,1,0];
-    this.angularVelocityAngle = 0;
+    this.localVelocity = [0,0,0];
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
