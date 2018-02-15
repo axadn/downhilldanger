@@ -239,6 +239,25 @@ export const mat4RotationComponent = (mat) =>(
     ]
 );
 
+const rotationComponentMask = [
+  true, true, true, false,
+  true, true, true, false,
+  true, true, true, false,
+  false, false, false, false
+];
+export function mat4RotationComponentInPlace(mat, result){
+  for(let i = 0; i < 16; ++i){
+    if(rotationComponentMask[i]){
+      result[i] = mat[i];
+    }
+    else{
+      result[i] = 0;
+    }
+  }
+  result[15] = 1;
+  return result;
+}
+
 export const vectorSquareMag = vector => {
   let sum = 0;
   for(let i = 0; i < vector.length; ++i){

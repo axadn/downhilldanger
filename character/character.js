@@ -13,6 +13,8 @@ import * as HUD from "../hud/hud";
 window.MathUtils = MathUtils;
 import * as CollisionUtils from "../utils/collision_utils";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
+
+
 export default class Character extends GameObject{
   constructor(mesh, boundingBox, slope, transformationMatrix = MathUtils.identityMatrix4){
     super(mesh, transformationMatrix);
@@ -115,7 +117,6 @@ export default class Character extends GameObject{
     }
   }
   _steer(direction){
-
     this.addAngularVelocity(
       MathUtils.axisAngleToQuaternion(
         this.transformDirection([0,0,1]),
@@ -295,3 +296,4 @@ export default class Character extends GameObject{
     }
   }
 }
+Character.transformedDirectionTemp = [0,0,0];

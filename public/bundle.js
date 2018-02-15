@@ -73,6 +73,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["addVectorsInPlace"] = addVectorsInPlace;
 /* harmony export (immutable) */ __webpack_exports__["subtractVectorsInPlace"] = subtractVectorsInPlace;
 /* harmony export (immutable) */ __webpack_exports__["vectorCrossInPlace"] = vectorCrossInPlace;
+/* harmony export (immutable) */ __webpack_exports__["mat4RotationComponentInPlace"] = mat4RotationComponentInPlace;
 /* harmony export (immutable) */ __webpack_exports__["projectVectorInPlace"] = projectVectorInPlace;
 /* harmony export (immutable) */ __webpack_exports__["projectVectorOntoPlane"] = projectVectorOntoPlane;
 /* harmony export (immutable) */ __webpack_exports__["projectVectorOntoPlaneInPlace"] = projectVectorOntoPlaneInPlace;
@@ -358,6 +359,25 @@ const mat4RotationComponent = (mat) =>(
 );
 /* harmony export (immutable) */ __webpack_exports__["mat4RotationComponent"] = mat4RotationComponent;
 
+
+const rotationComponentMask = [
+  true, true, true, false,
+  true, true, true, false,
+  true, true, true, false,
+  false, false, false, false
+];
+function mat4RotationComponentInPlace(mat, result){
+  for(let i = 0; i < 16; ++i){
+    if(rotationComponentMask[i]){
+      result[i] = mat[i];
+    }
+    else{
+      result[i] = 0;
+    }
+  }
+  result[15] = 1;
+  return result;
+}
 
 const vectorSquareMag = vector => {
   let sum = 0;
@@ -743,6 +763,13 @@ class GameObject {
       __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["mat4RotationComponent"](this._transformationMatrix),
        direction.concat([1])).slice(0,3);
   }
+  transformDirectionInPlace(direction, result){
+    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyVec3ByMatrix4InPlace"](
+      __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["mat4RotationComponentInPlace"](this._transformationMatrix, matrixRotationComponentTemp),
+      direction,
+      result
+    );
+  }
   inverseTransformPoint(point){
     return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyVec4ByMatrix4"](
       __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["inverse_mat4_rot_pos"](this._transformationMatrix),
@@ -813,6 +840,7 @@ class GameObject {
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = GameObject;
 
+GameObject.matrixRotationComponentTemp = Array(16);
 
 
 /***/ }),
@@ -1847,6 +1875,8 @@ const BREAK_FRICTION = [0.04,0.16,0.04];
 window.MathUtils = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__;
 
 
+
+
 class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["a" /* default */]{
   constructor(mesh, boundingBox, slope, transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["identityMatrix4"]){
     super(mesh, transformationMatrix);
@@ -1949,7 +1979,6 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _steer(direction){
-
     this.addAngularVelocity(
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["axisAngleToQuaternion"](
         this.transformDirection([0,0,1]),
@@ -2131,6 +2160,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Character;
 
+Character.transformedDirectionTemp = [0,0,0];
 
 
 /***/ }),

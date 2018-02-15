@@ -54,6 +54,13 @@ export default class GameObject {
       MathUtils.mat4RotationComponent(this._transformationMatrix),
        direction.concat([1])).slice(0,3);
   }
+  transformDirectionInPlace(direction, result){
+    return MathUtils.multiplyVec3ByMatrix4InPlace(
+      MathUtils.mat4RotationComponentInPlace(this._transformationMatrix, matrixRotationComponentTemp),
+      direction,
+      result
+    );
+  }
   inverseTransformPoint(point){
     return MathUtils.multiplyVec4ByMatrix4(
       MathUtils.inverse_mat4_rot_pos(this._transformationMatrix),
@@ -122,3 +129,4 @@ export default class GameObject {
       timestamp - this.lastTimeStamp > 1000 / this.currentAnimationFramerate);
   }
 }
+GameObject.matrixRotationComponentTemp = Array(16);
