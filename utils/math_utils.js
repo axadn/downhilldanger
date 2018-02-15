@@ -347,13 +347,11 @@ export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   if(vec.length < 4){
     vec = vec.concat(0);
   }
-  const result = [];
+  const result = [0,0,0,0];
   for(let i = 0; i < 4; ++i){
-    let colResult = 0;
     for(let j = 0; j < 4; ++j){
-      colResult += matrix[j * 4 + i] * vec[j];
+      result[j] += matrix[i * 4 + j] * vec[i];
     }
-    result.push(colResult);
   }
   return result;
 };
@@ -361,12 +359,16 @@ export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
 const vectorTransformTemp = [0,0,0];
 export function multiplyVec3ByMatrix4InPlace(matrix, vec, result){
   let component;
+  for(let i = 0; i <3; ++i){
+    vectorTransformTemp[i] = 0;
+  }
   for(let i = 0; i < 3; ++i){
-    component = 0;
     for(let j=0; j<3; ++j){
-      component += matrix[j * 4 + i] * vec[j];
+      vectorTransformTemp[j] += matrix[i * 4 + j] * vec[i];
     }
-    vectorTransformTemp[i] = component;
+    for(let j =0; j<3; ++j){
+      vectorTransformTemp[j] +=matrix[12 + j];
+    }
   }
   for(let i = 0; i <3; ++i){
     result[i] = vectorTransformTemp[i];
