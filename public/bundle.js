@@ -74,6 +74,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["subtractVectorsInPlace"] = subtractVectorsInPlace;
 /* harmony export (immutable) */ __webpack_exports__["vectorCrossInPlace"] = vectorCrossInPlace;
 /* harmony export (immutable) */ __webpack_exports__["planeNormalInPlace"] = planeNormalInPlace;
+/* harmony export (immutable) */ __webpack_exports__["scaleVectorInPlace"] = scaleVectorInPlace;
+/* harmony export (immutable) */ __webpack_exports__["multiplyVec3ByMatrix4InPlace"] = multiplyVec3ByMatrix4InPlace;
 /* harmony export (immutable) */ __webpack_exports__["distance"] = distance;
 const tempVector3 = [0,0,0];
 const tempVector3_1 = [0,0,0];
@@ -398,6 +400,15 @@ const planeNormalTemp = [0,0,0];
 const pointOffsetTemp = [0,0,0];
 const triangleSideTemp = [0,0,0];
 const sideOffsetCrossTemp = [0,0,0];
+/**
+triangle configuration :
+t2
+
+          t1
+
+
+t0
+*/
 const triangleContainsPoint =  (p, triangle) =>{
   planeNormalInPlace(triangle, planeNormalTemp);
 
@@ -434,6 +445,13 @@ const scaleVector = (vec, scale)=>{
 /* harmony export (immutable) */ __webpack_exports__["scaleVector"] = scaleVector;
 
 
+function scaleVectorInPlace(vector, scale){
+  for(let i = 0; i < vec.length; ++i){
+    vector[i] *= scale;
+  }
+  return vector;
+}
+
 const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   if(vec.length < 4){
     vec = vec.concat(0);
@@ -451,15 +469,23 @@ const multiplyVec4ByMatrix4 = (matrix, vec) =>{
 /* harmony export (immutable) */ __webpack_exports__["multiplyVec4ByMatrix4"] = multiplyVec4ByMatrix4;
 
 
-/**
-triangle configuration :
-t2
+const vectorTransformTemp = [0,0,0];
+function multiplyVec3ByMatrix4InPlace(matrix, vec, result){
+  let component;
+  for(let i = 0; i < 3; ++i){
+    component = 0;
+    for(let j=0; j<3; ++j){
+      component += matrix[j * 4 + i] * vec[j];
+    }
+    vectorTransformTemp[i] = component;
+  }
+  for(let i = 0; i <3; ++i){
+    result[i] = vectorTransformTemp[i];
+  }
+  return result;
+}
 
-          t1
 
-
-t0
-*/
 const vectorMag = (vector)=>{
   return Math.sqrt(vectorSquareMag(vector));
 };

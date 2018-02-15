@@ -275,6 +275,15 @@ const planeNormalTemp = [0,0,0];
 const pointOffsetTemp = [0,0,0];
 const triangleSideTemp = [0,0,0];
 const sideOffsetCrossTemp = [0,0,0];
+/**
+triangle configuration :
+t2
+
+          t1
+
+
+t0
+*/
 export const triangleContainsPoint =  (p, triangle) =>{
   planeNormalInPlace(triangle, planeNormalTemp);
 
@@ -307,6 +316,13 @@ export const scaleVector = (vec, scale)=>{
   return newVec;
 };
 
+export function scaleVectorInPlace(vector, scale){
+  for(let i = 0; i < vec.length; ++i){
+    vector[i] *= scale;
+  }
+  return vector;
+}
+
 export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   if(vec.length < 4){
     vec = vec.concat(0);
@@ -322,15 +338,23 @@ export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   return result;
 };
 
-/**
-triangle configuration :
-t2
+const vectorTransformTemp = [0,0,0];
+export function multiplyVec3ByMatrix4InPlace(matrix, vec, result){
+  let component;
+  for(let i = 0; i < 3; ++i){
+    component = 0;
+    for(let j=0; j<3; ++j){
+      component += matrix[j * 4 + i] * vec[j];
+    }
+    vectorTransformTemp[i] = component;
+  }
+  for(let i = 0; i <3; ++i){
+    result[i] = vectorTransformTemp[i];
+  }
+  return result;
+}
 
-          t1
 
-
-t0
-*/
 export const vectorMag = (vector)=>{
   return Math.sqrt(vectorSquareMag(vector));
 };
