@@ -272,19 +272,31 @@ export function planeNormalInPlace(triangle, result, resultStart = 0){
 }
 
 const planeNormalTemp = [0,0,0];
+const pointOffsetTemp = [0,0,0];
+const triangleSideTemp = [0,0,0];
+const sideOffsetCrossTemp = [0,0,0];
 export const triangleContainsPoint =  (p, triangle) =>{
   planeNormalInPlace(triangle, planeNormalTemp);
-  return(
-  vectorDot(
-    vectorCross(subtractVectors(triangle[1], triangle[0]), subtractVectors(p, triangle[0])),
-    planeNormalTemp) >= 0 &&
-    vectorDot(
-      vectorCross(subtractVectors(triangle[2], triangle[1]), subtractVectors(p, triangle[1])),
-      planeNormalTemp) >= 0 &&
-      vectorDot(
-        vectorCross(subtractVectors(triangle[0], triangle[2]), subtractVectors(p, triangle[2])),
-        planeNormalTemp) >= 0);
 
+  //this checks if the first side is ahead of the point clockwise
+  subtractVectorsInPlace(triangle[1], triangle[0], triangleSideTemp);
+  subtractVectorsInPlace(p, triangle[0], pointOffsetTemp);
+  vectorCrossInPlace(triangleSideTemp,pointOffsetTemp, sideOffsetCrossTemp);
+  if(vectorDot(sideOffsetCrossTemp, planeNormalTemp) < 0) return false;
+
+  //same thing for 2nd side
+  subtractVectorsInPlace(triangle[2], triangle[1], triangleSideTemp);
+  subtractVectorsInPlace(p, triangle[1], pointOffsetTemp);
+  vectorCrossInPlace(triangleSideTemp,pointOffsetTemp, sideOffsetCrossTemp);
+  if(vectorDot(sideOffsetCrossTemp, planeNormalTemp) < 0) return false;
+
+  //3rd side
+  subtractVectorsInPlace(triangle[0], triangle[2], triangleSideTemp);
+  subtractVectorsInPlace(p, triangle[2], pointOffsetTemp);
+  vectorCrossInPlace(triangleSideTemp,pointOffsetTemp, sideOffsetCrossTemp);
+  if(vectorDot(sideOffsetCrossTemp, planeNormalTemp) < 0) return false;
+
+  return true;
 };
 
 export const scaleVector = (vec, scale)=>{
