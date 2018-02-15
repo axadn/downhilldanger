@@ -252,6 +252,13 @@ export const projectVector = (vector, onto)=>{
   return scaleVector(onto, dotProduct/ vectorSquareMag(onto));
 };
 
+export function projectVectorInPlace(vector, onto, result){
+  const scaleAmount =  vectorDot(vector, onto) / vectorSquareMag(onto);
+  for(let i = 0; i < 3; ++i){
+    result[i] = onto[i] * scaleAmount;
+  }
+}
+
 export const projectVectorOntoPlane = (vector, planeNormal)=>{
   return subtractVectors(vector.slice(0,3), projectVector(vector, planeNormal));
 };

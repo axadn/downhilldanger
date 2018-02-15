@@ -73,6 +73,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["addVectorsInPlace"] = addVectorsInPlace;
 /* harmony export (immutable) */ __webpack_exports__["subtractVectorsInPlace"] = subtractVectorsInPlace;
 /* harmony export (immutable) */ __webpack_exports__["vectorCrossInPlace"] = vectorCrossInPlace;
+/* harmony export (immutable) */ __webpack_exports__["projectVectorInPlace"] = projectVectorInPlace;
 /* harmony export (immutable) */ __webpack_exports__["planeNormalInPlace"] = planeNormalInPlace;
 /* harmony export (immutable) */ __webpack_exports__["scaleVectorInPlace"] = scaleVectorInPlace;
 /* harmony export (immutable) */ __webpack_exports__["multiplyVec3ByMatrix4InPlace"] = multiplyVec3ByMatrix4InPlace;
@@ -372,6 +373,13 @@ const projectVector = (vector, onto)=>{
 };
 /* harmony export (immutable) */ __webpack_exports__["projectVector"] = projectVector;
 
+
+function projectVectorInPlace(vector, onto, result){
+  const scaleAmount =  vectorDot(vector, onto) / vectorSquareMag(onto);
+  for(let i = 0; i < 3; ++i){
+    result[i] = onto[i] * scaleAmount;
+  }
+}
 
 const projectVectorOntoPlane = (vector, planeNormal)=>{
   return subtractVectors(vector.slice(0,3), projectVector(vector, planeNormal));
