@@ -362,6 +362,8 @@ export function scaleVectorInPlace(vector, scale){
   return vector;
 }
 
+
+//----------------------------------------------------------//
 export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   if(vec.length < 4){
     vec = vec.concat(0);
@@ -377,7 +379,6 @@ export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
 
 const vectorTransformTemp = [0,0,0];
 export function multiplyVec3ByMatrix4InPlace(matrix, vec, result){
-  let component;
   for(let i = 0; i <3; ++i){
     vectorTransformTemp[i] = 0;
   }
@@ -395,7 +396,22 @@ export function multiplyVec3ByMatrix4InPlace(matrix, vec, result){
   return result;
 }
 
+export function rotateVec3byMatrix4InPlace(matrix, vec, result){
+  for(let i = 0; i <3; ++i){
+    vectorTransformTemp[i] = 0;
+  }
+  for(let i = 0; i < 3; ++i){
+    for(let j=0; j<3; ++j){
+      vectorTransformTemp[j] += matrix[i * 4 + j] * vec[i];
+    }
+  }
+  for(let i = 0; i <3; ++i){
+    result[i] = vectorTransformTemp[i];
+  }
+  return result;
+};
 
+//------------------------------------------------------------------------//
 export const vectorMag = (vector)=>{
   return Math.sqrt(vectorSquareMag(vector));
 };

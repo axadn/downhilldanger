@@ -80,6 +80,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["planeNormalInPlace"] = planeNormalInPlace;
 /* harmony export (immutable) */ __webpack_exports__["scaleVectorInPlace"] = scaleVectorInPlace;
 /* harmony export (immutable) */ __webpack_exports__["multiplyVec3ByMatrix4InPlace"] = multiplyVec3ByMatrix4InPlace;
+/* harmony export (immutable) */ __webpack_exports__["rotateVec3byMatrix4InPlace"] = rotateVec3byMatrix4InPlace;
 /* harmony export (immutable) */ __webpack_exports__["distance"] = distance;
 const tempVector3 = [0,0,0];
 const tempVector3_1 = [0,0,0];
@@ -493,6 +494,8 @@ function scaleVectorInPlace(vector, scale){
   return vector;
 }
 
+
+//----------------------------------------------------------//
 const multiplyVec4ByMatrix4 = (matrix, vec) =>{
   if(vec.length < 4){
     vec = vec.concat(0);
@@ -510,7 +513,6 @@ const multiplyVec4ByMatrix4 = (matrix, vec) =>{
 
 const vectorTransformTemp = [0,0,0];
 function multiplyVec3ByMatrix4InPlace(matrix, vec, result){
-  let component;
   for(let i = 0; i <3; ++i){
     vectorTransformTemp[i] = 0;
   }
@@ -528,7 +530,22 @@ function multiplyVec3ByMatrix4InPlace(matrix, vec, result){
   return result;
 }
 
+function rotateVec3byMatrix4InPlace(matrix, vec, result){
+  for(let i = 0; i <3; ++i){
+    vectorTransformTemp[i] = 0;
+  }
+  for(let i = 0; i < 3; ++i){
+    for(let j=0; j<3; ++j){
+      vectorTransformTemp[j] += matrix[i * 4 + j] * vec[i];
+    }
+  }
+  for(let i = 0; i <3; ++i){
+    result[i] = vectorTransformTemp[i];
+  }
+  return result;
+};
 
+//------------------------------------------------------------------------//
 const vectorMag = (vector)=>{
   return Math.sqrt(vectorSquareMag(vector));
 };
@@ -764,8 +781,8 @@ class GameObject {
        direction.concat([1])).slice(0,3);
   }
   transformDirectionInPlace(direction, result){
-    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["multiplyVec3ByMatrix4InPlace"](
-      __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["mat4RotationComponentInPlace"](this._transformationMatrix, matrixRotationComponentTemp),
+    return __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["rotateVec3byMatrix4InPlace"](
+      this._transformationMatrix,
       direction,
       result
     );
@@ -839,8 +856,6 @@ class GameObject {
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = GameObject;
-
-GameObject.matrixRotationComponentTemp = Array(16);
 
 
 /***/ }),
@@ -1921,7 +1936,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlaneInPlace"](this.velocity, this.transformDirection([0,0,1]), this.velocity);
       let localVelocity = this.inverseTransformDirection(this.velocity);
       this._applyFriction(localVelocity);
-      this.velocity = this.transformDirection(localVelocity);
+      this.transformDirectionInPlace(localVelocity, this.velocity);
     }
     this.normalizeAnimationInfluence();
     this._mixAnimations();

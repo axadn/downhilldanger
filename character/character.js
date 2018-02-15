@@ -59,7 +59,7 @@ export default class Character extends GameObject{
       MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.transformDirection([0,0,1]), this.velocity);
       let localVelocity = this.inverseTransformDirection(this.velocity);
       this._applyFriction(localVelocity);
-      this.velocity = this.transformDirection(localVelocity);
+      this.transformDirectionInPlace(localVelocity, this.velocity);
     }
     this.normalizeAnimationInfluence();
     this._mixAnimations();
