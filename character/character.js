@@ -54,7 +54,9 @@ export default class Character extends GameObject{
     this.velocity[2] -= this.fallSpeed;
     if(distanceFromSurface < this.capsuleRadius){
       this._planeAlign();
-      this.velocity = MathUtils.projectVectorOntoPlane(this.velocity, this.transformDirection([0,0,1]));
+      debugger;
+      MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.transformDirection([0,0,1]), this.velocity);
+      //this.velocity = MathUtils.projectVectorOntoPlane(this.velocity, this.transformDirection([0,0,1]));
       let localVelocity = this.inverseTransformDirection(this.velocity);
       this._applyFriction(localVelocity);
       this.velocity = this.transformDirection(localVelocity);

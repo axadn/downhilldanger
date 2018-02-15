@@ -383,17 +383,18 @@ function projectVectorInPlace(vector, onto, result){
   return result;
 }
 
+
 const projectVectorOntoPlane = (vector, planeNormal)=>{
   return subtractVectors(vector.slice(0,3), projectVector(vector, planeNormal));
 };
 /* harmony export (immutable) */ __webpack_exports__["projectVectorOntoPlane"] = projectVectorOntoPlane;
 
 
-
+const projectedAlongNormal = [0,0,0];
 function projectVectorOntoPlaneInPlace(vector, planeNormal, result){
   return subtractVectorsInPlace(
     vector,
-    projectVectorInPlace(vector, planeNormal, result),
+    projectVectorInPlace(vector, planeNormal, projectedAlongNormal),
     result
   );
 }
@@ -1884,7 +1885,9 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.velocity[2] -= this.fallSpeed;
     if(distanceFromSurface < this.capsuleRadius){
       this._planeAlign();
-      this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlane"](this.velocity, this.transformDirection([0,0,1]));
+      debugger;
+      __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["projectVectorOntoPlaneInPlace"](this.velocity, this.transformDirection([0,0,1]), this.velocity);
+      //this.velocity = MathUtils.projectVectorOntoPlane(this.velocity, this.transformDirection([0,0,1]));
       let localVelocity = this.inverseTransformDirection(this.velocity);
       this._applyFriction(localVelocity);
       this.velocity = this.transformDirection(localVelocity);
