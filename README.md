@@ -20,3 +20,4 @@ Collision detection is implemented for the edges of the path, the trees, and bal
 - [ ] texture the player
 - [ ] implement the finish line
 - [ ] add other obstacle types
+- [ ] sound effects
