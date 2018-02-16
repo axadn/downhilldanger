@@ -18,3 +18,5 @@ Collision detection is implemented for the edges of the path, the trees, and bal
 - [ ] Do more math and physics operations in place to create less garbage
 - [x] Add skeletal animation support
 - [ ] texture the player
+- [ ] implement the finish line
+- [ ] add other obstacle types
