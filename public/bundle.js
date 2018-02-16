@@ -75,6 +75,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["subtractVectorsInPlace"] = subtractVectorsInPlace;
 /* harmony export (immutable) */ __webpack_exports__["vectorCrossInPlace"] = vectorCrossInPlace;
 /* harmony export (immutable) */ __webpack_exports__["mat4RotationComponentInPlace"] = mat4RotationComponentInPlace;
+/* harmony export (immutable) */ __webpack_exports__["scalarProjection"] = scalarProjection;
 /* harmony export (immutable) */ __webpack_exports__["projectVectorInPlace"] = projectVectorInPlace;
 /* harmony export (immutable) */ __webpack_exports__["projectVectorOntoPlane"] = projectVectorOntoPlane;
 /* harmony export (immutable) */ __webpack_exports__["projectVectorOntoPlaneInPlace"] = projectVectorOntoPlaneInPlace;
@@ -393,6 +394,9 @@ const projectVector = (vector, onto)=>{
 /* harmony export (immutable) */ __webpack_exports__["projectVector"] = projectVector;
 
 
+function scalarProjection(vector, onto){
+  return vectorDot(vector, onto) / vectorMag(onto);
+}
 function projectVectorInPlace(vector, onto, result){
   const scaleAmount =  vectorDot(vector, onto) / vectorSquareMag(onto);
   for(let i = 0; i < 3; ++i){
@@ -2622,9 +2626,10 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     const posOffset = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](pos, currentSegPoint);
     if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["vectorDot"](posOffset, edgeNormal) < 0){
       let edgeVector =  toggleLeft? vec0: vec1;
+      let penetration = -1 *__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["scalarProjection"](posOffset, edgeNormal);
       return{normal: edgeNormal, colliderPoint: pos,
          vector: edgeVector, edgePoint0: currentSegPoint,
-         penetration: 2,
+         penetration,
         edgePoint1: nextSegPoint, toggleLeft};
     }
     return false;

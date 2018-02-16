@@ -414,9 +414,10 @@ export default class Slope extends GameObject{
     const posOffset = MathUtils.subtractVectors(pos, currentSegPoint);
     if(MathUtils.vectorDot(posOffset, edgeNormal) < 0){
       let edgeVector =  toggleLeft? vec0: vec1;
+      let penetration = -1 *MathUtils.scalarProjection(posOffset, edgeNormal);
       return{normal: edgeNormal, colliderPoint: pos,
          vector: edgeVector, edgePoint0: currentSegPoint,
-         penetration: 2,
+         penetration,
         edgePoint1: nextSegPoint, toggleLeft};
     }
     return false;

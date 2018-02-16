@@ -264,6 +264,9 @@ export const projectVector = (vector, onto)=>{
   return scaleVector(onto, dotProduct/ vectorSquareMag(onto));
 };
 
+export function scalarProjection(vector, onto){
+  return vectorDot(vector, onto) / vectorMag(onto);
+}
 export function projectVectorInPlace(vector, onto, result){
   const scaleAmount =  vectorDot(vector, onto) / vectorSquareMag(onto);
   for(let i = 0; i < 3; ++i){
