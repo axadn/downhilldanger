@@ -97,7 +97,7 @@ function _getSphereCapsuleCollisionData({sphereOrigin,sphereRadius, capsuleRadiu
     Math.PI/2
   );
   let penetration, spherePoint;
-  penetration = sphereRadius - dist - capsuleRadius;
+  penetration = sphereRadius - dist + capsuleRadius;
   const capsuleNormal = MathUtils.multiplyVec4ByMatrix4(rotationMatrix, capsuleVector.concat(0)).slice(0,3);
   spherePoint =
     MathUtils.addVectors(

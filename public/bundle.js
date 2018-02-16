@@ -137,11 +137,11 @@ const translationMatrix = (x,y,z) =>([
 ]);
 /* harmony export (immutable) */ __webpack_exports__["translationMatrix"] = translationMatrix;
 
-const scaleMatrix =(x,y,z) => ([
+const scaleMatrix =(x,y,z, w) => ([
   x,0,0,0,
   0,y,0,0,
   0,0,z,0,
-  0,0,0,1
+  0,0,0,w
 ]);
 /* harmony export (immutable) */ __webpack_exports__["scaleMatrix"] = scaleMatrix;
 
@@ -1049,7 +1049,7 @@ function _getSphereCapsuleCollisionData({sphereOrigin,sphereRadius, capsuleRadiu
     Math.PI/2
   );
   let penetration, spherePoint;
-  penetration = sphereRadius - dist - capsuleRadius;
+  penetration = sphereRadius - dist + capsuleRadius;
   const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](rotationMatrix, capsuleVector.concat(0)).slice(0,3);
   spherePoint =
     __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](
@@ -1405,7 +1405,7 @@ const BONE_INFLUENCES = 2;
 
 
 class ObjectsRasterizer{
-  constructor(scale= 0.5, swapYZ = true){
+  constructor(scale= 30, swapYZ = true){
     window.rasterizer = this;
     const canvas = document.querySelector("#glCanvas");
     const canvas2 = document.querySelector("#flat-canvas");
@@ -1418,11 +1418,12 @@ class ObjectsRasterizer{
 
     this.cameraDist = DEFAULT_CAMERA_DIST;
     this.viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["identityMatrix4"];
-    this.perspectiveMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["simple_perspective_matrix"],
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleMatrix"](scale, scale, scale));
-    if(swapYZ){
-      this.perspectiveMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["swapYZMatrix"], this.perspectiveMatrix)
-    }
+    this.perspectiveMatrix = 
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["simple_perspective_matrix"];
+      debugger;
+    // if(swapYZ){
+    //   this.perspectiveMatrix = MathUtils.mat_4_multiply(MathUtils.swapYZMatrix, this.perspectiveMatrix)
+    // }
     this.compileDefaultShaders();
     //this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
@@ -1742,7 +1743,7 @@ class ObjectsRasterizer{
     let cameraMatrix = this.camera.getTransformationMatrix();
     let viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["inverse_mat4_rot_pos"](cameraMatrix);
     viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](viewMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["swapYZMatrix"])
-    viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](viewMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["simple_perspective_matrix"]);
+    viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](viewMatrix, this.perspectiveMatrix);
     return viewMatrix;
   }
 

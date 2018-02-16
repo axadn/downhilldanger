@@ -7,7 +7,7 @@ import * as HUD from "../hud/hud";
 import { vectorMag } from "./math_utils";
 
 export class ObjectsRasterizer{
-  constructor(scale= 0.5, swapYZ = true){
+  constructor(scale= 30, swapYZ = true){
     window.rasterizer = this;
     const canvas = document.querySelector("#glCanvas");
     const canvas2 = document.querySelector("#flat-canvas");
@@ -20,11 +20,12 @@ export class ObjectsRasterizer{
 
     this.cameraDist = DEFAULT_CAMERA_DIST;
     this.viewMatrix = MathUtils.identityMatrix4;
-    this.perspectiveMatrix = MathUtils.mat_4_multiply(MathUtils.simple_perspective_matrix,
-      MathUtils.scaleMatrix(scale, scale, scale));
-    if(swapYZ){
-      this.perspectiveMatrix = MathUtils.mat_4_multiply(MathUtils.swapYZMatrix, this.perspectiveMatrix)
-    }
+    this.perspectiveMatrix = 
+      MathUtils.simple_perspective_matrix;
+      debugger;
+    // if(swapYZ){
+    //   this.perspectiveMatrix = MathUtils.mat_4_multiply(MathUtils.swapYZMatrix, this.perspectiveMatrix)
+    // }
     this.compileDefaultShaders();
     //this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
@@ -344,7 +345,7 @@ export class ObjectsRasterizer{
     let cameraMatrix = this.camera.getTransformationMatrix();
     let viewMatrix = MathUtils.inverse_mat4_rot_pos(cameraMatrix);
     viewMatrix = MathUtils.mat_4_multiply(viewMatrix, MathUtils.swapYZMatrix)
-    viewMatrix = MathUtils.mat_4_multiply(viewMatrix, MathUtils.simple_perspective_matrix);
+    viewMatrix = MathUtils.mat_4_multiply(viewMatrix, this.perspectiveMatrix);
     return viewMatrix;
   }
 

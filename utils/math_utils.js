@@ -44,11 +44,11 @@ export const translationMatrix = (x,y,z) =>([
   0,0,1,0,
   x,y,z,1
 ]);
-export const scaleMatrix =(x,y,z) => ([
+export const scaleMatrix =(x,y,z, w) => ([
   x,0,0,0,
   0,y,0,0,
   0,0,z,0,
-  0,0,0,1
+  0,0,0,w
 ]);
 
 export const xRotationMatrix = radians =>{
