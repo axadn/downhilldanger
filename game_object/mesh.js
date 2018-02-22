@@ -4,7 +4,28 @@ import * as MathUtils from "../utils/math_utils";
 function isZeroQuat(quat){
   return quat[0]=== 0 && quat[1] === 0 && quat[2] === 0 && quat[3] === 1;
 }
-export default class Mesh {
+export default function createMesh(options={}){
+  const mesh = new Mesh(options);
+  return new Promise(
+    (resolve, reject)=>{
+      if(options.textureBuffer){
+        mesh.texture = textureBuffer;
+        mesh.textured = true;
+        resolve(mesh);
+      }
+      else if (options.textured && options.img_src){
+        rasterizer.bufferTexture(img_src).then(
+          texture=>{
+            mesh.bufferTexture = texture;
+            resolve(mesh);
+          } 
+        );
+      }
+    }
+  );
+}
+
+export class Mesh {
   constructor({vertices, faces, bones, colors, uvs, skinWeights, skinIndices, animations, bindPose,
     colored, skinned, textured, rasterizer, textureBuffer, img_src, mode2, data, action_file}){
     this.vertices = vertices;
@@ -143,16 +164,6 @@ export default class Mesh {
   //       this.animations[anim.name] = frames;
   //     });
   //  } 
-    this.img_src = img_src;
-    if(textureBuffer){
-        this.texture = textureBuffer;
-      this.textured = true;
-
-    }
-    else if (textured && img_src){
-      this.texture = rasterizer.bufferTexture(img_src);
-    }
-
   }
   inverseBindVertices(){
   }

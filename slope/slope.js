@@ -27,21 +27,30 @@ import TreePool from "./object_pools/tree_pool";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
 import * as MathUtils from "../utils/math_utils";
 import * as CollisionUtils from "../utils/collision_utils";
-import Mesh from "../game_object/mesh";
+import createMesh from "../game_object/mesh";
 import GameObject from "../game_object/game_object";
-export default class Slope extends GameObject{
 
-  constructor(transformationMatrix = MathUtils.identityMatrix4, rasterizer, img_src = "snow.jpg"){
-    super(undefined);
-    this._transformationMatrix = transformationMatrix.slice(0,16);
-    this.mesh = new Mesh({
-      faces: [],
+export default function createSlope(transformatinMatrix = MathUtils.identityMatrix4, rasterizer){
+  const img_src = "snow.jpg";
+  return createMesh({
+    faces: [],
       vertices: [],
       textured: true,
       img_src,
-      uvs: [], rasterizer
-    });
+      uvs: [],
+      rasterizer
+  }).then(
+    mesh=>{
+      return Slope(mesh);
+    }
+  );
+};
 
+export default class Slope extends GameObject{
+  constructor(mesh){
+    this.mesh = mesh;
+    super(undefined);
+    this._transformationMatrix = transformationMatrix.slice(0,16);
     this.rasterizer = rasterizer;
     this.currentTurn = "none";
     this.bufferedSegments = 0;
