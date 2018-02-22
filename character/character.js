@@ -18,14 +18,14 @@ import * as AssetUtils from "../utils/asset_utils";
 import snowboarder_data from "../snowboarder";
 import snowboardActions from "../actions";
 import createMesh from "../game_object/mesh";
+import AudioMixer from "../audio/mixer";
 
 const effectSrcs= {};
 export default function createCharacter(slope){
   return new Promise((resolve, reject)=>{
-    const effectSrcs = {};
     const runningJobs = {};
     let processedCharMesh = undefined;
-    
+
     const soundEffects = ["hit"];
 
     const finishJob = name =>{
@@ -53,7 +53,7 @@ export default function createCharacter(slope){
     .then(
       mesh=>{
         processedCharMesh = mesh;
-        delete runningJobs['process_mesh'];
+        finishJob('process_mesh');
       }
     )
     .catch(reject);
@@ -245,6 +245,7 @@ class Character extends GameObject{
     }
   }
   _handleCollision(collisionData){
+    if(effectSrcs.hit) AudioMixer.play({src: effectSrcs.hit});
     this.velocity = MathUtils.scaleVector(
       MathUtils.bounceVectorOffPlane(this.velocity,
         collisionData.normal),

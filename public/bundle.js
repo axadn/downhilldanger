@@ -1920,6 +1920,7 @@ module.exports = {"vertices":[-1000,999.999939,-1000.000122,-1000,1000.000122,99
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__actions__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__actions___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__actions__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__game_object_mesh__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__audio_mixer__ = __webpack_require__(25);
 
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
@@ -1941,13 +1942,13 @@ window.MathUtils = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__;
 
 
 
+
 const effectSrcs= {};
 function createCharacter(slope){
   return new Promise((resolve, reject)=>{
-    const effectSrcs = {};
     const runningJobs = {};
     let processedCharMesh = undefined;
-    
+
     const soundEffects = ["hit"];
 
     const finishJob = name =>{
@@ -1975,7 +1976,7 @@ function createCharacter(slope){
     .then(
       mesh=>{
         processedCharMesh = mesh;
-        delete runningJobs['process_mesh'];
+        finishJob('process_mesh');
       }
     )
     .catch(reject);
@@ -2167,6 +2168,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _handleCollision(collisionData){
+    if(effectSrcs.hit) __WEBPACK_IMPORTED_MODULE_8__audio_mixer__["a" /* default */].play({src: effectSrcs.hit});
     this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["bounceVectorOffPlane"](this.velocity,
         collisionData.normal),
@@ -3126,6 +3128,63 @@ function loadAsset(url, responseType = ""){
     });
     
 }
+
+/***/ }),
+/* 25 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+class Mixer{
+    constructor(numChannels){
+        this.numChannels = numChannels;
+        this.heap = [];
+        for(let i = 0; i <numChannels; ++i){
+            this.heap.push({
+                audioElement: document.createElement("audio"),
+                priority: -1
+            });
+        }
+    }
+    play({src, priority, loop}){
+        const audioElement = this._popHeap();
+        const idx = this._pushHeap({
+            audioElement,
+            priority: priority || 0
+        });
+        audioElement.src = src;
+        audioElement.currentTime = 0;
+        audioElement.play();
+        if(loop){
+            audioElement.loop = true;
+            audioElement.onended = null;
+        }else{
+            audioElement.onended = ()=>{
+                this.heap[idx].priority = -1;
+                this._reheap(idx);
+            }
+        }
+    }
+
+    _reheap(changedIndex){
+        const newIdx = 0;
+        return newIdx;
+    }
+    _pushHeap(soundDescriptor){
+        this.heap[0] = soundDescriptor;
+        const newIdx = 0;
+        return newIdx;
+    }
+
+    _popHeap(){
+        const removed = this.heap[0];
+        const audioElement = removed.audioElement;
+       // heap.pop();
+        return audioElement;
+    }
+
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (new Mixer(5));
 
 /***/ })
 /******/ ]);

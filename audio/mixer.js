@@ -1,4 +1,4 @@
-export default class Mixer{
+class Mixer{
     constructor(numChannels){
         this.numChannels = numChannels;
         this.heap = [];
@@ -10,10 +10,10 @@ export default class Mixer{
         }
     }
     play({src, priority, loop}){
-        audioElement = this._popHeap();
-        idx = this._pushHeap({
+        const audioElement = this._popHeap();
+        const idx = this._pushHeap({
             audioElement,
-            priority
+            priority: priority || 0
         });
         audioElement.src = src;
         audioElement.currentTime = 0;
@@ -30,12 +30,12 @@ export default class Mixer{
     }
 
     _reheap(changedIndex){
-        newIdx = 0;
+        const newIdx = 0;
         return newIdx;
     }
     _pushHeap(soundDescriptor){
         this.heap[0] = soundDescriptor;
-        newIdx = 0;
+        const newIdx = 0;
         return newIdx;
     }
 
@@ -47,3 +47,5 @@ export default class Mixer{
     }
 
 }
+
+export default new Mixer(5);
