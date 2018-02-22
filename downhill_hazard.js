@@ -2,11 +2,9 @@ import * as MathUtils from "./utils/math_utils";
 import * as WebGLUtils from "./utils/webgl_utils";
 import * as Input from "./input.js";
 import monkeyData from "./untitled.js";
-import snowboarder_data from "./snowboarder";
-import snowboardActions from "./actions";
 import GameObject from "./game_object/game_object";
-import SkyBox from "./skybox.json";
-import Character from "./character/character";
+//import createSkybox from "../skybox/skybox";
+import createCharacter from "./character/character";
 import createSlope from "./slope/slope";
 import Mesh from "./game_object/mesh";
 import * as HUD from "./hud/hud";
@@ -19,46 +17,44 @@ function gameLoop(timestamp){
 function main(){
   const rasterizer = new WebGLUtils.ObjectsRasterizer();
   createSlope(MathUtils.translationMatrix(0,-3,-4), rasterizer)
-  .then(afterSlope)
+  .then(slope=>
+    createCharacter(slope).then(character=> ({character, slope}))
+  )
+  // .then(({character, slope})=>
+  //   createSkyBox(SkyBox).then(skybox=>({character, slope, skybox}))
+  // )
+  .then(({character, slope, skybox})=>{
+    rasterizer.objects.character = character;
+   // SkyBox.img_src = "skybox.jpg";
+   // SkyBox.textured = true;
+    //SkyBox.rasterizer = rasterizer;
+   // let skyMesh = new Mesh(SkyBox);
+   // skyMesh.buffers = rasterizer.sendMeshToGPU(skyMesh);
+   // rasterizer.skyBox = new GameObject(skyMesh);
+    HUD.setStartTime(Date.now());
+    window.requestAnimationFrame(gameLoop);
+    window.rasterizer = rasterizer;
+    rasterizer.cameraTarget = character;
+    slope.generateSegment();
+
+    window.addEventListener('keydown', handleKeyDown(rasterizer));
+    rasterizer.position[1] -= 2;
+    rasterizer.position[0] += 0.3;
+    rasterizer.rotation[0] -= 0.4;
+    rasterizer.position[2] += 0.7;
+    rasterizer.objects.slope = slope;
+    rasterizer.position = [0,-6,0];
+
+    window.addEventListener("keydown", Input.keyDown(character));
+    window.addEventListener("keyup", Input.keyUp(character));
+  })
   .catch(error=>{
-    debugger;
-    alert(error)});
+  debugger;
+  alert(error)});
 }
 function afterSlope(slope){
   debugger;
-  window.slope = slope;
-
-  const boxMan = new Character(new Mesh({data:snowboarder_data,
-        action_file: snowboardActions, mode2: true,colored: true, skinned: true}), undefined, slope);
-  boxMan.mesh.name = "boxy";
-  //boxMan.playAnimation("rest");
-  rasterizer.objects.boxMan = boxMan;
-  SkyBox.img_src = "skybox.jpg";
-  SkyBox.textured = true;
-  SkyBox.rasterizer = rasterizer;
-  let skyMesh = new Mesh(SkyBox);
-  skyMesh.buffers = rasterizer.sendMeshToGPU(skyMesh);
-  rasterizer.skyBox = new GameObject(skyMesh);
-  HUD.setStartTime(Date.now());
-  window.requestAnimationFrame(gameLoop);
-//  window.requestAnimationFrame(
-//    () => rasterizer.draw(boxMan));
-
-  window.rasterizer = rasterizer;
-  rasterizer.cameraTarget = boxMan;
-  slope.generateSegment();
-
-  //slope.mesh.buffers = rasterizer.sendMeshToGPU(slope.mesh);
-  window.addEventListener('keydown', handleKeyDown(rasterizer));
-  rasterizer.position[1] -= 2;
-  rasterizer.position[0] += 0.3;
-  rasterizer.rotation[0] -= 0.4;
-  rasterizer.position[2] += 0.7;
-  rasterizer.objects.slope = slope;
-  rasterizer.position = [0,-6,0];
-
-  window.addEventListener("keydown", Input.keyDown(boxMan));
-  window.addEventListener("keyup", Input.keyUp(boxMan));
+  
 };
 const handleKeyDown = rasterizer => e => {
   switch(e.key){

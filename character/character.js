@@ -14,9 +14,24 @@ window.MathUtils = MathUtils;
 import * as CollisionUtils from "../utils/collision_utils";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
 
+import snowboarder_data from "../snowboarder";
+import snowboardActions from "../actions";
+import createMesh from "../game_object/mesh";
 
-export default class Character extends GameObject{
+export default function createCharacter(slope){
+  debugger;
+  return createMesh({data:snowboarder_data,
+    action_file: snowboardActions, mode2: true,colored: true, skinned: true})
+  .then(
+    mesh=>{
+      return new Character(mesh, undefined, slope);
+    }
+  );
+}
+
+class Character extends GameObject{
   constructor(mesh, boundingBox, slope, transformationMatrix = MathUtils.identityMatrix4){
+    debugger;
     super(mesh, transformationMatrix);
     this.mesh = mesh;
     this.boundingBox = boundingBox;
@@ -275,7 +290,7 @@ export default class Character extends GameObject{
     let nextWorldPos = MathUtils.projectVectorOntoPlane(this.velocity, this.surfacePlaneNormal);
     MathUtils.addVectorsInPlace(this.getPosition(),nextWorldPos,nextWorldPos);
     if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
-      slope.positionIsPastSegmentStart(nextWorldPos,
+      this.slope.positionIsPastSegmentStart(nextWorldPos,
       this.currentSegmentNumber + 1)){
       ++this.currentSegmentNumber;
       if(this.slope.notifyOfCharacterSegmentNumber(this.currentSegmentNumber)){
@@ -284,7 +299,7 @@ export default class Character extends GameObject{
       let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
          this.currentSegmentNumber) || this.floorTriangle;
     }
-    else if (this.currentSegmentNumber > 0 && !slope.positionIsPastSegmentStart(nextWorldPos,this.currentSegmentNumber)) {
+    else if (this.currentSegmentNumber > 0 && !this.slope.positionIsPastSegmentStart(nextWorldPos,this.currentSegmentNumber)) {
       --this.currentSegmentNumber;
       let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
          this.currentSegmentNumber) || this.floorTriangle;

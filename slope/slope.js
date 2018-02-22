@@ -62,7 +62,7 @@ export default function createSlope(transformationMatrix = MathUtils.identityMat
   )
   .then(
     ({mesh, treePool, balloonMesh})=>{
-      return new Slope(mesh,transformationMatrix, treePool);
+      return new Slope(mesh,transformationMatrix, treePool, balloonMesh);
     }
   );
 };
@@ -70,6 +70,7 @@ class Slope extends GameObject{
   constructor(mesh, transformationMatrix, treePool, balloonMesh){
     super(undefined);
     this.mesh = mesh;
+    this.treePool = treePool;
     this.balloonMesh = balloonMesh;
     this._transformationMatrix = transformationMatrix.slice(0,16);
     this.rasterizer = rasterizer;
@@ -103,7 +104,6 @@ class Slope extends GameObject{
 
   }
   _setupTreeMesh(){
-    this.treePool = new TreePool(this.rasterizer);
     this.sideGeometry = [];
     this.currentSideGeometryType = TREE_SEGMENT;
     this.treesCreatedSinceStart = 0;

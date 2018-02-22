@@ -12,7 +12,7 @@ export default function createMesh(options={}){
         rasterizer.bufferTexture(options.img_src)
         .then(
           texture=>{
-            mesh.bufferTexture = texture;
+            mesh.texture = texture;
             resolve(mesh);
           } 
         )
