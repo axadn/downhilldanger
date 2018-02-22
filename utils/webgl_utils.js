@@ -22,7 +22,6 @@ export class ObjectsRasterizer{
     this.viewMatrix = MathUtils.identityMatrix4;
     this.perspectiveMatrix = 
       MathUtils.simple_perspective_matrix;
-      debugger;
     this.compileDefaultShaders();
     //this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
@@ -169,7 +168,6 @@ export class ObjectsRasterizer{
         resolve(texture);
       });
       img.addEventListener("error", error=>{
-        debugger;
         reject(error);
       });
     });

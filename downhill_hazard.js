@@ -3,7 +3,7 @@ import * as WebGLUtils from "./utils/webgl_utils";
 import * as Input from "./input.js";
 import monkeyData from "./untitled.js";
 import GameObject from "./game_object/game_object";
-//import createSkybox from "../skybox/skybox";
+import createSkybox from "./skybox/skybox";
 import createCharacter from "./character/character";
 import createSlope from "./slope/slope";
 import Mesh from "./game_object/mesh";
@@ -20,23 +20,23 @@ function main(){
   .then(slope=>
     createCharacter(slope).then(character=> ({character, slope}))
   )
-  // .then(({character, slope})=>
-  //   createSkyBox(SkyBox).then(skybox=>({character, slope, skybox}))
-  // )
-  .then(({character, slope, skybox})=>{
-    rasterizer.objects.character = character;
-   // SkyBox.img_src = "skybox.jpg";
-   // SkyBox.textured = true;
-    //SkyBox.rasterizer = rasterizer;
-   // let skyMesh = new Mesh(SkyBox);
-   // skyMesh.buffers = rasterizer.sendMeshToGPU(skyMesh);
-   // rasterizer.skyBox = new GameObject(skyMesh);
+  .then(({character, slope})=>
+    createSkybox().then(skybox=>({character, slope, skybox}))
+  )
+  .then(assetsLoaded)
+  .catch(error=>{
+  alert("error loading assets, please try reloading the page")});
+}
+function assetsLoaded({character, slope, skybox}){
+  skybox.mesh.buffers = rasterizer.sendMeshToGPU(skybox.mesh);
+  rasterizer.skyBox = skybox;
+  rasterizer.objects.character = character;
     HUD.setStartTime(Date.now());
     window.requestAnimationFrame(gameLoop);
     window.rasterizer = rasterizer;
     rasterizer.cameraTarget = character;
     slope.generateSegment();
-
+    
     window.addEventListener('keydown', handleKeyDown(rasterizer));
     rasterizer.position[1] -= 2;
     rasterizer.position[0] += 0.3;
@@ -47,14 +47,6 @@ function main(){
 
     window.addEventListener("keydown", Input.keyDown(character));
     window.addEventListener("keyup", Input.keyUp(character));
-  })
-  .catch(error=>{
-  debugger;
-  alert(error)});
-}
-function afterSlope(slope){
-  debugger;
-  
 };
 const handleKeyDown = rasterizer => e => {
   switch(e.key){

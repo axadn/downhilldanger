@@ -19,7 +19,6 @@ import snowboardActions from "../actions";
 import createMesh from "../game_object/mesh";
 
 export default function createCharacter(slope){
-  debugger;
   return createMesh({data:snowboarder_data,
     action_file: snowboardActions, mode2: true,colored: true, skinned: true})
   .then(
@@ -31,7 +30,6 @@ export default function createCharacter(slope){
 
 class Character extends GameObject{
   constructor(mesh, boundingBox, slope, transformationMatrix = MathUtils.identityMatrix4){
-    debugger;
     super(mesh, transformationMatrix);
     this.mesh = mesh;
     this.boundingBox = boundingBox;
