@@ -7,7 +7,8 @@ import * as HUD from "../hud/hud";
 import { vectorMag } from "./math_utils";
 
 export class ObjectsRasterizer{
-  constructor(scale= 30, swapYZ = true){
+  constructor(options = {}){
+    this.swapYZ = options.hasOwnProperty("swapYZ")? options.swapYZ : true;
     window.rasterizer = this;
     const canvas = document.querySelector("#glCanvas");
     const canvas2 = document.querySelector("#flat-canvas");
@@ -17,15 +18,11 @@ export class ObjectsRasterizer{
       alert("Unable to initialize WebGL. Your browser or machine may not support it");
       return;
     }
-
     this.cameraDist = DEFAULT_CAMERA_DIST;
     this.viewMatrix = MathUtils.identityMatrix4;
     this.perspectiveMatrix = 
       MathUtils.simple_perspective_matrix;
       debugger;
-    // if(swapYZ){
-    //   this.perspectiveMatrix = MathUtils.mat_4_multiply(MathUtils.swapYZMatrix, this.perspectiveMatrix)
-    // }
     this.compileDefaultShaders();
     //this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
@@ -164,12 +161,14 @@ export class ObjectsRasterizer{
     const img = new Image();
     img.src = img_src;
     img.crossOrigin = "";
-    img.addEventListener("load", ()=>{
-      this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
-      this.gl.generateMipmap(this.gl.TEXTURE_2D);
+    return new Promise((resolve, reject)=>{
+      img.addEventListener("load", ()=>{
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        resolve(texture);
+      });
     });
-    return texture;
   }
   adjustToCanvas(){
     this.gl.canvas.width = this.gl.canvas.clientWidth;
@@ -344,7 +343,9 @@ export class ObjectsRasterizer{
     //let cameraMatrix =  MathUtils.swapYZMatrix;
     let cameraMatrix = this.camera.getTransformationMatrix();
     let viewMatrix = MathUtils.inverse_mat4_rot_pos(cameraMatrix);
-    viewMatrix = MathUtils.mat_4_multiply(viewMatrix, MathUtils.swapYZMatrix)
+    if(this.swapYZ){
+      viewMatrix = MathUtils.mat_4_multiply(viewMatrix, MathUtils.swapYZMatrix);
+    }
     viewMatrix = MathUtils.mat_4_multiply(viewMatrix, this.perspectiveMatrix);
     return viewMatrix;
   }

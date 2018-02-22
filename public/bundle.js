@@ -946,163 +946,6 @@ function renderMilliseconds(milliseconds){
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export approximateCollisionNormal */
-/* unused harmony export boxIntersectsBox */
-/* harmony export (immutable) */ __webpack_exports__["c"] = sphereCollidesCapsule;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__math_utils__ = __webpack_require__(0);
-
-
-const COLLISION_REJECTION = 0.05;
-/* unused harmony export COLLISION_REJECTION */
-
-
-const movingBoxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1, moveVector) =>{
-  const colliderPoint = boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1) || 
-  boxIntersectsBox(matrix1, dimensions1, matrix0, dimensions0);
-  if(colliderPoint){
-    return {normal: approximateCollisionNormal(
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](colliderPoint, moveVector.concat(0)), matrix1, dimensions1),
-      colliderPoint
-    };
-  }
-};
-/* harmony export (immutable) */ __webpack_exports__["b"] = movingBoxIntersectsBox;
-
-function approximateCollisionNormal(position, boxMatrix, boxDimensions){
-  const transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](
-    __WEBPACK_IMPORTED_MODULE_0__math_utils__["inverse_mat4_rot_pos"](boxMatrix), position);
-  let maxDimensionIndex;
-  let maxDistFromSurface = 0;
-  let distFromSurface;
-  for(let i = 0; i < 2; ++i){
-    distFromSurface = Math.abs(Math.abs(transformedPoint[i]) - boxDimensions[i]);
-    if(distFromSurface > maxDistFromSurface){
-      maxDistFromSurface = distFromSurface;
-      maxDimensionIndex = i;
-    }
-  }
-  const normal = [0,0,0,0];
-  normal[maxDimensionIndex] = (transformedPoint[maxDimensionIndex] < 0) ? -1 : 1;
-  return __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](boxMatrix, normal).slice(0,3);
-};
-function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
-  let transformedPoint, pointCollides;
-  const worldCoordsPoints = boxColliderToPoints(matrix0, dimensions0);
-  for(let i = 0; i < worldCoordsPoints.length; ++i){
-    transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["inverse_mat4_rot_pos"](matrix1),
-      worldCoordsPoints[i]
-    );
-    pointCollides = true;
-    for(let j = 0; j < 3; ++j){
-      if(transformedPoint[j] > dimensions1[j] ||
-         transformedPoint[j] < -1* dimensions1[j]){
-           pointCollides = false;
-           break;
-      }
-    }
-    if(pointCollides){
-       return worldCoordsPoints[i];
-    }
-  }
-  return false;
-}
-
-function sphereCollidesCapsule(sphereOrigin, sphereRadius,
-capsulePoint0, capsulePoint1, capsuleRadius){
-  const capsuleVector = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint1, capsulePoint0);
-  if (capsuleVector[0] === 0 && capsuleVector[1] === 0 && capsuleVector[2] === 0){
-    capsuleVector[0] = 0.01;
-  }
-  const point0ToSphereOrigin = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint0);
-  const point0ToSphereAngle = __WEBPACK_IMPORTED_MODULE_0__math_utils__["angleBetweenVectors"](point0ToSphereOrigin, capsuleVector);
-  const point1ToSphereOrigin = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint1);
-  const point1ToSphereAngle = __WEBPACK_IMPORTED_MODULE_0__math_utils__["angleBetweenVectors"](point1ToSphereOrigin,
-     __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](capsuleVector, -1)
-    );
-  const maxDist = sphereRadius + capsuleRadius;
-  let dist;
-  if(point0ToSphereAngle < Math.PI/2 &&
-    point1ToSphereAngle < Math.PI/2){
-    dist =  __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorMag"](point0ToSphereOrigin) * Math.sin(point0ToSphereAngle);
-    if(dist <= maxDist){
-      return _getSphereCapsuleCollisionData({sphereOrigin, sphereRadius,
-         point0ToSphereOrigin, capsuleRadius, capsuleVector, dist});
-    }
-    return false;
-  } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["distance"](capsulePoint0, sphereOrigin)) <= maxDist){
-    const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint0);
-    let sphereNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint0, sphereOrigin);
-    let penetration = sphereRadius - dist + capsuleRadius;
-    let spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](sphereNormal), sphereRadius);
-    return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
-  } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["distance"](capsulePoint1, sphereOrigin)) <= maxDist){
-    const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint1);
-    let sphereNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint1, sphereOrigin);
-    let penetration = sphereRadius - dist + capsuleRadius;
-    let spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](sphereNormal), sphereRadius);
-    return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
-  }
-  return false;
-}
-
-function _getSphereCapsuleCollisionData({sphereOrigin,sphereRadius, capsuleRadius,
-  point0ToSphereOrigin,capsuleVector,dist}){
-  const rotationMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["axisAngleToMatrix"](
-    __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorCross"](point0ToSphereOrigin, capsuleVector),
-    Math.PI/2
-  );
-  let penetration, spherePoint;
-  penetration = sphereRadius - dist + capsuleRadius;
-  const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](rotationMatrix, capsuleVector.concat(0)).slice(0,3);
-  spherePoint =
-    __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](
-    sphereOrigin,
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
-        __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](
-          capsuleNormal
-        ),
-        sphereRadius - penetration
-      )
-    );
-  const side2 = 
-    __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
-      __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](capsuleNormal),
-      -1 * Math.sqrt(Math.pow(sphereRadius, 2), Math.pow(sphereRadius - penetration))
-    );
-  spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](spherePoint, side2);
-  return {capsuleNormal,
-  sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](spherePoint, sphereOrigin),
-  sphereOrigin,
-  spherePoint,
-  penetration};
-}
-
-const boxColliderToPoints = (matrix, dimensions) =>{
-  const points = [];
-  for(let xDirection = -1; xDirection <= 1; xDirection+= 2){
-    for(let yDirection = -1; yDirection<= 1; yDirection+= 2){
-      for(let zDirection = -1; zDirection<= 1; zDirection+= 2){
-        points.push(
-          __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](
-            matrix, [dimensions[0] * xDirection,
-            dimensions[1] * yDirection,
-            dimensions[2] * zDirection, 1]
-          )
-        );
-      }
-    }
-  }
-  return points;
-};
-/* harmony export (immutable) */ __webpack_exports__["a"] = boxColliderToPoints;
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__ = __webpack_require__(0);
 const mat4ToDualQuat = __webpack_require__(17);
 
@@ -1283,6 +1126,163 @@ class Mesh {
 
 
 /***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export approximateCollisionNormal */
+/* unused harmony export boxIntersectsBox */
+/* harmony export (immutable) */ __webpack_exports__["c"] = sphereCollidesCapsule;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__math_utils__ = __webpack_require__(0);
+
+
+const COLLISION_REJECTION = 0.05;
+/* unused harmony export COLLISION_REJECTION */
+
+
+const movingBoxIntersectsBox = (matrix0, dimensions0, matrix1, dimensions1, moveVector) =>{
+  const colliderPoint = boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1) || 
+  boxIntersectsBox(matrix1, dimensions1, matrix0, dimensions0);
+  if(colliderPoint){
+    return {normal: approximateCollisionNormal(
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](colliderPoint, moveVector.concat(0)), matrix1, dimensions1),
+      colliderPoint
+    };
+  }
+};
+/* harmony export (immutable) */ __webpack_exports__["b"] = movingBoxIntersectsBox;
+
+function approximateCollisionNormal(position, boxMatrix, boxDimensions){
+  const transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](
+    __WEBPACK_IMPORTED_MODULE_0__math_utils__["inverse_mat4_rot_pos"](boxMatrix), position);
+  let maxDimensionIndex;
+  let maxDistFromSurface = 0;
+  let distFromSurface;
+  for(let i = 0; i < 2; ++i){
+    distFromSurface = Math.abs(Math.abs(transformedPoint[i]) - boxDimensions[i]);
+    if(distFromSurface > maxDistFromSurface){
+      maxDistFromSurface = distFromSurface;
+      maxDimensionIndex = i;
+    }
+  }
+  const normal = [0,0,0,0];
+  normal[maxDimensionIndex] = (transformedPoint[maxDimensionIndex] < 0) ? -1 : 1;
+  return __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](boxMatrix, normal).slice(0,3);
+};
+function boxIntersectsBox(matrix0, dimensions0, matrix1, dimensions1){
+  let transformedPoint, pointCollides;
+  const worldCoordsPoints = boxColliderToPoints(matrix0, dimensions0);
+  for(let i = 0; i < worldCoordsPoints.length; ++i){
+    transformedPoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["inverse_mat4_rot_pos"](matrix1),
+      worldCoordsPoints[i]
+    );
+    pointCollides = true;
+    for(let j = 0; j < 3; ++j){
+      if(transformedPoint[j] > dimensions1[j] ||
+         transformedPoint[j] < -1* dimensions1[j]){
+           pointCollides = false;
+           break;
+      }
+    }
+    if(pointCollides){
+       return worldCoordsPoints[i];
+    }
+  }
+  return false;
+}
+
+function sphereCollidesCapsule(sphereOrigin, sphereRadius,
+capsulePoint0, capsulePoint1, capsuleRadius){
+  const capsuleVector = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint1, capsulePoint0);
+  if (capsuleVector[0] === 0 && capsuleVector[1] === 0 && capsuleVector[2] === 0){
+    capsuleVector[0] = 0.01;
+  }
+  const point0ToSphereOrigin = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint0);
+  const point0ToSphereAngle = __WEBPACK_IMPORTED_MODULE_0__math_utils__["angleBetweenVectors"](point0ToSphereOrigin, capsuleVector);
+  const point1ToSphereOrigin = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint1);
+  const point1ToSphereAngle = __WEBPACK_IMPORTED_MODULE_0__math_utils__["angleBetweenVectors"](point1ToSphereOrigin,
+     __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](capsuleVector, -1)
+    );
+  const maxDist = sphereRadius + capsuleRadius;
+  let dist;
+  if(point0ToSphereAngle < Math.PI/2 &&
+    point1ToSphereAngle < Math.PI/2){
+    dist =  __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorMag"](point0ToSphereOrigin) * Math.sin(point0ToSphereAngle);
+    if(dist <= maxDist){
+      return _getSphereCapsuleCollisionData({sphereOrigin, sphereRadius,
+         point0ToSphereOrigin, capsuleRadius, capsuleVector, dist});
+    }
+    return false;
+  } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["distance"](capsulePoint0, sphereOrigin)) <= maxDist){
+    const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint0);
+    let sphereNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint0, sphereOrigin);
+    let penetration = sphereRadius - dist + capsuleRadius;
+    let spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](sphereNormal), sphereRadius);
+    return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
+  } else if((dist = __WEBPACK_IMPORTED_MODULE_0__math_utils__["distance"](capsulePoint1, sphereOrigin)) <= maxDist){
+    const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](sphereOrigin, capsulePoint1);
+    let sphereNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](capsulePoint1, sphereOrigin);
+    let penetration = sphereRadius - dist + capsuleRadius;
+    let spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](__WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](sphereNormal), sphereRadius);
+    return {capsuleNormal, sphereNormal, sphereOrigin, spherePoint, penetration};
+  }
+  return false;
+}
+
+function _getSphereCapsuleCollisionData({sphereOrigin,sphereRadius, capsuleRadius,
+  point0ToSphereOrigin,capsuleVector,dist}){
+  const rotationMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["axisAngleToMatrix"](
+    __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorCross"](point0ToSphereOrigin, capsuleVector),
+    Math.PI/2
+  );
+  let penetration, spherePoint;
+  penetration = sphereRadius - dist + capsuleRadius;
+  const capsuleNormal = __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](rotationMatrix, capsuleVector.concat(0)).slice(0,3);
+  spherePoint =
+    __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](
+    sphereOrigin,
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
+        __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](
+          capsuleNormal
+        ),
+        sphereRadius - penetration
+      )
+    );
+  const side2 = 
+    __WEBPACK_IMPORTED_MODULE_0__math_utils__["scaleVector"](
+      __WEBPACK_IMPORTED_MODULE_0__math_utils__["vectorNormalize"](capsuleNormal),
+      -1 * Math.sqrt(Math.pow(sphereRadius, 2), Math.pow(sphereRadius - penetration))
+    );
+  spherePoint = __WEBPACK_IMPORTED_MODULE_0__math_utils__["addVectors"](spherePoint, side2);
+  return {capsuleNormal,
+  sphereNormal: __WEBPACK_IMPORTED_MODULE_0__math_utils__["subtractVectors"](spherePoint, sphereOrigin),
+  sphereOrigin,
+  spherePoint,
+  penetration};
+}
+
+const boxColliderToPoints = (matrix, dimensions) =>{
+  const points = [];
+  for(let xDirection = -1; xDirection <= 1; xDirection+= 2){
+    for(let yDirection = -1; yDirection<= 1; yDirection+= 2){
+      for(let zDirection = -1; zDirection<= 1; zDirection+= 2){
+        points.push(
+          __WEBPACK_IMPORTED_MODULE_0__math_utils__["multiplyVec4ByMatrix4"](
+            matrix, [dimensions[0] * xDirection,
+            dimensions[1] * yDirection,
+            dimensions[2] * zDirection, 1]
+          )
+        );
+      }
+    }
+  }
+  return points;
+};
+/* harmony export (immutable) */ __webpack_exports__["a"] = boxColliderToPoints;
+
+
+/***/ }),
 /* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1301,7 +1301,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__skybox_json___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7__skybox_json__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__character_character__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__slope_slope__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__game_object_mesh__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__game_object_mesh__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__hud_hud__ = __webpack_require__(2);
 
 
@@ -1409,7 +1409,8 @@ const BONE_INFLUENCES = 2;
 
 
 class ObjectsRasterizer{
-  constructor(scale= 30, swapYZ = true){
+  constructor(options = {}){
+    this.swapYZ = options.hasOwnProperty("swapYZ")? options.swapYZ : true;
     window.rasterizer = this;
     const canvas = document.querySelector("#glCanvas");
     const canvas2 = document.querySelector("#flat-canvas");
@@ -1419,15 +1420,11 @@ class ObjectsRasterizer{
       alert("Unable to initialize WebGL. Your browser or machine may not support it");
       return;
     }
-
     this.cameraDist = DEFAULT_CAMERA_DIST;
     this.viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["identityMatrix4"];
     this.perspectiveMatrix = 
       __WEBPACK_IMPORTED_MODULE_0__math_utils__["simple_perspective_matrix"];
       debugger;
-    // if(swapYZ){
-    //   this.perspectiveMatrix = MathUtils.mat_4_multiply(MathUtils.swapYZMatrix, this.perspectiveMatrix)
-    // }
     this.compileDefaultShaders();
     //this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);
@@ -1566,12 +1563,14 @@ class ObjectsRasterizer{
     const img = new Image();
     img.src = img_src;
     img.crossOrigin = "";
-    img.addEventListener("load", ()=>{
-      this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
-      this.gl.generateMipmap(this.gl.TEXTURE_2D);
+    return new Promise((resolve, reject)=>{
+      img.addEventListener("load", ()=>{
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+        this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, img);
+        this.gl.generateMipmap(this.gl.TEXTURE_2D);
+        resolve(texture);
+      });
     });
-    return texture;
   }
   adjustToCanvas(){
     this.gl.canvas.width = this.gl.canvas.clientWidth;
@@ -1746,7 +1745,9 @@ class ObjectsRasterizer{
     //let cameraMatrix =  MathUtils.swapYZMatrix;
     let cameraMatrix = this.camera.getTransformationMatrix();
     let viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["inverse_mat4_rot_pos"](cameraMatrix);
-    viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](viewMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["swapYZMatrix"])
+    if(this.swapYZ){
+      viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](viewMatrix, __WEBPACK_IMPORTED_MODULE_0__math_utils__["swapYZMatrix"]);
+    }
     viewMatrix = __WEBPACK_IMPORTED_MODULE_0__math_utils__["mat_4_multiply"](viewMatrix, this.perspectiveMatrix);
     return viewMatrix;
   }
@@ -1900,7 +1901,7 @@ module.exports = {"vertices":[-1000,999.999939,-1000.000122,-1000,1000.000122,99
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__hud_hud__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_collision_utils__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_collision_utils__ = __webpack_require__(4);
 
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
@@ -2208,8 +2209,8 @@ Character.transformedDirectionTemp = [0,0,0];
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__object_pools_tree_pool__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_collision_utils__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__game_object_mesh__ = __webpack_require__(3);
 const SEGMENT_WIDTH = 90;
 const SEGMENT_LENGTH = 50;
 const EDGE_LOOP_RESOLUTION = 5;
@@ -2764,7 +2765,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tree__ = __webpack_require__(16);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game_object_mesh__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__game_object_mesh__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__game_object_game_object__ = __webpack_require__(1);
 
