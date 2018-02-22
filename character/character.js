@@ -13,24 +13,56 @@ import * as HUD from "../hud/hud";
 window.MathUtils = MathUtils;
 import * as CollisionUtils from "../utils/collision_utils";
 import {UPDATE_INTERVAL} from "../game_object/game_object";
+import * as AssetUtils from "../utils/asset_utils";
 
 import snowboarder_data from "../snowboarder";
 import snowboardActions from "../actions";
 import createMesh from "../game_object/mesh";
 
+const effectSrcs= {};
 export default function createCharacter(slope){
-  return createMesh({data:snowboarder_data,
-    action_file: snowboardActions, mode2: true,colored: true, skinned: true})
-  .then(
-    mesh=>{
-      return new Character(mesh, undefined, slope);
-    }
-  );
+  return new Promise((resolve, reject)=>{
+    const effectSrcs = {};
+    const runningJobs = {};
+    let processedCharMesh = undefined;
+    
+    const soundEffects = ["hit"];
+
+    const finishJob = name =>{
+      delete runningJobs[name];
+      if(Object.keys(runningJobs).length === 0){
+        resolve(new Character({mesh: processedCharMesh, slope}));
+      }
+    };
+
+    soundEffects.forEach(name=>{
+      if(effectSrcs.hasOwnProperty(name)) return;
+      runningJobs[`load_audio_${name}`] = true;
+      AssetUtils.loadAsset(`${name}.mp3`, "blob").then(
+        result=>{
+          effectSrcs[name] = URL.createObjectURL(result.target.response);
+          finishJob(`load_audio_${name}`);
+        }
+      )
+      .catch(reject);
+    });
+
+    runningJobs[`process_mesh`] = true;
+    createMesh({data:snowboarder_data,
+      action_file: snowboardActions, mode2: true,colored: true, skinned: true})
+    .then(
+      mesh=>{
+        processedCharMesh = mesh;
+        delete runningJobs['process_mesh'];
+      }
+    )
+    .catch(reject);
+  });
 }
 
 class Character extends GameObject{
-  constructor(mesh, boundingBox, slope, transformationMatrix = MathUtils.identityMatrix4){
-    super(mesh, transformationMatrix);
+  constructor({mesh, boundingBox, slope, transformationMatrix}){
+    super(mesh, transformationMatrix || MathUtils.identityMatrix4);
     this.mesh = mesh;
     this.boundingBox = boundingBox;
     this.speed = 0.2;

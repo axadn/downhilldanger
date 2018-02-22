@@ -1308,14 +1308,16 @@ const boxColliderToPoints = (matrix, dimensions) =>{
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_webgl_utils__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__input_js__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__untitled_js__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__game_object_game_object__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__skybox_skybox__ = __webpack_require__(23);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__character_character__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__slope_slope__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__game_object_mesh__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__hud_hud__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_asset_utils__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__input_js__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__untitled_js__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__game_object_game_object__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__skybox_skybox__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__character_character__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__slope_slope__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__game_object_mesh__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__hud_hud__ = __webpack_require__(2);
+
 
 
 
@@ -1328,18 +1330,18 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 document.addEventListener("DOMContentLoaded", main);
 function gameLoop(timestamp){
-  __WEBPACK_IMPORTED_MODULE_9__hud_hud__["d" /* updateTime */](timestamp);
+  __WEBPACK_IMPORTED_MODULE_10__hud_hud__["d" /* updateTime */](timestamp);
   rasterizer.drawObjects.bind(rasterizer)(timestamp);
   window.requestAnimationFrame(gameLoop);
 }
 function main(){
   const rasterizer = new __WEBPACK_IMPORTED_MODULE_1__utils_webgl_utils__["a" /* ObjectsRasterizer */]();
-  Object(__WEBPACK_IMPORTED_MODULE_7__slope_slope__["a" /* default */])(__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["translationMatrix"](0,-3,-4), rasterizer)
+  Object(__WEBPACK_IMPORTED_MODULE_8__slope_slope__["a" /* default */])(__WEBPACK_IMPORTED_MODULE_0__utils_math_utils__["translationMatrix"](0,-3,-4), rasterizer)
   .then(slope=>
-    Object(__WEBPACK_IMPORTED_MODULE_6__character_character__["a" /* default */])(slope).then(character=> ({character, slope}))
+    Object(__WEBPACK_IMPORTED_MODULE_7__character_character__["a" /* default */])(slope).then(character=> ({character, slope}))
   )
   .then(({character, slope})=>
-    Object(__WEBPACK_IMPORTED_MODULE_5__skybox_skybox__["a" /* default */])().then(skybox=>({character, slope, skybox}))
+    Object(__WEBPACK_IMPORTED_MODULE_6__skybox_skybox__["a" /* default */])().then(skybox=>({character, slope, skybox}))
   )
   .then(assetsLoaded)
   .catch(error=>{
@@ -1349,7 +1351,7 @@ function assetsLoaded({character, slope, skybox}){
   skybox.mesh.buffers = rasterizer.sendMeshToGPU(skybox.mesh);
   rasterizer.skyBox = skybox;
   rasterizer.objects.character = character;
-    __WEBPACK_IMPORTED_MODULE_9__hud_hud__["b" /* setStartTime */](Date.now());
+    __WEBPACK_IMPORTED_MODULE_10__hud_hud__["b" /* setStartTime */](Date.now());
     window.requestAnimationFrame(gameLoop);
     window.rasterizer = rasterizer;
     rasterizer.cameraTarget = character;
@@ -1363,8 +1365,8 @@ function assetsLoaded({character, slope, skybox}){
     rasterizer.objects.slope = slope;
     rasterizer.position = [0,-6,0];
 
-    window.addEventListener("keydown", __WEBPACK_IMPORTED_MODULE_2__input_js__["a" /* keyDown */](character));
-    window.addEventListener("keyup", __WEBPACK_IMPORTED_MODULE_2__input_js__["b" /* keyUp */](character));
+    window.addEventListener("keydown", __WEBPACK_IMPORTED_MODULE_3__input_js__["a" /* keyDown */](character));
+    window.addEventListener("keyup", __WEBPACK_IMPORTED_MODULE_3__input_js__["b" /* keyUp */](character));
 };
 const handleKeyDown = rasterizer => e => {
   switch(e.key){
@@ -1912,11 +1914,12 @@ module.exports = {"vertices":[-1000,999.999939,-1000.000122,-1000,1000.000122,99
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__hud_hud__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_collision_utils__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__snowboarder__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__snowboarder___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4__snowboarder__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__actions__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__actions___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__actions__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__game_object_mesh__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__utils_asset_utils__ = __webpack_require__(24);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__snowboarder__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__snowboarder___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5__snowboarder__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__actions__ = __webpack_require__(10);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__actions___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__actions__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__game_object_mesh__ = __webpack_require__(3);
 
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
@@ -1937,19 +1940,51 @@ window.MathUtils = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__;
 
 
 
+
+const effectSrcs= {};
 function createCharacter(slope){
-  return Object(__WEBPACK_IMPORTED_MODULE_6__game_object_mesh__["a" /* default */])({data:__WEBPACK_IMPORTED_MODULE_4__snowboarder___default.a,
-    action_file: __WEBPACK_IMPORTED_MODULE_5__actions___default.a, mode2: true,colored: true, skinned: true})
-  .then(
-    mesh=>{
-      return new Character(mesh, undefined, slope);
-    }
-  );
+  return new Promise((resolve, reject)=>{
+    const effectSrcs = {};
+    const runningJobs = {};
+    let processedCharMesh = undefined;
+    
+    const soundEffects = ["hit"];
+
+    const finishJob = name =>{
+      delete runningJobs[name];
+      if(Object.keys(runningJobs).length === 0){
+        resolve(new Character({mesh: processedCharMesh, slope}));
+      }
+    };
+
+    soundEffects.forEach(name=>{
+      if(effectSrcs.hasOwnProperty(name)) return;
+      runningJobs[`load_audio_${name}`] = true;
+      __WEBPACK_IMPORTED_MODULE_4__utils_asset_utils__["a" /* loadAsset */](`${name}.mp3`, "blob").then(
+        result=>{
+          effectSrcs[name] = URL.createObjectURL(result.target.response);
+          finishJob(`load_audio_${name}`);
+        }
+      )
+      .catch(reject);
+    });
+
+    runningJobs[`process_mesh`] = true;
+    Object(__WEBPACK_IMPORTED_MODULE_7__game_object_mesh__["a" /* default */])({data:__WEBPACK_IMPORTED_MODULE_5__snowboarder___default.a,
+      action_file: __WEBPACK_IMPORTED_MODULE_6__actions___default.a, mode2: true,colored: true, skinned: true})
+    .then(
+      mesh=>{
+        processedCharMesh = mesh;
+        delete runningJobs['process_mesh'];
+      }
+    )
+    .catch(reject);
+  });
 }
 
 class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["a" /* default */]{
-  constructor(mesh, boundingBox, slope, transformationMatrix = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["identityMatrix4"]){
-    super(mesh, transformationMatrix);
+  constructor({mesh, boundingBox, slope, transformationMatrix}){
+    super(mesh, transformationMatrix || __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["identityMatrix4"]);
     this.mesh = mesh;
     this.boundingBox = boundingBox;
     this.speed = 0.2;
@@ -3072,6 +3107,24 @@ function createSkyBox(){
     .then(mesh=>{
         return new __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /* default */](mesh);
     });
+}
+
+/***/ }),
+/* 24 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = loadAsset;
+function loadAsset(url, responseType = ""){
+    const xhr = new XMLHttpRequest();
+    xhr.open("get", url);
+    xhr.responseType = responseType;
+    return new Promise((resolve, reject)=>{
+        xhr.onload = resolve;
+        xhr.onerror = reject;
+        xhr.send();
+    });
+    
 }
 
 /***/ })

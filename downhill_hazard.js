@@ -1,5 +1,6 @@
 import * as MathUtils from "./utils/math_utils";
 import * as WebGLUtils from "./utils/webgl_utils";
+import * as AssetUtils from "./utils/asset_utils";
 import * as Input from "./input.js";
 import monkeyData from "./untitled.js";
 import GameObject from "./game_object/game_object";
