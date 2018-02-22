@@ -168,6 +168,10 @@ export class ObjectsRasterizer{
         this.gl.generateMipmap(this.gl.TEXTURE_2D);
         resolve(texture);
       });
+      img.addEventListener("error", error=>{
+        debugger;
+        reject(error);
+      });
     });
   }
   adjustToCanvas(){

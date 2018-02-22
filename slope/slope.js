@@ -29,9 +29,13 @@ import * as MathUtils from "../utils/math_utils";
 import * as CollisionUtils from "../utils/collision_utils";
 import createMesh from "../game_object/mesh";
 import GameObject from "../game_object/game_object";
-
-export default function createSlope(transformatinMatrix = MathUtils.identityMatrix4, rasterizer){
+import treeMesh from "../tree";
+export default function createSlope(transformationMatrix = MathUtils.identityMatrix4, rasterizer){
   const img_src = "snow.jpg";
+  const tree_img = "tree.png";
+  treeMesh.textured = true;
+  balloonMesh.colored = true;
+  treeMesh.img_src = tree_img;
   return createMesh({
     faces: [],
       vertices: [],
@@ -39,17 +43,34 @@ export default function createSlope(transformatinMatrix = MathUtils.identityMatr
       img_src,
       uvs: [],
       rasterizer
-  }).then(
-    mesh=>{
-      return Slope(mesh);
+  })
+  .then(
+    slopeMesh=>{
+      return createMesh(treeMesh)
+      .then(treeDone=>{
+        return {mesh: slopeMesh, treePool: new TreePool(treeDone)}
+      });
+    }  
+  )
+  .then(
+    ({mesh, treePool})=>{
+      return createMesh(balloonMesh)
+      .then(balloonDone=>{
+        return {mesh, treePool, balloonMesh: balloonDone};
+      });
+    }
+  )
+  .then(
+    ({mesh, treePool, balloonMesh})=>{
+      return new Slope(mesh,transformationMatrix, treePool);
     }
   );
 };
-
-export default class Slope extends GameObject{
-  constructor(mesh){
-    this.mesh = mesh;
+class Slope extends GameObject{
+  constructor(mesh, transformationMatrix, treePool, balloonMesh){
     super(undefined);
+    this.mesh = mesh;
+    this.balloonMesh = balloonMesh;
     this._transformationMatrix = transformationMatrix.slice(0,16);
     this.rasterizer = rasterizer;
     this.currentTurn = "none";
@@ -64,7 +85,6 @@ export default class Slope extends GameObject{
     this.balloonsCreatedSinceStart = 0;
     //this.segmentRotation[0] = 0;
     this._setupTreeMesh();
-    this._setupBalloonMesh();
     const firstLoop = this.createEdgeLoop();
     let unpackedVertices;
 
@@ -87,11 +107,6 @@ export default class Slope extends GameObject{
     this.sideGeometry = [];
     this.currentSideGeometryType = TREE_SEGMENT;
     this.treesCreatedSinceStart = 0;
-  }
-  _setupBalloonMesh(){
-    this.balloonMesh = new Mesh(balloonMesh);
-    this.balloonMesh.colored = true;
-    this.balloonMesh.buffers = this.rasterizer.sendMeshToGPU(this.balloonMesh);
   }
   _addUvsSegment(){
     for(let i = 0; i <= EDGE_LOOP_RESOLUTION; ++i){

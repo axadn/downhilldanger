@@ -8,18 +8,24 @@ export default function createMesh(options={}){
   const mesh = new Mesh(options);
   return new Promise(
     (resolve, reject)=>{
-      if(options.textureBuffer){
-        mesh.texture = textureBuffer;
-        mesh.textured = true;
-        resolve(mesh);
-      }
-      else if (options.textured && options.img_src){
-        rasterizer.bufferTexture(img_src).then(
+      if (options.textured && options.img_src){
+        rasterizer.bufferTexture(options.img_src)
+        .then(
           texture=>{
             mesh.bufferTexture = texture;
             resolve(mesh);
           } 
+        )
+        .catch(
+          error=> reject(error)
         );
+      }
+      else{
+        if(options.textureBuffer){
+          mesh.texture = options.textureBuffer;
+          mesh.textured = true;
+        }
+        resolve(mesh);
       }
     }
   );

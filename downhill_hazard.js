@@ -7,7 +7,7 @@ import snowboardActions from "./actions";
 import GameObject from "./game_object/game_object";
 import SkyBox from "./skybox.json";
 import Character from "./character/character";
-import Slope from "./slope/slope";
+import createSlope from "./slope/slope";
 import Mesh from "./game_object/mesh";
 import * as HUD from "./hud/hud";
 document.addEventListener("DOMContentLoaded", main);
@@ -18,7 +18,14 @@ function gameLoop(timestamp){
 }
 function main(){
   const rasterizer = new WebGLUtils.ObjectsRasterizer();
-  const slope = new Slope(MathUtils.translationMatrix(0,-3,-4), rasterizer, "snow.jpg");
+  createSlope(MathUtils.translationMatrix(0,-3,-4), rasterizer)
+  .then(afterSlope)
+  .catch(error=>{
+    debugger;
+    alert(error)});
+}
+function afterSlope(slope){
+  debugger;
   window.slope = slope;
 
   const boxMan = new Character(new Mesh({data:snowboarder_data,
@@ -52,8 +59,7 @@ function main(){
 
   window.addEventListener("keydown", Input.keyDown(boxMan));
   window.addEventListener("keyup", Input.keyUp(boxMan));
-
-}
+};
 const handleKeyDown = rasterizer => e => {
   switch(e.key){
     case "ArrowUp":
