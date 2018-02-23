@@ -26,6 +26,7 @@ function main(){
   )
   .then(assetsLoaded)
   .catch(error=>{
+    debugger;
   alert("error loading assets, please try reloading the page")});
 }
 function assetsLoaded({character, slope, skybox}){

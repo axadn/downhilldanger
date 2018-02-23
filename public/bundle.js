@@ -1345,6 +1345,7 @@ function main(){
   )
   .then(assetsLoaded)
   .catch(error=>{
+    debugger;
   alert("error loading assets, please try reloading the page")});
 }
 function assetsLoaded({character, slope, skybox}){
@@ -1943,7 +1944,7 @@ window.MathUtils = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__;
 
 
 
-const effectSrcs= {};
+const effectBuffers= {};
 function createCharacter(slope){
   return new Promise((resolve, reject)=>{
     const runningJobs = {};
@@ -1957,16 +1958,14 @@ function createCharacter(slope){
         resolve(new Character({mesh: processedCharMesh, slope}));
       }
     };
-
+    const context = new AudioContext();
     soundEffects.forEach(name=>{
-      if(effectSrcs.hasOwnProperty(name)) return;
+      if(effectBuffers.hasOwnProperty(name)) return;
       runningJobs[`load_audio_${name}`] = true;
-      __WEBPACK_IMPORTED_MODULE_4__utils_asset_utils__["a" /* loadAsset */](`${name}.mp3`, "blob").then(
-        result=>{
-          effectSrcs[name] = URL.createObjectURL(result.target.response);
-          finishJob(`load_audio_${name}`);
-        }
-      )
+      __WEBPACK_IMPORTED_MODULE_4__utils_asset_utils__["a" /* loadAsset */](`${name}.mp3`, "arraybuffer")
+      .then(result=> context.decodeAudioData(result.target.response))
+      .then(buffer=>{effectBuffers[name] = buffer})
+      .then(()=>finishJob(`load_audio_${name}`))
       .catch(reject);
     });
 
@@ -1974,7 +1973,7 @@ function createCharacter(slope){
     Object(__WEBPACK_IMPORTED_MODULE_7__game_object_mesh__["a" /* default */])({data:__WEBPACK_IMPORTED_MODULE_5__snowboarder___default.a,
       action_file: __WEBPACK_IMPORTED_MODULE_6__actions___default.a, mode2: true,colored: true, skinned: true})
     .then(
-      mesh=>{
+      mesh=>{ 
         processedCharMesh = mesh;
         finishJob('process_mesh');
       }
@@ -2168,7 +2167,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     }
   }
   _handleCollision(collisionData){
-    if(effectSrcs.hit) __WEBPACK_IMPORTED_MODULE_8__audio_mixer__["a" /* default */].play({src: effectSrcs.hit});
+    __WEBPACK_IMPORTED_MODULE_8__audio_mixer__["a" /* default */].play({buffer: effectBuffers.hit});
     this.velocity = __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["scaleVector"](
       __WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["bounceVectorOffPlane"](this.velocity,
         collisionData.normal),
@@ -3134,52 +3133,34 @@ function loadAsset(url, responseType = ""){
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+
 class Mixer{
     constructor(numChannels){
         this.numChannels = numChannels;
         this.heap = [];
-        for(let i = 0; i <numChannels; ++i){
-            this.heap.push({
-                audioElement: document.createElement("audio"),
-                priority: -1
-            });
-        }
+        this.context = new AudioContext();
     }
-    play({src, priority, loop}){
-        const audioElement = this._popHeap();
-        const idx = this._pushHeap({
-            audioElement,
-            priority: priority || 0
-        });
-        audioElement.src = src;
-        audioElement.currentTime = 0;
-        audioElement.play();
-        if(loop){
-            audioElement.loop = true;
-            audioElement.onended = null;
-        }else{
-            audioElement.onended = ()=>{
-                this.heap[idx].priority = -1;
-                this._reheap(idx);
-            }
+    play({buffer, priority, loop}){
+        if(this.heap.length == this.numChannels){
+            const removed = this._popHeap();
         }
+        else{
+            this._popHeap();
+        }
+        const source = this.context.createBufferSource();
+        source.buffer = buffer;
+        source.connect(this.context.destination);
+        source.start(0);
     }
 
     _reheap(changedIndex){
-        const newIdx = 0;
-        return newIdx;
     }
     _pushHeap(soundDescriptor){
-        this.heap[0] = soundDescriptor;
-        const newIdx = 0;
-        return newIdx;
+        this.heap.push(soundDescriptor);
     }
 
     _popHeap(){
-        const removed = this.heap[0];
-        const audioElement = removed.audioElement;
-       // heap.pop();
-        return audioElement;
+        this.heap.pop();
     }
 
 }

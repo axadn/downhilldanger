@@ -20,7 +20,7 @@ import snowboardActions from "../actions";
 import createMesh from "../game_object/mesh";
 import AudioMixer from "../audio/mixer";
 
-const effectSrcs= {};
+const effectBuffers= {};
 export default function createCharacter(slope){
   return new Promise((resolve, reject)=>{
     const runningJobs = {};
@@ -34,16 +34,14 @@ export default function createCharacter(slope){
         resolve(new Character({mesh: processedCharMesh, slope}));
       }
     };
-
+    const context = new AudioContext();
     soundEffects.forEach(name=>{
-      if(effectSrcs.hasOwnProperty(name)) return;
+      if(effectBuffers.hasOwnProperty(name)) return;
       runningJobs[`load_audio_${name}`] = true;
-      AssetUtils.loadAsset(`${name}.mp3`, "blob").then(
-        result=>{
-          effectSrcs[name] = URL.createObjectURL(result.target.response);
-          finishJob(`load_audio_${name}`);
-        }
-      )
+      AssetUtils.loadAsset(`${name}.mp3`, "arraybuffer")
+      .then(result=> context.decodeAudioData(result.target.response))
+      .then(buffer=>{effectBuffers[name] = buffer})
+      .then(()=>finishJob(`load_audio_${name}`))
       .catch(reject);
     });
 
@@ -51,7 +49,7 @@ export default function createCharacter(slope){
     createMesh({data:snowboarder_data,
       action_file: snowboardActions, mode2: true,colored: true, skinned: true})
     .then(
-      mesh=>{
+      mesh=>{ 
         processedCharMesh = mesh;
         finishJob('process_mesh');
       }
@@ -245,7 +243,7 @@ class Character extends GameObject{
     }
   }
   _handleCollision(collisionData){
-    if(effectSrcs.hit) AudioMixer.play({src: effectSrcs.hit});
+    AudioMixer.play({buffer: effectBuffers.hit});
     this.velocity = MathUtils.scaleVector(
       MathUtils.bounceVectorOffPlane(this.velocity,
         collisionData.normal),

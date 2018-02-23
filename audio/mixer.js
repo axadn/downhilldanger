@@ -1,49 +1,31 @@
+
 class Mixer{
     constructor(numChannels){
         this.numChannels = numChannels;
         this.heap = [];
-        for(let i = 0; i <numChannels; ++i){
-            this.heap.push({
-                audioElement: document.createElement("audio"),
-                priority: -1
-            });
-        }
+        this.context = new AudioContext();
     }
-    play({src, priority, loop}){
-        const audioElement = this._popHeap();
-        const idx = this._pushHeap({
-            audioElement,
-            priority: priority || 0
-        });
-        audioElement.src = src;
-        audioElement.currentTime = 0;
-        audioElement.play();
-        if(loop){
-            audioElement.loop = true;
-            audioElement.onended = null;
-        }else{
-            audioElement.onended = ()=>{
-                this.heap[idx].priority = -1;
-                this._reheap(idx);
-            }
+    play({buffer, priority, loop}){
+        if(this.heap.length == this.numChannels){
+            const removed = this._popHeap();
         }
+        else{
+            this._popHeap();
+        }
+        const source = this.context.createBufferSource();
+        source.buffer = buffer;
+        source.connect(this.context.destination);
+        source.start(0);
     }
 
     _reheap(changedIndex){
-        const newIdx = 0;
-        return newIdx;
     }
     _pushHeap(soundDescriptor){
-        this.heap[0] = soundDescriptor;
-        const newIdx = 0;
-        return newIdx;
+        this.heap.push(soundDescriptor);
     }
 
     _popHeap(){
-        const removed = this.heap[0];
-        const audioElement = removed.audioElement;
-       // heap.pop();
-        return audioElement;
+        this.heap.pop();
     }
 
 }
