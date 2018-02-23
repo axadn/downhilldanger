@@ -1950,7 +1950,7 @@ function createCharacter(slope){
     const runningJobs = {};
     let processedCharMesh = undefined;
 
-    const soundEffects = ["hit"];
+    const soundEffects = ["hit", "collect"];
 
     const finishJob = name =>{
       delete runningJobs[name];
@@ -2226,6 +2226,7 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     const balloonCount = this.slope.capsuleCollidesWithBalloons(capsulePoint0, capsulePoint1,
       this.capsuleRadius,this.currentSegmentNumber);
     if(balloonCount > 0){
+      __WEBPACK_IMPORTED_MODULE_8__audio_mixer__["a" /* default */].play({buffer: effectBuffers.collect});
       __WEBPACK_IMPORTED_MODULE_2__hud_hud__["a" /* addPoints */](balloonCount);
     }
     __WEBPACK_IMPORTED_MODULE_2__hud_hud__["c" /* updateSpeed */](__WEBPACK_IMPORTED_MODULE_1__utils_math_utils__["vectorMag"](this.velocity)*8);

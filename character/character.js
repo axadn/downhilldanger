@@ -26,7 +26,7 @@ export default function createCharacter(slope){
     const runningJobs = {};
     let processedCharMesh = undefined;
 
-    const soundEffects = ["hit"];
+    const soundEffects = ["hit", "collect"];
 
     const finishJob = name =>{
       delete runningJobs[name];
@@ -302,6 +302,7 @@ class Character extends GameObject{
     const balloonCount = this.slope.capsuleCollidesWithBalloons(capsulePoint0, capsulePoint1,
       this.capsuleRadius,this.currentSegmentNumber);
     if(balloonCount > 0){
+      AudioMixer.play({buffer: effectBuffers.collect});
       HUD.addPoints(balloonCount);
     }
     HUD.updateSpeed(MathUtils.vectorMag(this.velocity)*8);
