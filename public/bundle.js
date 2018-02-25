@@ -3040,19 +3040,20 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
       this.segmentMatrices[segmentNumber + 1],
       [xOffset, 0, 0, 1]
     );
-    let vec0, vec1;
+    let edgeVector, vec1;
     if(toggleLeft){
-      vec0 = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](nextSegPoint, currentSegPoint);
-      vec1 = [0,0,1];
+      edgeVector = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](nextSegPoint, currentSegPoint);
+      __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["rotateVec3byMatrix4InPlace"](
+        this.segmentMatrices[segmentNumber], [0,0,1],localUpTemp);
     }
     else{
-      vec0 = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](nextSegPoint, currentSegPoint);
-      vec1 = [0,0,-1];
+      edgeVector = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](nextSegPoint, currentSegPoint);
+      __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["rotateVec3byMatrix4InPlace"](
+        this.segmentMatrices[segmentNumber], [0,0,-1],localUpTemp);
     }
-    const edgeNormal = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["vectorCross"]( vec0, vec1);
+    const edgeNormal = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["vectorCross"](edgeVector, localUpTemp);
     const posOffset = __WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["subtractVectors"](pos, currentSegPoint);
     if(__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["vectorDot"](posOffset, edgeNormal) < 0){
-      let edgeVector =  toggleLeft? vec0: vec1;
       let penetration = -1 *__WEBPACK_IMPORTED_MODULE_3__utils_math_utils__["scalarProjection"](posOffset, edgeNormal);
       return{normal: edgeNormal, colliderPoint: pos,
          vector: edgeVector, edgePoint0: currentSegPoint,
@@ -3155,6 +3156,7 @@ class Slope extends __WEBPACK_IMPORTED_MODULE_2__game_object_game_object__["a" /
     this.mesh.setDirty();
   }
 }
+const localUpTemp = [0,0,0];
 
 
 /***/ }),

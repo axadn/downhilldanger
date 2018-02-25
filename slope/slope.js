@@ -425,19 +425,20 @@ class Slope extends GameObject{
       this.segmentMatrices[segmentNumber + 1],
       [xOffset, 0, 0, 1]
     );
-    let vec0, vec1;
+    let edgeVector, vec1;
     if(toggleLeft){
-      vec0 = MathUtils.subtractVectors(nextSegPoint, currentSegPoint);
-      vec1 = [0,0,1];
+      edgeVector = MathUtils.subtractVectors(nextSegPoint, currentSegPoint);
+      MathUtils.rotateVec3byMatrix4InPlace(
+        this.segmentMatrices[segmentNumber], [0,0,1],localUpTemp);
     }
     else{
-      vec0 = MathUtils.subtractVectors(nextSegPoint, currentSegPoint);
-      vec1 = [0,0,-1];
+      edgeVector = MathUtils.subtractVectors(nextSegPoint, currentSegPoint);
+      MathUtils.rotateVec3byMatrix4InPlace(
+        this.segmentMatrices[segmentNumber], [0,0,-1],localUpTemp);
     }
-    const edgeNormal = MathUtils.vectorCross( vec0, vec1);
+    const edgeNormal = MathUtils.vectorCross(edgeVector, localUpTemp);
     const posOffset = MathUtils.subtractVectors(pos, currentSegPoint);
     if(MathUtils.vectorDot(posOffset, edgeNormal) < 0){
-      let edgeVector =  toggleLeft? vec0: vec1;
       let penetration = -1 *MathUtils.scalarProjection(posOffset, edgeNormal);
       return{normal: edgeNormal, colliderPoint: pos,
          vector: edgeVector, edgePoint0: currentSegPoint,
@@ -540,3 +541,4 @@ class Slope extends GameObject{
     this.mesh.setDirty();
   }
 }
+const localUpTemp = [0,0,0];
