@@ -5,17 +5,26 @@ class Mixer{
         this.heap = []; // min heap for priority queue
         this.context = new AudioContext();
     }
-    play({buffer, priority, loop}){
+    play({buffer, priority, loop, volume}){
         if(this.heap.length == this.numChannels){
             this._popHeap();
         } 
         const source = this.context.createBufferSource();
+        const gainNode = this.context.createGain();
         source.buffer = buffer;
-        source.connect(this.context.destination);
+        source.loop = loop === undefined? false : loop;
+        source.connect(gainNode);
+        gainNode.gain.value = volume === undefined ? 1 : volume;
+        gainNode.connect(this.context.destination);
         source.start(0);
         const soundDescriptor = {source,priority: priority || 0};
         const idx = this._pushHeap(soundDescriptor);
         source.onended = this._removeSound(soundDescriptor);
+        return {
+            setVolume(volume){
+                gainNode.gain.value = volume;
+            }
+        };
     }
 
     _removeSound(soundDescriptor){ //swap with bottom of heap, pop bottom, then heapify down

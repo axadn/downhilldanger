@@ -8,6 +8,11 @@ const STEER_ANIMATION_LERP_SPEED = 0.09;
 const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
 const BREAK_FRICTION = [0.04,0.16,0.04];
+const COLLISION_INTENSITY_MIN_VELOCITY = 2;
+const COLLISION_INTENSITY_MAX_VELOCITY = 10;
+const SPEED_VOLUME_INTENSITY_MIN_VELOCITY = 0.2;
+const SPEED_VOLUME_INTENSITY_MAX_VELOCITY = 20;
+const HUD_DISPLAY_SPEED_MULTIPLIER = 8;
 import * as MathUtils from "../utils/math_utils";
 import * as HUD from "../hud/hud";
 window.MathUtils = MathUtils;
@@ -26,7 +31,7 @@ export default function createCharacter(slope){
     const runningJobs = {};
     let processedCharMesh = undefined;
 
-    const soundEffects = ["hit", "collect"];
+    const soundEffects = ["hit", "collect", "sliding"];
 
     const finishJob = name =>{
       delete runningJobs[name];
@@ -85,6 +90,7 @@ class Character extends GameObject{
     this.currentAnimationFrame = 0;
     window.character = this;
     this.mixedAnimations = Array(this.mesh.numBones * 8);
+    this.snowSound = AudioMixer.play({buffer: effectBuffers.sliding, volume: 0, loop: true});
   }
 
   update(){
@@ -98,11 +104,19 @@ class Character extends GameObject{
     this.velocity[2] -= this.fallSpeed;
     this.transformDirectionInPlace([0,0,1], this.localUp);
     if(distanceFromSurface < this.capsuleRadius){
+      let snowVolume = MathUtils.vectorMag(this.velocity);
+      snowVolume -= SPEED_VOLUME_INTENSITY_MIN_VELOCITY;
+      if (snowVolume < 0) snowVolume = 0;
+      snowVolume /= SPEED_VOLUME_INTENSITY_MAX_VELOCITY;
+      this.snowSound.setVolume(snowVolume);
       this._planeAlign();
       MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.localUp, this.velocity);
       this.inverseTransformDirectionInPlace(this.velocity, this.localVelocity);
       this._applyFriction(this.localVelocity);
       this.transformDirectionInPlace(this.localVelocity, this.velocity);
+    }
+    else{
+      this.snowSound.setVolume(0);
     }
     this.normalizeAnimationInfluence();
     this._mixAnimations();
@@ -243,7 +257,12 @@ class Character extends GameObject{
     }
   }
   _handleCollision(collisionData){
-    AudioMixer.play({buffer: effectBuffers.hit});
+    let volume = MathUtils.vectorMag(this.velocity);
+    volume -= COLLISION_INTENSITY_MIN_VELOCITY;
+    volume /= COLLISION_INTENSITY_MAX_VELOCITY;
+    if(volume > 0){
+      AudioMixer.play({buffer: effectBuffers.hit, volume});
+    }
     this.velocity = MathUtils.scaleVector(
       MathUtils.bounceVectorOffPlane(this.velocity,
         collisionData.normal),
@@ -305,7 +324,7 @@ class Character extends GameObject{
       AudioMixer.play({buffer: effectBuffers.collect});
       HUD.addPoints(balloonCount);
     }
-    HUD.updateSpeed(MathUtils.vectorMag(this.velocity)*8);
+    HUD.updateSpeed(MathUtils.vectorMag(this.velocity)*HUD_DISPLAY_SPEED_MULTIPLIER);
     // this.slope.boxCollidesWithObstacle(
     //   this.getTransformationMatrix(), this.boxDimensions,
     //   this.velocity, this.currentSegmentNumber);
