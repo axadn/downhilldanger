@@ -90,7 +90,8 @@ class Character extends GameObject{
     this.currentAnimationFrame = 0;
     window.character = this;
     this.mixedAnimations = Array(this.mesh.numBones * 8);
-    this.snowSound = AudioMixer.play({buffer: effectBuffers.sliding, volume: 0, loop: true});
+    this.snowSound = AudioMixer.play({buffer: effectBuffers.sliding,
+      priority: 10, volume: 0, loop: true});
   }
 
   update(){

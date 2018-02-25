@@ -2225,7 +2225,8 @@ class Character extends __WEBPACK_IMPORTED_MODULE_0__game_object_game_object__["
     this.currentAnimationFrame = 0;
     window.character = this;
     this.mixedAnimations = Array(this.mesh.numBones * 8);
-    this.snowSound = __WEBPACK_IMPORTED_MODULE_8__audio_mixer__["a" /* default */].play({buffer: effectBuffers.sliding, volume: 0, loop: true});
+    this.snowSound = __WEBPACK_IMPORTED_MODULE_8__audio_mixer__["a" /* default */].play({buffer: effectBuffers.sliding,
+      priority: 10, volume: 0, loop: true});
   }
 
   update(){
