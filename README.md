@@ -15,9 +15,9 @@ Collision detection is implemented for the edges of the path, the trees, and bal
 ### Moving forward
 - [x] Add debugging functions the rasterizer class 
 - [x] Implement an object pool for the trees to help slowdowns due to garbage collection
-- [ ] Do more math and physics operations in place to create less garbage
+- [x] Do more math and physics operations in place to create less garbage
 - [x] Add skeletal animation support
 - [ ] texture the player
 - [ ] implement the finish line
 - [ ] add other obstacle types
-- [ ] sound effects
+- [x] sound effects
