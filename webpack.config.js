@@ -19,10 +19,10 @@ module.exports = {
         }
       }
     ]
-  },
-  plugins: [
-    new UglifyJsPlugin({
-      sourceMap: true
-    })
-  ]
+   },
+  // plugins: [
+  //   new UglifyJsPlugin({
+  //     sourceMap: true
+  //   })
+  // ]
 };
