@@ -3,7 +3,7 @@ class Mixer{
     constructor(numChannels){
         this.numChannels = numChannels;
         this.heap = []; // min heap for priority queue
-        this.context = new AudioContext();
+        this.context = new (AudioContext|| webkitAudioContext)();
     }
     play({buffer, priority, loop, volume}){
         if(this.heap.length == this.numChannels){
