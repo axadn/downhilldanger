@@ -2216,7 +2216,7 @@ function createCharacter(slope) {
         resolve(new Character({ mesh: processedCharMesh, slope: slope }));
       }
     };
-    var context = new AudioContext();
+    var context = new (window.AudioContext || window.webkitAudioContext)();
     soundEffects.forEach(function (name) {
       if (effectBuffers.hasOwnProperty(name)) return;
       runningJobs["load_audio_" + name] = true;

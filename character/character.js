@@ -39,7 +39,7 @@ export default function createCharacter(slope){
         resolve(new Character({mesh: processedCharMesh, slope}));
       }
     };
-    const context = new AudioContext();
+    const context = new (window.AudioContext || window.webkitAudioContext)();
     soundEffects.forEach(name=>{
       if(effectBuffers.hasOwnProperty(name)) return;
       runningJobs[`load_audio_${name}`] = true;
