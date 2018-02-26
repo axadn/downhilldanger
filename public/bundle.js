@@ -2221,7 +2221,9 @@ function createCharacter(slope) {
       if (effectBuffers.hasOwnProperty(name)) return;
       runningJobs["load_audio_" + name] = true;
       AssetUtils.loadAsset(name + ".mp3", "arraybuffer").then(function (result) {
-        return context.decodeAudioData(result.target.response);
+        return new Promise(function (resolve, reject) {
+          return context.decodeAudioData(result.target.response, resolve, reject);
+        });
       }).then(function (buffer) {
         effectBuffers[name] = buffer;
       }).then(function () {

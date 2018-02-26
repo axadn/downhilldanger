@@ -44,7 +44,7 @@ export default function createCharacter(slope){
       if(effectBuffers.hasOwnProperty(name)) return;
       runningJobs[`load_audio_${name}`] = true;
       AssetUtils.loadAsset(`${name}.mp3`, "arraybuffer")
-      .then(result=> context.decodeAudioData(result.target.response))
+      .then(result=> new Promise((resolve, reject)=>context.decodeAudioData(result.target.response, resolve, reject)))
       .then(buffer=>{effectBuffers[name] = buffer})
       .then(()=>finishJob(`load_audio_${name}`))
       .catch(reject);
