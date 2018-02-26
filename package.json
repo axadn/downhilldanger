@@ -4,7 +4,12 @@
   "description": "",
   "main": "downhill_hazard",
   "dependencies": {
+    "babel-loader": "^7.1.3",
+    "babel-minify-webpack-plugin": "^0.3.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
     "mat4-to-dual-quat": "^1.0.0",
+    "uglifyjs-webpack-plugin": "^1.2.2",
     "webpack": "^3.10.0"
   },
   "devDependencies": {}

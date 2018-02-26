@@ -2,7 +2,7 @@ const tempVector3 = [0,0,0];
 const tempVector3_1 = [0,0,0];
 const tempVector3_2 = [0,0,0];
 const tempVector3_3 = [0,0,0];
-export const mat_4_multiply = (matrix0, matrix1)=>{
+export  function mat_4_multiply(matrix0, matrix1){
   const result = [];
   let sum = 0;
   for(let i = 0; i < 4; ++i){
@@ -18,7 +18,6 @@ export const mat_4_multiply = (matrix0, matrix1)=>{
 };
 
 export function mat4MultipyInPlace(matrix0, matrix1, result){
-  const result = [];
   let sum = 0;
   for(let i = 0; i < 4; ++i){
     for(let j= 0; j < 4; ++j){
@@ -344,7 +343,7 @@ export const triangleContainsPoint =  (p, triangle) =>{
 };
 
 //--------------------------matrix multiplication--------------------------------//
-export const multiplyVec4ByMatrix4 = (matrix, vec) =>{
+export function multiplyVec4ByMatrix4(matrix, vec){
   if(vec.length < 4){
     vec = vec.concat(0);
   }
@@ -539,7 +538,7 @@ export const setMatrixLocInPlace = (mat, vec) =>{
 };
 export const IdentityQuaternion = [1,0,0,0];
 
-export const lerpQuaternions = (quat1, quat2, lerpAmount) =>{
+export function lerpQuaternions(quat1, quat2, lerpAmount){
   let result = [];
   for(let i = 0; i < 4; ++i){
     result.push(quat1[i] * lerpAmount + quat2[i] * (1 - lerpAmount));

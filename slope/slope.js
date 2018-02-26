@@ -5,7 +5,9 @@ const SLOPE_BUFFER_AMOUNT = 30;
 const BACK_BUFFER_ANOUNT = 10;
 const TURN_TYPE_SWITCH_FREQUENCY = 3;
 const SHARP_TURN = 0.35;
+const SHARP_TURN_BANK = 0.25;
 const GRADUAL_TURN = 0.14;
+const GRADUAL_TURN_BANK = 0.1;
 const TILES_PER_SEGMENT = 1;
 const TREES_PER_SEGMENT = 2;
 const TREE_COLLIDER = "TREE_COLLIDER";
@@ -258,11 +260,11 @@ class Slope extends GameObject{
     switch(this.currentTurn){
       case "sharp":
         this.segmentRotation[2] += multiplier * SHARP_TURN;
-        this.segmentRotation[1] = -1* multiplier* 0.25;
+        this.segmentRotation[1] = -1* multiplier* SHARP_TURN_BANK;
         break;
       case "gradual":
         this.segmentRotation[2] += multiplier * GRADUAL_TURN;
-        this.segmentRotation[1] = -1* multiplier* 0.10;
+        this.segmentRotation[1] = -1* multiplier* GRADUAL_TURN_BANK;
         break;
       default:
         this.segmentRotation[1] = Math.random() *0.03;
