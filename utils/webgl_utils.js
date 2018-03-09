@@ -12,7 +12,7 @@ export class ObjectsRasterizer{
     window.rasterizer = this;
     const canvas = document.querySelector("#glCanvas");
     const canvas2 = document.querySelector("#flat-canvas");
-    this.gl = canvas.getContext("webgl");
+    this.gl = canvas.getContext("webgl") || canvas.getContext('experimental-webgl');
     this.ctx = canvas2.getContext('2d');
     if(!this.gl){
       alert("Unable to initialize WebGL. Your browser or machine may not support it");
