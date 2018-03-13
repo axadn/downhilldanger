@@ -88,6 +88,7 @@ export class Mesh {
 
       let frame, newAction, matrix;
       Object.keys(action_file.actions).forEach(actionName=>{
+        debugger;
         newAction = [];
         Object.keys(action_file.actions[actionName]).forEach(keyFrame=>{
           frame = [];
