@@ -2189,7 +2189,7 @@ var SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 var EDGE_COLLISION_DAMP_FACTOR = 0.2;
 var EDGE_COLLISION_PADDING_ROTATION = 0.5;
 var STEER_SPEED = 0.015;
-var STEER_ANIMATION_LERP_SPEED = 0.09;
+var STEER_ANIMATION_LERP_SPEED = 0.12;
 
 var SNOWBOARD_RESTITUTION = 0.48;
 var SNOWBOARD_FRICTION = [0.187, 0.01, 0.187, 1];
@@ -2397,16 +2397,24 @@ var Character = function (_GameObject) {
   }, {
     key: "steerAnimationLeft",
     value: function steerAnimationLeft() {
-      this.fadeOutSteeringInfluence("right");
-      this.fadeOutSteeringInfluence("neutral");
-      this.fadeInSteeringInfluence("left");
+      if (this.currentAnimations["right"].influence != 0) {
+        this.fadeOutSteeringInfluence("right", 2);
+        this.fadeInSteeringInfluence("neutral", 2);
+      } else {
+        this.fadeOutSteeringInfluence("neutral");
+        this.fadeInSteeringInfluence("left");
+      }
     }
   }, {
     key: "steerAnimationRight",
     value: function steerAnimationRight() {
-      this.fadeOutSteeringInfluence("left");
-      this.fadeOutSteeringInfluence("neutral");
-      this.fadeInSteeringInfluence("right");
+      if (this.currentAnimations["left"].influence != 0) {
+        this.fadeOutSteeringInfluence("left", 2);
+        this.fadeInSteeringInfluence("neutral", 2);
+      } else {
+        this.fadeOutSteeringInfluence("neutral");
+        this.fadeInSteeringInfluence("right");
+      }
     }
   }, {
     key: "steerAnimationNeutral",
@@ -2418,13 +2426,17 @@ var Character = function (_GameObject) {
   }, {
     key: "fadeOutSteeringInfluence",
     value: function fadeOutSteeringInfluence(key) {
-      this.currentAnimations[key].influence -= STEER_ANIMATION_LERP_SPEED;
+      var speed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+
+      this.currentAnimations[key].influence -= STEER_ANIMATION_LERP_SPEED * speed;
       this.currentAnimations[key].influence = Math.max(this.currentAnimations[key].influence, 0);
     }
   }, {
     key: "fadeInSteeringInfluence",
     value: function fadeInSteeringInfluence(key) {
-      this.currentAnimations[key].influence += STEER_ANIMATION_LERP_SPEED;
+      var speed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+
+      this.currentAnimations[key].influence += STEER_ANIMATION_LERP_SPEED * speed;
       this.currentAnimations[key].influence = Math.min(this.currentAnimations[key].influence, 1);
     }
   }, {

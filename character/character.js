@@ -3,7 +3,7 @@ const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
 const STEER_SPEED = 0.015;
-const STEER_ANIMATION_LERP_SPEED = 0.09;
+const STEER_ANIMATION_LERP_SPEED = 0.12;
 
 const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
@@ -210,28 +210,39 @@ class Character extends GameObject{
       animation=>animation.influence /= magnitude);
   }
   steerAnimationLeft(){
-    this.fadeOutSteeringInfluence("right");
-    this.fadeOutSteeringInfluence("neutral");
-    this.fadeInSteeringInfluence("left");
+    if(this.currentAnimations["right"].influence != 0){
+      this.fadeOutSteeringInfluence("right", 2);
+      this.fadeInSteeringInfluence("neutral", 2);
+    }
+    else{
+      this.fadeOutSteeringInfluence("neutral");
+      this.fadeInSteeringInfluence("left");
+    } 
   }
   steerAnimationRight(){
-    this.fadeOutSteeringInfluence("left");
-    this.fadeOutSteeringInfluence("neutral");
-    this.fadeInSteeringInfluence("right");
+    if(this.currentAnimations["left"].influence != 0){
+      this.fadeOutSteeringInfluence("left", 2);
+      this.fadeInSteeringInfluence("neutral", 2);
+    }
+    else{
+      this.fadeOutSteeringInfluence("neutral");
+      this.fadeInSteeringInfluence("right");
+    } 
+
   }
   steerAnimationNeutral(){
     this.fadeOutSteeringInfluence("right");
     this.fadeOutSteeringInfluence("left");
     this.fadeInSteeringInfluence("neutral");
   }
-  fadeOutSteeringInfluence(key){
-    this.currentAnimations[key].influence -= STEER_ANIMATION_LERP_SPEED;
+  fadeOutSteeringInfluence(key, speed = 1){
+    this.currentAnimations[key].influence -= STEER_ANIMATION_LERP_SPEED * speed;
     this.currentAnimations[key].influence = Math.max(
       this.currentAnimations[key].influence, 0
     );
   }
-  fadeInSteeringInfluence(key){
-    this.currentAnimations[key].influence += STEER_ANIMATION_LERP_SPEED;
+  fadeInSteeringInfluence(key, speed = 1){
+    this.currentAnimations[key].influence += STEER_ANIMATION_LERP_SPEED * speed;
     this.currentAnimations[key].influence = Math.min(
       this.currentAnimations[key].influence, 1
     )
