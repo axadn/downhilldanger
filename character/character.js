@@ -1,4 +1,5 @@
 import GameObject from "../game_object/game_object";
+
 const SQR_MAGNITUDE_ALLOWED_ABOVE_SURFACE = 4;
 const EDGE_COLLISION_DAMP_FACTOR = 0.2;
 const EDGE_COLLISION_PADDING_ROTATION = 0.5;
@@ -6,13 +7,14 @@ const STEER_SPEED = 0.015;
 const STEER_ANIMATION_LERP_SPEED = 0.12;
 
 const SNOWBOARD_RESTITUTION = 0.48;
-const SNOWBOARD_FRICTION = [0.187,0.01,0.187,1];
-const BREAK_FRICTION = [0.04,0.16,0.04];
+const SNOWBOARD_FRICTION = [0.187, 0.01, 0.187, 1];
+const BREAK_FRICTION = [0.04, 0.16, 0.04];
 const COLLISION_INTENSITY_MIN_VELOCITY = 2;
 const COLLISION_INTENSITY_MAX_VELOCITY = 10;
 const SPEED_VOLUME_INTENSITY_MIN_VELOCITY = 0.2;
 const SPEED_VOLUME_INTENSITY_MAX_VELOCITY = 20;
 const HUD_DISPLAY_SPEED_MULTIPLIER = 8;
+
 import * as MathUtils from "../utils/math_utils";
 import * as HUD from "../hud/hud";
 window.MathUtils = MathUtils;
@@ -83,9 +85,9 @@ class Character extends GameObject{
     this.setPosition([0,0,16]);
     this.name = "snowboarder";
     this.currentAnimations = {
-      "neutral":{influence: 1},
-      "left":{influence: 0},
-      "right":{influence: 0}
+      "neutral":{influence: 1, loop: true, frame: 0},
+      "left":{influence: 0, loop: true, frame: 0},
+      "right":{influence: 0, loop: true, frame: 0}
     };
     this.currentAnimationFrame = 0;
     window.character = this;
@@ -119,11 +121,28 @@ class Character extends GameObject{
     else{
       this.snowSound.setVolume(0);
     }
+    
+    this._updateAnimations();
     this.normalizeAnimationInfluence();
     this._mixAnimations();
     super.update();
   }
-  
+  _updateAnimations(){
+    const animEntries = Object.entries(this.currentAnimations);
+    for(let i = 0; i < animEntries.length; ++i){
+      if(animEntries[i][1].influence != 0){
+        animEntries[i][1].frame += 1;
+        if(animEntries[i][1].frame >= this.mesh.animations[animEntries[i][0]].length){
+          if(animEntries[i][1].loop){
+            animEntries[i][1].frame = 0;
+          }
+          else{
+            animEntries[i][1].frame -= 1;
+          }
+        }
+      }
+    }
+  }
   _getSurfaceData(){
     let localDownVector = MathUtils.multiplyVec4ByMatrix4(
       this.slope.segmentMatrices[this.currentSegmentNumber],
@@ -178,16 +197,20 @@ class Character extends GameObject{
   }
   _mixAnimations(){
     const currentKeys = Object.keys(this.currentAnimations);
-    //first fill the lerped transform with the first animation we find,
+    // first fill the lerped transform with the first animation we find,
     // which does not have influence 0, * its influence
     let firstAnimIndex;
+    let animFrame;
     for(let i = 0; i < currentKeys.length; ++i){
       if(this.currentAnimations[currentKeys[i]].influence !== 0){
         firstAnimIndex = i;
+        animFrame = this.currentAnimations[currentKeys[i]].frame;
         break;
       }
     }
-    let anim = this.mesh.animations[currentKeys[firstAnimIndex]][0];
+    let anim = this.mesh.animations[currentKeys[firstAnimIndex]][
+      this.currentAnimations[currentKeys[firstAnimIndex]].frame
+    ];
     let influence = this.currentAnimations[currentKeys[firstAnimIndex]].influence;
     for(let i = 0; i < anim.length; ++i){
       this.mixedAnimations[i] = anim[i] * influence;
@@ -195,7 +218,9 @@ class Character extends GameObject{
     // now add all the other anims * their influence
     for(let i = firstAnimIndex + 1; i < currentKeys.length; ++i){
       if(this.currentAnimations[currentKeys[i]].influence === 0) continue;
-      anim = this.mesh.animations[currentKeys[i]][0];
+      anim = this.mesh.animations[currentKeys[i]][
+        this.currentAnimations[currentKeys[i]].frame
+      ];
       influence = this.currentAnimations[currentKeys[i]].influence;
       for(let transformIdx = 0; transformIdx < anim.length; ++transformIdx){
         this.mixedAnimations[transformIdx] += 
