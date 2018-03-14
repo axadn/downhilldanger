@@ -265,6 +265,9 @@ class Character extends GameObject{
       this.fadeOutSteeringInfluence("right", 2);
       this.fadeInSteeringInfluence("neutral", 2);
     }
+    else if(this.currentAnimations["brake"].influence > 0.7){
+      this.steerAnimationNeutral();
+    }
     else{
       this.fadeOutSteeringInfluence("neutral");
       this.fadeInSteeringInfluence("left");
@@ -276,6 +279,9 @@ class Character extends GameObject{
       this.fadeOutSteeringInfluence("left", 2);
       this.fadeInSteeringInfluence("neutral", 2);
     }
+    else if(this.currentAnimations["brake"].influence > 0.7){
+      this.steerAnimationNeutral();
+    }
     else{
       this.fadeOutSteeringInfluence("neutral");
       this.fadeInSteeringInfluence("right");
@@ -283,10 +289,10 @@ class Character extends GameObject{
 
   }
   steerAnimationNeutral(){
-    this.fadeOutSteeringInfluence("brake", 0.01);
-    this.fadeOutSteeringInfluence("right", 3);
-    this.fadeOutSteeringInfluence("left", 3);
-     this.fadeInSteeringInfluence("neutral",0.05);
+    this.fadeOutSteeringInfluence("brake", 0.1);
+    this.fadeOutSteeringInfluence("right", 2);
+    this.fadeOutSteeringInfluence("left", 2);
+     this.fadeInSteeringInfluence("neutral",0.2);
   }
   fadeOutSteeringInfluence(key, speed = 1){
     this.currentAnimations[key].influence -= STEER_ANIMATION_LERP_SPEED * speed;
