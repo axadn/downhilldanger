@@ -87,7 +87,8 @@ class Character extends GameObject{
     this.currentAnimations = {
       "neutral":{influence: 1, loop: true, frame: 0},
       "left":{influence: 0, loop: true, frame: 0},
-      "right":{influence: 0, loop: true, frame: 0}
+      "right":{influence: 0, loop: true, frame: 0},
+      "brake":{influence: 0, loop: false, frame: 0}
     };
     this.currentAnimationFrame = 0;
     window.character = this;
@@ -129,15 +130,33 @@ class Character extends GameObject{
   }
   _updateAnimations(){
     const animEntries = Object.entries(this.currentAnimations);
+    let mixerInfo, anim;
     for(let i = 0; i < animEntries.length; ++i){
-      if(animEntries[i][1].influence != 0){
-        animEntries[i][1].frame += 1;
-        if(animEntries[i][1].frame >= this.mesh.animations[animEntries[i][0]].length){
-          if(animEntries[i][1].loop){
-            animEntries[i][1].frame = 0;
+      mixerInfo = animEntries[i][1];
+      anim = this.mesh.animations[animEntries[i][0]];
+      if(!mixerInfo.playedThrough){
+        if(mixerInfo.reverse){
+          mixerInfo.frame -= 1;
+          if(mixerInfo.frame < 0){
+            if(mixerInfo.loop){
+              mixerInfo.frame = anim.length - 1;
+            }
+            else{
+              mixerInfo.frame = 0;
+              mixerInfo.playedThrough = true;
+            }
           }
-          else{
-            animEntries[i][1].frame -= 1;
+        }
+        else{
+          mixerInfo.frame += 1;
+          if(mixerInfo.frame >= anim.length){
+            if(mixerInfo.loop){
+              mixerInfo.frame = 0;
+            }
+            else{
+              mixerInfo.frame = anim.length - 1;
+              mixerInfo.playedThrough = true;
+            }
           }
         }
       }
@@ -216,12 +235,12 @@ class Character extends GameObject{
       this.mixedAnimations[i] = anim[i] * influence;
     }
     // now add all the other anims * their influence
-    for(let i = firstAnimIndex + 1; i < currentKeys.length; ++i){
-      if(this.currentAnimations[currentKeys[i]].influence === 0) continue;
-      anim = this.mesh.animations[currentKeys[i]][
-        this.currentAnimations[currentKeys[i]].frame
+    for(let idx = firstAnimIndex + 1; idx < currentKeys.length; ++idx){
+      if(this.currentAnimations[currentKeys[idx]].influence === 0) continue;
+      anim = this.mesh.animations[currentKeys[idx]][
+        this.currentAnimations[currentKeys[idx]].frame
       ];
-      influence = this.currentAnimations[currentKeys[i]].influence;
+      influence = this.currentAnimations[currentKeys[idx]].influence;
       for(let transformIdx = 0; transformIdx < anim.length; ++transformIdx){
         this.mixedAnimations[transformIdx] += 
           anim[transformIdx] * influence;
@@ -234,7 +253,14 @@ class Character extends GameObject{
     Object.values(this.currentAnimations).forEach(
       animation=>animation.influence /= magnitude);
   }
+  brakeAnimation(){
+    this.fadeOutSteeringInfluence("left");
+    this.fadeOutSteeringInfluence("right");
+    this.fadeOutSteeringInfluence("neutral");
+    this.fadeInSteeringInfluence("brake", 4);
+  }
   steerAnimationLeft(){
+    this.fadeOutSteeringInfluence("brake",0.1);
     if(this.currentAnimations["right"].influence != 0){
       this.fadeOutSteeringInfluence("right", 2);
       this.fadeInSteeringInfluence("neutral", 2);
@@ -245,6 +271,7 @@ class Character extends GameObject{
     } 
   }
   steerAnimationRight(){
+    this.fadeOutSteeringInfluence("brake", 0.1);
     if(this.currentAnimations["left"].influence != 0){
       this.fadeOutSteeringInfluence("left", 2);
       this.fadeInSteeringInfluence("neutral", 2);
@@ -256,41 +283,51 @@ class Character extends GameObject{
 
   }
   steerAnimationNeutral(){
-    this.fadeOutSteeringInfluence("right");
-    this.fadeOutSteeringInfluence("left");
-    this.fadeInSteeringInfluence("neutral");
+    this.fadeOutSteeringInfluence("brake", 0.01);
+    this.fadeOutSteeringInfluence("right", 3);
+    this.fadeOutSteeringInfluence("left", 3);
+     this.fadeInSteeringInfluence("neutral",0.05);
   }
   fadeOutSteeringInfluence(key, speed = 1){
     this.currentAnimations[key].influence -= STEER_ANIMATION_LERP_SPEED * speed;
     this.currentAnimations[key].influence = Math.max(
       this.currentAnimations[key].influence, 0
     );
+    if(key == 'brake'){
+      this.currentAnimations[key].playedThrough = false;
+      this.currentAnimations[key].reverse = true;
+    }
   }
   fadeInSteeringInfluence(key, speed = 1){
     this.currentAnimations[key].influence += STEER_ANIMATION_LERP_SPEED * speed;
     this.currentAnimations[key].influence = Math.min(
       this.currentAnimations[key].influence, 1
     )
+    if(key == 'brake'){
+      this.currentAnimations[key].playedThrough = false;
+      this.currentAnimations[key].reverse = false;
+    }
   }
   _handleControls(){
-    if(this.input.left ? !this.input.right : this.input.right){
-      if(this.input.right){
-        this._steer(-1);
-        this.steerAnimationRight();
-      }
-      else{
-        this.steerAnimationLeft();
-        this._steer(1);
-      }
-    }
-    else{
-      this.steerAnimationNeutral();
-    }
     if(this.input.back){
       this.friction = BREAK_FRICTION
+      this.brakeAnimation();
     }
     else{
       this.friction = SNOWBOARD_FRICTION;
+      if(this.input.left ? !this.input.right : this.input.right){
+        if(this.input.right){
+          this._steer(-1);
+          this.steerAnimationRight();
+        }
+        else{
+          this.steerAnimationLeft();
+          this._steer(1);
+        }
+      }
+      else{
+        this.steerAnimationNeutral();
+      }
     }
   }
   _handleCollision(collisionData){
