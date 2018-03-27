@@ -49,6 +49,7 @@ A great solution to this problem that has seen use lately is dual quaternions. D
 My eventual solution was to convert the transformation matrices into dual quaternions, and then use these for all the mixing and the shaders.
 
 More about dual quaternions: 
+
 https://www.cs.utah.edu/~ladislav/kavan07skinning/kavan07skinning.pdf
 https://cs.gmu.edu/~jmlien/teaching/cs451/uploads/Main/dual-quaternion.pdf
 http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.434.4796&rep=rep1&type=pdf
