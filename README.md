@@ -57,6 +57,32 @@ http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.434.4796&rep=rep1&type=
 #### Collision Detection
 Because of the way I have the slope procedurally generated (segment by segment) we only need to check the character's collider against colliders in the current segment, the previous segment, and the next segment. This saves a lot of calculations. We only need to check for collision against a few balloons and trees each frame. This is similar to the quadtree method used to divide space and detect likely colisions used in a lot of games.
   
+#### Debugging
+To assist with debugging, I've added a couple methods to the rasterizer class. 
+These allow you to draw lines and circles between points in 3D space from the console or source code. This is useful for checking that the results of transformations and math operations are what you expect.
+```javascript
+  debugLine(start, end, style = "black"){
+    start = MathUtils.multiplyVec4ByMatrix4(this.viewMatrix, start.concat(1));
+    start = MathUtils.scaleVector(start, 1/start[3]);
+    start = this.clipSpaceToFlatCanvasCoords(start[0],start[1]);
+    end = MathUtils.multiplyVec4ByMatrix4(this.viewMatrix, end.concat(1));
+    end = MathUtils.scaleVector(end, 1/end[3]);
+    end = this.clipSpaceToFlatCanvasCoords(end[0], end[1]);
+    this.ctx.beginPath();
+    this.ctx.moveTo(start[0],start[1]);
+    this.ctx.lineTo(end[0],end[1]);
+    this.ctx.strokeStyle = style;
+    this.ctx.stroke();
+  }
+  
+  debugCircle(pos, radius){
+    pos = MathUtils.multiplyVec4ByMatrix4(this.viewMatrix, pos.concat(0));
+    this.ctx.arc(pos[0], pos[1], radius, 0, Math.PI * 2);
+    this.ctx.stroke();
+  }
+ 
+```
+
 ### Moving forward
 - [x] Add debugging functions the rasterizer class 
 - [x] Implement an object pool for the trees to help slowdowns due to garbage collection
