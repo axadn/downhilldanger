@@ -39,6 +39,17 @@ class TreePool{
 
 ```
 
+#### Animation Mixing
+Eventually, when I began to add animations to the character, I ran into the problem of needing to smoothly interpolate between different animations. It is also extremely common to have multiple bones to affect the final position of a vertex. This is a bit of a problem because the exporter I am using exports the bone's animations as transformation matrices. Transformation matrices can not be directly interpolated because of how they represent transformations. This would produce garbage.
+
+One solution is to extract the rotation and position and individualy interpolate these. This is inconvenient, however, because one needs to break down all the matrices, interpolate them, and then recombine them back into a transformation matrix.
+
+A great solution to this problem that has seen use lately is dual quaternions. Dual quaternions by nature are very simple to interpolate, and one can write a shader that takes bone transformations formatted as dual quaternions. This allows us to easily interpolate the different animations and bone influences without converting back and forth between different formats.
+
+More about dual quaternions: 
+https://www.cs.utah.edu/~ladislav/kavan07skinning/kavan07skinning.pdf
+https://cs.gmu.edu/~jmlien/teaching/cs451/uploads/Main/dual-quaternion.pdf
+http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.434.4796&rep=rep1&type=pdf
 
 ### Moving forward
 - [x] Add debugging functions the rasterizer class 
