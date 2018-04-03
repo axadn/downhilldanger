@@ -44,7 +44,7 @@ Eventually, when I began to add animations to the character, I ran into the prob
 
 One solution is to extract the rotation and position and individualy interpolate these. This is inconvenient, however, because one needs to break down all the matrices, interpolate them, and then recombine them back into a transformation matrix.
 
-A great solution to this problem that has seen use lately is dual quaternions. Dual quaternions by nature are very simple to interpolate (you can just treat each quaternion as 4D vector). You can write a shader that takes bone transformations formatted as dual quaternions. This allows us to easily interpolate the different animations and bone influences without converting back and forth between different formats. Dual quaternions also take less space than transformation matrices. Instead of 16 components, there are 8.
+A great solution to this problem that has seen use lately is dual quaternions. Dual quaternions by nature are very simple to interpolate (you can just treat each quaternion as 4D vector). One can write a shader that takes bone transformations formatted as dual quaternions. This allows us to easily interpolate the different animations and bone influences without converting back and forth between different formats. Dual quaternions also take less space than transformation matrices. Instead of 16 components, there are 8.
 
 My eventual solution was to convert the transformation matrices into dual quaternions, and then use these for all the mixing and the shaders.
 
