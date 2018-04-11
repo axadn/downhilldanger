@@ -1,7 +1,7 @@
 var path = require("path");
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 module.exports = {
-  entry: "./downhill_hazard.js",
+  entry: "./frontend/downhill_hazard.js",
   output: {
     path: path.resolve(__dirname, 'public'),
     filename: "bundle.js",
