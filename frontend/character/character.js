@@ -9,6 +9,7 @@ const STEER_ANIMATION_LERP_SPEED = 0.12;
 const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187, 0.01, 0.187, 1];
 const BREAK_FRICTION = [0.04, 0.16, 0.04];
+const JUMP_VECTOR = [0,0.5,1.5];
 const COLLISION_INTENSITY_MIN_VELOCITY = 2;
 const COLLISION_INTENSITY_MAX_VELOCITY = 10;
 const SPEED_VOLUME_INTENSITY_MIN_VELOCITY = 0.2;
@@ -74,7 +75,7 @@ class Character extends GameObject{
     this.fallSpeed = 0.15;
     this.slope = slope;
     this.currentSegmentNumber = 0;
-    this.input = {left: false, right: false, back: false}
+    this.input = {left: false, right: false, back: false, jump: false};
     this.velocity = [0,1,0];
     this.localVelocity = [0,0,0];
     this.localUp = [0,0,1];
@@ -99,7 +100,6 @@ class Character extends GameObject{
 
   update(){
     this._ensureAboveSurface();
-    this._handleControls();
     this._getSurfaceData();
     this._moveForward();
     const surfaceOffset = MathUtils.subtractVectors
@@ -108,13 +108,16 @@ class Character extends GameObject{
     this.velocity[2] -= this.fallSpeed;
     this.transformDirectionInPlace([0,0,1], this.localUp);
     if(distanceFromSurface < this.capsuleRadius){
+      this._handleControls();
       let snowVolume = MathUtils.vectorMag(this.velocity);
       snowVolume -= SPEED_VOLUME_INTENSITY_MIN_VELOCITY;
       if (snowVolume < 0) snowVolume = 0;
       snowVolume /= SPEED_VOLUME_INTENSITY_MAX_VELOCITY;
       this.snowSound.setVolume(snowVolume);
       this._planeAlign();
-      MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.localUp, this.velocity);
+      if(MathUtils.vectorDot(this.velocity, this.localUp) < 0){
+        MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.localUp, this.velocity);
+      }
       this.inverseTransformDirectionInPlace(this.velocity, this.localVelocity);
       this._applyFriction(this.localVelocity);
       this.transformDirectionInPlace(this.localVelocity, this.velocity);
@@ -321,7 +324,10 @@ class Character extends GameObject{
     }
     else{
       this.friction = SNOWBOARD_FRICTION;
-      if(this.input.left ? !this.input.right : this.input.right){
+      if(this.input.jump){
+        this._jump();
+      }
+      else if(this.input.left ? !this.input.right : this.input.right){
         if(this.input.right){
           this._steer(-1);
           this.steerAnimationRight();
@@ -335,6 +341,10 @@ class Character extends GameObject{
         this.steerAnimationNeutral();
       }
     }
+  }
+  _jump(){
+    MathUtils.addVectorsInPlace(this.velocity, this.transformDirection(JUMP_VECTOR),
+     this.velocity, 3);
   }
   _handleCollision(collisionData){
     let volume = MathUtils.vectorMag(this.velocity);

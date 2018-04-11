@@ -12,6 +12,9 @@ export const keyDown = character => e=>{
     case "ArrowDown":
     case "s":
       character.input.back = true;
+      break;
+    case " ":
+      character.input.jump = true;
   }
 }
 
@@ -29,6 +32,8 @@ export const keyUp = character => e => {
     case "s":
       character.input.back = false;
       break;
+    case " ":
+      character.input.jump = false;
   }
 }
 

@@ -895,7 +895,6 @@ var Mesh = exports.Mesh = function () {
           newAction = void 0,
           matrix = void 0;
       Object.keys(action_file.actions).forEach(function (actionName) {
-        debugger;
         newAction = [];
         Object.keys(action_file.actions[actionName]).forEach(function (keyFrame) {
           frame = [];
@@ -1804,6 +1803,9 @@ var keyDown = exports.keyDown = function keyDown(character) {
       case "ArrowDown":
       case "s":
         character.input.back = true;
+        break;
+      case " ":
+        character.input.jump = true;
     }
   };
 };
@@ -1823,6 +1825,8 @@ var keyUp = exports.keyUp = function keyUp(character) {
       case "s":
         character.input.back = false;
         break;
+      case " ":
+        character.input.jump = false;
     }
   };
 };
@@ -2137,6 +2141,7 @@ var STEER_ANIMATION_LERP_SPEED = 0.12;
 var SNOWBOARD_RESTITUTION = 0.48;
 var SNOWBOARD_FRICTION = [0.187, 0.01, 0.187, 1];
 var BREAK_FRICTION = [0.04, 0.16, 0.04];
+var JUMP_VECTOR = [0, 0.5, 1.5];
 var COLLISION_INTENSITY_MIN_VELOCITY = 2;
 var COLLISION_INTENSITY_MAX_VELOCITY = 10;
 var SPEED_VOLUME_INTENSITY_MIN_VELOCITY = 0.2;
@@ -2203,7 +2208,7 @@ var Character = function (_GameObject) {
     _this.fallSpeed = 0.15;
     _this.slope = slope;
     _this.currentSegmentNumber = 0;
-    _this.input = { left: false, right: false, back: false };
+    _this.input = { left: false, right: false, back: false, jump: false };
     _this.velocity = [0, 1, 0];
     _this.localVelocity = [0, 0, 0];
     _this.localUp = [0, 0, 1];
@@ -2231,7 +2236,6 @@ var Character = function (_GameObject) {
     key: "update",
     value: function update() {
       this._ensureAboveSurface();
-      this._handleControls();
       this._getSurfaceData();
       this._moveForward();
       var surfaceOffset = MathUtils.subtractVectors(this.getPosition(), this.surfacePoint);
@@ -2239,13 +2243,16 @@ var Character = function (_GameObject) {
       this.velocity[2] -= this.fallSpeed;
       this.transformDirectionInPlace([0, 0, 1], this.localUp);
       if (distanceFromSurface < this.capsuleRadius) {
+        this._handleControls();
         var snowVolume = MathUtils.vectorMag(this.velocity);
         snowVolume -= SPEED_VOLUME_INTENSITY_MIN_VELOCITY;
         if (snowVolume < 0) snowVolume = 0;
         snowVolume /= SPEED_VOLUME_INTENSITY_MAX_VELOCITY;
         this.snowSound.setVolume(snowVolume);
         this._planeAlign();
-        MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.localUp, this.velocity);
+        if (MathUtils.vectorDot(this.velocity, this.localUp) < 0) {
+          MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.localUp, this.velocity);
+        }
         this.inverseTransformDirectionInPlace(this.velocity, this.localVelocity);
         this._applyFriction(this.localVelocity);
         this.transformDirectionInPlace(this.localVelocity, this.velocity);
@@ -2452,7 +2459,9 @@ var Character = function (_GameObject) {
         this.brakeAnimation();
       } else {
         this.friction = SNOWBOARD_FRICTION;
-        if (this.input.left ? !this.input.right : this.input.right) {
+        if (this.input.jump) {
+          this._jump();
+        } else if (this.input.left ? !this.input.right : this.input.right) {
           if (this.input.right) {
             this._steer(-1);
             this.steerAnimationRight();
@@ -2464,6 +2473,11 @@ var Character = function (_GameObject) {
           this.steerAnimationNeutral();
         }
       }
+    }
+  }, {
+    key: "_jump",
+    value: function _jump() {
+      MathUtils.addVectorsInPlace(this.velocity, this.transformDirection(JUMP_VECTOR), this.velocity, 3);
     }
   }, {
     key: "_handleCollision",
