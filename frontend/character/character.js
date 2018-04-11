@@ -9,7 +9,7 @@ const STEER_ANIMATION_LERP_SPEED = 0.12;
 const SNOWBOARD_RESTITUTION = 0.48;
 const SNOWBOARD_FRICTION = [0.187, 0.01, 0.187, 1];
 const BREAK_FRICTION = [0.04, 0.16, 0.04];
-const JUMP_VECTOR = [0,0.5,1.5];
+const JUMP_VECTOR = [0,0.1,3];
 const COLLISION_INTENSITY_MIN_VELOCITY = 2;
 const COLLISION_INTENSITY_MAX_VELOCITY = 10;
 const SPEED_VOLUME_INTENSITY_MIN_VELOCITY = 0.2;
@@ -71,6 +71,7 @@ class Character extends GameObject{
     super(mesh, transformationMatrix || MathUtils.identityMatrix4);
     this.mesh = mesh;
     this.boundingBox = boundingBox;
+    this.state = "ground";
     this.speed = 0.2;
     this.fallSpeed = 0.15;
     this.slope = slope;
@@ -97,35 +98,57 @@ class Character extends GameObject{
     this.snowSound = AudioMixer.play({buffer: effectBuffers.sliding,
       priority: 10, volume: 0, loop: true});
   }
+  _applyGravity(){
+    this.velocity[2] -= this.fallSpeed;
+  }
+  _updateLocalUp(){
+    this.transformDirectionInPlace([0,0,1], this.localUp);
+  }
 
   update(){
     this._ensureAboveSurface();
     this._getSurfaceData();
-    this._moveForward();
+    this._handleCollisions();
+    this._applyGravity();
+    this._updateLocalUp();
     const surfaceOffset = MathUtils.subtractVectors
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
-    this.velocity[2] -= this.fallSpeed;
-    this.transformDirectionInPlace([0,0,1], this.localUp);
-    if(distanceFromSurface < this.capsuleRadius){
-      this._handleControls();
-      let snowVolume = MathUtils.vectorMag(this.velocity);
-      snowVolume -= SPEED_VOLUME_INTENSITY_MIN_VELOCITY;
-      if (snowVolume < 0) snowVolume = 0;
-      snowVolume /= SPEED_VOLUME_INTENSITY_MAX_VELOCITY;
-      this.snowSound.setVolume(snowVolume);
-      this._planeAlign();
-      if(MathUtils.vectorDot(this.velocity, this.localUp) < 0){
-        MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.localUp, this.velocity);
-      }
-      this.inverseTransformDirectionInPlace(this.velocity, this.localVelocity);
-      this._applyFriction(this.localVelocity);
-      this.transformDirectionInPlace(this.localVelocity, this.velocity);
-    }
-    else{
-      this.snowSound.setVolume(0);
-    }
     
+    switch(this.state){
+      case "ground":
+        this._groundControls();
+        let snowVolume = MathUtils.vectorMag(this.velocity);
+        snowVolume -= SPEED_VOLUME_INTENSITY_MIN_VELOCITY;
+        if (snowVolume < 0) snowVolume = 0;
+        snowVolume /= SPEED_VOLUME_INTENSITY_MAX_VELOCITY;
+        this.snowSound.setVolume(snowVolume);
+        this._planeAlign();
+        if(MathUtils.vectorDot(this.velocity, this.localUp) < 0){
+          MathUtils.projectVectorOntoPlaneInPlace(this.velocity, this.localUp, this.velocity);
+        }
+        this.inverseTransformDirectionInPlace(this.velocity, this.localVelocity);
+        this._applyFriction(this.localVelocity);
+        this.transformDirectionInPlace(this.localVelocity, this.velocity);
+        if(distanceFromSurface > this.capsuleRadius){
+          this.state = "air";
+        }
+        break;
+      case "jump":
+        this.snowSound.setVolume(0);
+        if(MathUtils.vectorDot(this.localUp, this.velocity) <= 0){  
+          this.state = "air";
+        }
+        break;
+      case "air":
+        if(distanceFromSurface <= this.capsuleRadius){
+          this.state = "ground";
+        }
+        this.snowSound.setVolume(0);
+        break;
+      
+    }
+
     this._updateAnimations();
     this.normalizeAnimationInfluence();
     this._mixAnimations();
@@ -317,7 +340,7 @@ class Character extends GameObject{
       this.currentAnimations[key].reverse = false;
     }
   }
-  _handleControls(){
+  _groundControls(){
     if(this.input.back){
       this.friction = BREAK_FRICTION
       this.brakeAnimation();
@@ -345,6 +368,7 @@ class Character extends GameObject{
   _jump(){
     MathUtils.addVectorsInPlace(this.velocity, this.transformDirection(JUMP_VECTOR),
      this.velocity, 3);
+     this.state = "jump";
   }
   _handleCollision(collisionData){
     let volume = MathUtils.vectorMag(this.velocity);
@@ -401,7 +425,7 @@ class Character extends GameObject{
     collisionData.normal = collisionData.sphereNormal;
     this._handleCollision(collisionData);
   }
-  _moveForward(){
+  _handleCollisions(){
     const edgeCollisionData = this.slope.boxIsBeyondEdge(
       this.getTransformationMatrix(), this.boxDimensions, this.currentSegmentNumber);
     const capsulePoint0 = this.getPosition();
