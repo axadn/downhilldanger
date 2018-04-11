@@ -31,3 +31,9 @@ export const keyUp = character => e => {
       break;
   }
 }
+
+export const releaseKeys = character => e=>{
+  character.input.left = false;
+  character.input.right = false;
+  character.input.back = false;
+}

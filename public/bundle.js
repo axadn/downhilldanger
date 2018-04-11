@@ -1315,7 +1315,6 @@ function assetsLoaded(_ref2) {
   rasterizer.cameraTarget = character;
   slope.generateSegment();
 
-  window.addEventListener('keydown', handleKeyDown(rasterizer));
   rasterizer.position[1] -= 2;
   rasterizer.position[0] += 0.3;
   rasterizer.rotation[0] -= 0.4;
@@ -1325,36 +1324,7 @@ function assetsLoaded(_ref2) {
 
   window.addEventListener("keydown", Input.keyDown(character));
   window.addEventListener("keyup", Input.keyUp(character));
-};
-var handleKeyDown = function handleKeyDown(rasterizer) {
-  return function (e) {
-    switch (e.key) {
-      case "ArrowUp":
-        rasterizer.rotation[0] += 0.1;
-        break;
-      case "ArrowDown":
-        rasterizer.rotation[0] -= 0.1;
-        break;
-      case "ArrowLeft":
-        rasterizer.rotation[2] += 0.1;
-        break;
-      case "ArrowRight":
-        rasterizer.rotation[0] -= 0.1;
-        break;
-      case "a":
-        rasterizer.position[1] += 0.1;
-        break;
-      case "w":
-        rasterizer.position[1] -= 0.1;
-        break;
-      case "s":
-        rasterizer.position[2] += 0.1;
-        break;
-      case "d":
-        rasterizer.position[2] -= 0.1;
-        break;
-    }
-  };
+  window.addEventListener("blur", Input.releaseKeys(character));
 };
 
 /***/ }),
@@ -1854,6 +1824,14 @@ var keyUp = exports.keyUp = function keyUp(character) {
         character.input.back = false;
         break;
     }
+  };
+};
+
+var releaseKeys = exports.releaseKeys = function releaseKeys(character) {
+  return function (e) {
+    character.input.left = false;
+    character.input.right = false;
+    character.input.back = false;
   };
 };
 

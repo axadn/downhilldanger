@@ -38,7 +38,6 @@ function assetsLoaded({character, slope, skybox}){
     rasterizer.cameraTarget = character;
     slope.generateSegment();
     
-    window.addEventListener('keydown', handleKeyDown(rasterizer));
     rasterizer.position[1] -= 2;
     rasterizer.position[0] += 0.3;
     rasterizer.rotation[0] -= 0.4;
@@ -48,33 +47,6 @@ function assetsLoaded({character, slope, skybox}){
 
     window.addEventListener("keydown", Input.keyDown(character));
     window.addEventListener("keyup", Input.keyUp(character));
+    window.addEventListener("blur", Input.releaseKeys(character));
 };
-const handleKeyDown = rasterizer => e => {
-  switch(e.key){
-    case "ArrowUp":
-      rasterizer.rotation[0] += 0.1;
-      break;
-    case "ArrowDown":
-      rasterizer.rotation[0] -= 0.1;
-      break;
-    case "ArrowLeft":
-      rasterizer.rotation[2] += 0.1;
-      break;
-    case "ArrowRight":
-    rasterizer.rotation[0] -= 0.1;
-      break;
-    case "a":
-      rasterizer.position[1] += 0.1;
-      break;
-    case "w":
-      rasterizer.position[1] -=0.1;
-      break;
-    case "s":
-    rasterizer.position[2] += 0.1;
-      break;
-    case "d":
-    rasterizer.position[2] -= 0.1;
-      break;
-  }
 
-}
