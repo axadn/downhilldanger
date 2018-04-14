@@ -28,7 +28,7 @@ const CLIFF_SLOPE = -Math.PI/3;
 
 const SLOPE_BUFFER_AMOUNT = 20;
 const BACK_BUFFER_ANOUNT = 10;
-const COURSE_LENGTH = 200;
+const COURSE_LENGTH = 20;
 const FINISH_LINE_LENGTH = 10;
 
 import balloonMesh from "../balloon";
@@ -39,51 +39,42 @@ import * as CollisionUtils from "../utils/collision_utils";
 import createMesh from "../game_object/mesh";
 import GameObject from "../game_object/game_object";
 import treeMesh from "../tree";
+import finishLineMesh from "../finish_line";
 export default function createSlope(transformationMatrix = MathUtils.identityMatrix4, rasterizer){
-  const img_src = "snow.jpg";
-  const tree_img = "tree.png";
   treeMesh.textured = true;
   balloonMesh.colored = true;
-  treeMesh.img_src = tree_img;
+  treeMesh.img_src = "tree.png";
+  const args = [];
+  window.finishLineMesh = finishLineMesh;
+  window.createMesh = createMesh;
+  
   return createMesh({
     faces: [],
-      vertices: [],
-      textured: true,
-      img_src,
-      uvs: [],
-      rasterizer
+    vertices: [],
+    textured: true,
+    img_src: "snow.jpg",
+    uvs: [],
+    rasterizer
   })
-  .then(
-    slopeMesh=>{
-      return createMesh(treeMesh)
-      .then(treeDone=>{
-        return {mesh: slopeMesh, treePool: new TreePool(treeDone)}
-      });
-    }  
-  )
-  .then(
-    ({mesh, treePool})=>{
-      return createMesh(balloonMesh)
-      .then(balloonDone=>{
-        return {mesh, treePool, balloonMesh: balloonDone};
-      });
-    }
-  )
-  .then(
-    ({mesh, treePool, balloonMesh})=>{
-      return new Slope(mesh,transformationMatrix, treePool, balloonMesh);
-    }
-  );
+  .then(processedMesh => args.push(processedMesh))
+  .then(()=>args.push(MathUtils.identityMatrix4.slice(0,16)))
+  .then(()=>createMesh(treeMesh))
+  .then(processedMesh=> args.push(new TreePool(processedMesh)))
+  .then(()=>createMesh(balloonMesh))
+  .then(processedMesh=> args.push(processedMesh))
+  .then(()=>createMesh({data: finishLineMesh, mode2: true}))
+  .then(processedMesh=>{
+    args.push(processedMesh);
+  })
+  .then(()=> new Slope(...args));
 };
 class Slope extends GameObject{
-  constructor(mesh, transformationMatrix, treePool, balloonMesh){
-    super(undefined);
-    this.mesh = mesh;
+  constructor(mesh, transformationMatrix, treePool, balloonMesh, finishLineMesh){
+    super(mesh, undefined);
     this.treePool = treePool;
     this.balloonMesh = balloonMesh;
-    this._transformationMatrix = transformationMatrix.slice(0,16);
+    this.finishLineMesh = finishLineMesh;
     this.rasterizer = rasterizer;
-    this.currentTurn = "none";
     this.bufferedSegments = 0;
     this.uvH = 0;
     this.segmentMatrices = [transformationMatrix];
@@ -97,7 +88,8 @@ class Slope extends GameObject{
     this._setupTreeMesh();
     const firstLoop = this._createEdgeLoop();
     let unpackedVertices;
-
+    this.turnDirection = "left";
+    this.currentTurn = "right";
     this.segmentsSinceStart = 0;
     for(let i = 0; i< firstLoop.length; i+=3){
       unpackedVertices = MathUtils.multiplyVec4ByMatrix4(
@@ -110,7 +102,7 @@ class Slope extends GameObject{
     for(let i = 0; i < SLOPE_BUFFER_AMOUNT + BACK_BUFFER_ANOUNT ; ++i ){
       this._generateSegment();
     }
-
+    
   }
   _setupTreeMesh(){
     this.sideGeometry = [];
@@ -236,12 +228,22 @@ class Slope extends GameObject{
   }
   _generateFinishLine(){
     const interpolateTowardX =  0.3;
-    const interpolateTowardZ = 0;
+    const interpolateTowardY = 0;
     const rotation = this.segmentRotation;
-    rotation[1] = 0;
+    debugger;
+    const lastMatrix = this.segmentMatrices[this.segmentMatrices.length - 1];
+    const finishLine =   new GameObject(this.finishLineMesh,
+      undefined, true);   
+    rasterizer.objects["finish_line"] = finishLine;
+    finishLine.setPosition(MathUtils.mat4TranslationComponent(lastMatrix));
+    
+    //figures out the appropriate zRotation
+
+    finishLine.setRotation(MathUtils.axisAngleToQuaternion([0,0,1],-1 * this.segmentRotation[2]));
+
     for(let i =0; i < FINISH_LINE_LENGTH; ++i){
       rotation[0] = (rotation[0] *2 + interpolateTowardX) / 3;
-      rotation[2] = (rotation[2] *2 + interpolateTowardZ) / 3;
+      rotation[1] = (rotation[1] *2 + interpolateTowardY) / 3;
       this._extrapolateNextSegment(rotation);
     }
   }

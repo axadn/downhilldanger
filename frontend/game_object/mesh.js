@@ -46,23 +46,6 @@ export class Mesh {
     this.boneIndices = skinIndices;
     this.animations ={};
     if(mode2){
-      this.boneWeights = [];
-      this.boneIndices = [];
-      let boneIndices;
-      this.numBones = Object.keys(data.jointNamePositionIndex).length;
-      data.vertexJointWeights.forEach((weights, vertexIdx)=>{
-        boneIndices = Object.keys(weights);
-        this.boneWeights.push(weights[boneIndices[0]]);
-        this.boneIndices.push(parseInt(boneIndices[0]));
-        if(boneIndices[1]){
-          this.boneWeights.push(weights[boneIndices[1]]);
-          this.boneIndices.push(parseInt(boneIndices[1]));
-        }
-        else{
-          this.boneWeights.push(0);
-          this.boneIndices.push(0);
-        }
-      });
       this.vertices = data.vertexPositions;
       this.faces = data.vertexPositionIndices;
       if(colored){
@@ -74,102 +57,62 @@ export class Mesh {
           }
         });
       }
-
-      const nameToAnimPosition = {};
-      Object.keys(action_file.jointNameIndices).forEach(jointName=>{
-        nameToAnimPosition[jointName.replace(".", "_")] = action_file.jointNameIndices[jointName];
-      });
-
-      const boneOrder = Object.entries(data.jointNamePositionIndex).sort(
-        (nameIndex0, nameIndex1) => nameIndex0[1] < nameIndex1[1] ? -1 : 1
-      ).map(entry=>
-        nameToAnimPosition[entry[0]]
-      );
-
-      let frame, newAction, matrix;
-      Object.keys(action_file.actions).forEach(actionName=>{
-        newAction = [];
-        Object.keys(action_file.actions[actionName]).forEach(keyFrame=>{
-          frame = [];
-          boneOrder.forEach(animBoneIdx =>{
-            if(animBoneIdx === undefined){
-              matrix = MathUtils.identityMatrix4;
-            }
-            else{
-              matrix = action_file.actions[actionName][keyFrame][animBoneIdx];
-            }
-            matrix = MathUtils.mat_4_transpose(
-              MathUtils.mat_4_multiply(
-                matrix,
-                action_file.inverseBindPoses[animBoneIdx]
-              )
-            );
-            mat4ToDualQuat(matrix).forEach(el=>frame.push(el));
-          });
-          newAction.push(frame);
+      if(action_file){
+        this.boneWeights = [];
+        this.boneIndices = [];
+        let boneIndices;
+        this.numBones = Object.keys(data.jointNamePositionIndex).length;
+        data.vertexJointWeights.forEach((weights, vertexIdx)=>{
+          boneIndices = Object.keys(weights);
+          this.boneWeights.push(weights[boneIndices[0]]);
+          this.boneIndices.push(parseInt(boneIndices[0]));
+          if(boneIndices[1]){
+            this.boneWeights.push(weights[boneIndices[1]]);
+            this.boneIndices.push(parseInt(boneIndices[1]));
+          }
+          else{
+            this.boneWeights.push(0);
+            this.boneIndices.push(0);
+          }
         });
-        this.animations[actionName] = newAction;
-      });
+
+        const nameToAnimPosition = {};
+        Object.keys(action_file.jointNameIndices).forEach(jointName=>{
+          nameToAnimPosition[jointName.replace(".", "_")] = action_file.jointNameIndices[jointName];
+        });
+
+        const boneOrder = Object.entries(data.jointNamePositionIndex).sort(
+          (nameIndex0, nameIndex1) => nameIndex0[1] < nameIndex1[1] ? -1 : 1
+        ).map(entry=>
+          nameToAnimPosition[entry[0]]
+        );
+
+        let frame, newAction, matrix;
+        Object.keys(action_file.actions).forEach(actionName=>{
+          newAction = [];
+          Object.keys(action_file.actions[actionName]).forEach(keyFrame=>{
+            frame = [];
+            boneOrder.forEach(animBoneIdx =>{
+              if(animBoneIdx === undefined){
+                matrix = MathUtils.identityMatrix4;
+              }
+              else{
+                matrix = action_file.actions[actionName][keyFrame][animBoneIdx];
+              }
+              matrix = MathUtils.mat_4_transpose(
+                MathUtils.mat_4_multiply(
+                  matrix,
+                  action_file.inverseBindPoses[animBoneIdx]
+                )
+              );
+              mat4ToDualQuat(matrix).forEach(el=>frame.push(el));
+            });
+            newAction.push(frame);
+          });
+          this.animations[actionName] = newAction;
+        });
+      }
      }
-  //   if(animations && animations.length) {
-  //     this.boneWeights = skinWeights;
-  //     this.boneIndices = skinIndices;
-  //     let frame, frameMultiplied;
-  //     let matrix;
-  //     let bindMats = [];
-  //     bones.forEach(bone=>{
-  //       let rot; 
-  //       if(isZeroQuat(bone.rotq)){
-  //         rot = MathUtils.identityMatrix4;
-  //       }
-  //       rot = MathUtils.quaternionToMatrix(bone.rotq);
-  //       let matrix;
-  //       matrix = MathUtils.mat_4_multiply(
-  //         rot,
-  //         MathUtils.translationMatrix(...bone.pos)
-  //       );
-  //       if(bone.parent !== -1){
-  //         matrix = MathUtils.mat_4_multiply(
-  //           matrix,
-  //           bindMats[bone.parent],
-  //         );
-  //      }
-  //      bindMats.push(
-  //        matrix
-  //      );
-  //    });
-  //    bindMats = bindMats.map(mat=> MathUtils.inverse_mat4_rot_pos(mat));
-  //     animations.forEach(anim=>{
-  //       const frames = [];
-  //       const numFrames = anim.hierarchy[0].keys.length;
-  //       for(let i = 0; i < numFrames ; ++i){
-  //         frame = [];
-  //         anim.hierarchy.forEach((bone, boneIdx)=> {
-  //           let rot;
-  //           if(isZeroQuat(bone.keys[i].rot)){
-  //             rot = MathUtils.identityMatrix4;
-  //           }
-  //           rot = MathUtils.quaternionToMatrix(bone.keys[i].rot);
-
-  //           matrix =
-  //               MathUtils.mat_4_multiply(
-  //                rot,
-  //                MathUtils.translationMatrix(...bone.keys[i].pos)
-  //              );
-  //           if(bones[boneIdx].parent != -1){
-  //              matrix = MathUtils.mat_4_multiply(matrix, frame[bones[boneIdx].parent]);
-  //           }
-  //           frame.push(matrix);
-  //         });
-  //         frameMultiplied = [];
-  //         frame.forEach((mat,matIdx)=> MathUtils.mat_4_transpose(
-  //           MathUtils.mat_4_multiply(bindMats[matIdx], mat)).forEach(el=>frameMultiplied.push(el)));
-  //         frames.push(frameMultiplied);
-  //       }
-
-  //       this.animations[anim.name] = frames;
-  //     });
-  //  } 
   }
   inverseBindVertices(){
   }
