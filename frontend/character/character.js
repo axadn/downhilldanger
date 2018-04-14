@@ -98,7 +98,7 @@ class Character extends GameObject{
     this.snowSound = AudioMixer.play({buffer: effectBuffers.sliding,
       priority: 10, volume: 0, loop: true});
   }
-  _applyGravity(){
+  _applyGravityStep(){
     this.velocity[2] -= this.fallSpeed;
   }
   _updateLocalUp(){
@@ -107,14 +107,16 @@ class Character extends GameObject{
 
   update(){
     this._ensureAboveSurface();
+
+    //let's gather some data about the environment/ our orientation first : 
     this._getSurfaceData();
-    this._handleCollisions();
-    this._applyGravity();
-    this._updateLocalUp();
+    this._updateSegmentNumber();
+    this._updateLocalUp(); // the vector representing the character's z axis
+    
     const surfaceOffset = MathUtils.subtractVectors
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
-    
+    HUD.updateSpeed(MathUtils.vectorMag(this.velocity)*HUD_DISPLAY_SPEED_MULTIPLIER);
     switch(this.state){
       case "ground":
         this._groundControls();
@@ -146,11 +148,12 @@ class Character extends GameObject{
         }
         this.snowSound.setVolume(0);
         break;
-      
     }
 
+    this._applyGravityStep();
+    this._handleCollisions();
     this._updateAnimations();
-    this.normalizeAnimationInfluence();
+    this._normalizeAnimationInfluence();
     this._mixAnimations();
     super.update();
   }
@@ -202,7 +205,10 @@ class Character extends GameObject{
      this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2]);
   }
   _ensureAboveSurface(){
-    if(!this.floorTriangle) return;
+    if(!this.floorTriangle){
+      debugger;
+       return;
+    }
     if(!MathUtils.pointIsAbovePlane(this.getPosition(), this.floorTriangle[0],
         this.floorTriangle[1], this.floorTriangle[2])){
         const upVector = MathUtils.multiplyVec4ByMatrix4(
@@ -269,7 +275,7 @@ class Character extends GameObject{
       influence = this.currentAnimations[currentKeys[idx]].influence;
       for(let transformIdx = 0; transformIdx < anim.length; ++transformIdx){
         this.mixedAnimations[transformIdx] += 
-          anim[transformIdx] * influence;
+          anim[transformIdx] * influ_ence;
       }
     }
   }
@@ -365,6 +371,23 @@ class Character extends GameObject{
       }
     }
   }
+  _updateSegmentNumber(){
+    if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
+      this.slope.positionIsPastSegmentStart(this.getPosition(),
+      this.currentSegmentNumber + 1)){
+      ++this.currentSegmentNumber;
+      if(this.slope.notifyOfCharacterSegmentNumber(this.currentSegmentNumber)){
+        --this.currentSegmentNumber;
+      }
+      let triangleAfterMove = this.slope.getSurroundingTriangle(this.getPosition(),
+         this.currentSegmentNumber) || this.floorTriangle;
+    }
+    else if (this.currentSegmentNumber > 0 && !this.slope.positionIsPastSegmentStart(this.getPosition(),this.currentSegmentNumber)) {
+      --this.currentSegmentNumber;
+      let triangleAfterMove = this.slope.getSurroundingTriangle(this.getPosition(),
+         this.currentSegmentNumber) || this.floorTriangle;
+    }
+  }
   _jump(){
     MathUtils.addVectorsInPlace(this.velocity, this.transformDirection(JUMP_VECTOR),
      this.velocity, 3);
@@ -392,31 +415,6 @@ class Character extends GameObject{
     ));
     this.friction = [0,0,0];
     setTimeout(()=>this.friction = SNOWBOARD_FRICTION,500);
-    // this.velocity = MathUtils.scaleVector(MathUtils.vectorNormalize(collisionData.normal),
-    // MathUtils.vectorMag(this.velocity)); 
-    
-    // let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
-    // pushBackVector = MathUtils.scaleVector(pushBackVector, 2);
-    // this.setPosition(MathUtils.addVectors(this.getPosition(),
-    //   pushBackVector));
-    // const collisionOffsetVector = MathUtils.subtractVectors(
-    //   collisionData.colliderPoint.slice(0,3),
-    //   this.getPosition()
-    // );
-    //  let addAngularVelocAngle = MathUtils.angleBetweenVectors(
-    //   this.velocity,
-    //    MathUtils.scaleVector(collisionData.normal, -1)
-    // );
-
-    //  addAngularVelocAngle /= 15;
-    //  addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
-    //  const addAngularVelocAxis = MathUtils.vectorCross(
-    //   this.velocity,
-    //   MathUtils.scaleVector(collisionData.normal, -1)
-    //  );
-    //  this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
-    //    addAngularVelocAxis, addAngularVelocAngle)
-    //  );
   }
   _handleEdgeCollision(collisionData){
    this._handleCollision(collisionData);
@@ -438,34 +436,13 @@ class Character extends GameObject{
       AudioMixer.play({buffer: effectBuffers.collect});
       HUD.addPoints(balloonCount);
     }
-    HUD.updateSpeed(MathUtils.vectorMag(this.velocity)*HUD_DISPLAY_SPEED_MULTIPLIER);
-    // this.slope.boxCollidesWithObstacle(
-    //   this.getTransformationMatrix(), this.boxDimensions,
-    //   this.velocity, this.currentSegmentNumber);
-
+    
     if(edgeCollisionData){
       this._handleEdgeCollision(edgeCollisionData);
       return;
     }
     else if(obstacleCollisionData){
       this._handleTreeCollision(obstacleCollisionData);
-    }
-    let nextWorldPos = MathUtils.projectVectorOntoPlane(this.velocity, this.surfacePlaneNormal);
-    MathUtils.addVectorsInPlace(this.getPosition(),nextWorldPos,nextWorldPos);
-    if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
-      this.slope.positionIsPastSegmentStart(nextWorldPos,
-      this.currentSegmentNumber + 1)){
-      ++this.currentSegmentNumber;
-      if(this.slope.notifyOfCharacterSegmentNumber(this.currentSegmentNumber)){
-        --this.currentSegmentNumber;
-      }
-      let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
-         this.currentSegmentNumber) || this.floorTriangle;
-    }
-    else if (this.currentSegmentNumber > 0 && !this.slope.positionIsPastSegmentStart(nextWorldPos,this.currentSegmentNumber)) {
-      --this.currentSegmentNumber;
-      let triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos,
-         this.currentSegmentNumber) || this.floorTriangle;
     }
   }
 }

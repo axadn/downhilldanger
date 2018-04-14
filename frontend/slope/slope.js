@@ -23,6 +23,7 @@ const BALLOON_RADIUS = 4.2;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 const CLIFF_PROBABILITY = 0.05;
+const COURSE_LENGTH = 200;
 
 import balloonMesh from "../balloon";
 import TreePool from "./object_pools/tree_pool";
@@ -284,6 +285,10 @@ class Slope extends GameObject{
          pos, MathUtils.mat4TranslationComponent(this.segmentMatrices[segmentNumber]));
     const result = MathUtils.vectorDot(offsetVector, segmentStartNormal);
     return result < 0;
+  }
+
+  segmentIsPastFinish(segmentNumber){
+    return segmentNumber > COURSE_LENGTH;
   }
 
   boxCollidesWithObstacle(boxMatrix, boxDimensions, movement, segment_number){

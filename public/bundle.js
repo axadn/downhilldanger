@@ -2234,8 +2234,8 @@ var Character = function (_GameObject) {
   }
 
   _createClass(Character, [{
-    key: "_applyGravity",
-    value: function _applyGravity() {
+    key: "_applyGravityStep",
+    value: function _applyGravityStep() {
       this.velocity[2] -= this.fallSpeed;
     }
   }, {
@@ -2247,13 +2247,15 @@ var Character = function (_GameObject) {
     key: "update",
     value: function update() {
       this._ensureAboveSurface();
+
+      //let's gather some data about the environment/ our orientation first : 
       this._getSurfaceData();
-      this._handleCollisions();
-      this._applyGravity();
-      this._updateLocalUp();
+      this._updateSegmentNumber();
+      this._updateLocalUp(); // the vector representing the character's z axis
+
       var surfaceOffset = MathUtils.subtractVectors(this.getPosition(), this.surfacePoint);
       var distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
-
+      HUD.updateSpeed(MathUtils.vectorMag(this.velocity) * HUD_DISPLAY_SPEED_MULTIPLIER);
       switch (this.state) {
         case "ground":
           this._groundControls();
@@ -2285,11 +2287,12 @@ var Character = function (_GameObject) {
           }
           this.snowSound.setVolume(0);
           break;
-
       }
 
+      this._applyGravityStep();
+      this._handleCollisions();
       this._updateAnimations();
-      this.normalizeAnimationInfluence();
+      this._normalizeAnimationInfluence();
       this._mixAnimations();
       _get(Character.prototype.__proto__ || Object.getPrototypeOf(Character.prototype), "update", this).call(this);
     }
@@ -2339,7 +2342,10 @@ var Character = function (_GameObject) {
   }, {
     key: "_ensureAboveSurface",
     value: function _ensureAboveSurface() {
-      if (!this.floorTriangle) return;
+      if (!this.floorTriangle) {
+        debugger;
+        return;
+      }
       if (!MathUtils.pointIsAbovePlane(this.getPosition(), this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2])) {
         var upVector = MathUtils.multiplyVec4ByMatrix4(this.slope.segmentMatrices[this.currentSegmentNumber], [0, 0, 1, 0]);
         this.setPosition(MathUtils.vectorTriangleIntersection(this.getPosition(), upVector, this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2]));
@@ -2397,7 +2403,7 @@ var Character = function (_GameObject) {
         anim = this.mesh.animations[currentKeys[idx]][this.currentAnimations[currentKeys[idx]].frame];
         influence = this.currentAnimations[currentKeys[idx]].influence;
         for (var transformIdx = 0; transformIdx < anim.length; ++transformIdx) {
-          this.mixedAnimations[transformIdx] += anim[transformIdx] * influence;
+          this.mixedAnimations[transformIdx] += anim[transformIdx] * influ_ence;
         }
       }
     }
@@ -2503,6 +2509,20 @@ var Character = function (_GameObject) {
       }
     }
   }, {
+    key: "_updateSegmentNumber",
+    value: function _updateSegmentNumber() {
+      if (this.currentSegmentNumber < this.slope.segmentMatrices.length - 1 && this.slope.positionIsPastSegmentStart(this.getPosition(), this.currentSegmentNumber + 1)) {
+        ++this.currentSegmentNumber;
+        if (this.slope.notifyOfCharacterSegmentNumber(this.currentSegmentNumber)) {
+          --this.currentSegmentNumber;
+        }
+        var triangleAfterMove = this.slope.getSurroundingTriangle(this.getPosition(), this.currentSegmentNumber) || this.floorTriangle;
+      } else if (this.currentSegmentNumber > 0 && !this.slope.positionIsPastSegmentStart(this.getPosition(), this.currentSegmentNumber)) {
+        --this.currentSegmentNumber;
+        var _triangleAfterMove = this.slope.getSurroundingTriangle(this.getPosition(), this.currentSegmentNumber) || this.floorTriangle;
+      }
+    }
+  }, {
     key: "_jump",
     value: function _jump() {
       MathUtils.addVectorsInPlace(this.velocity, this.transformDirection(JUMP_VECTOR), this.velocity, 3);
@@ -2525,31 +2545,6 @@ var Character = function (_GameObject) {
       setTimeout(function () {
         return _this2.friction = SNOWBOARD_FRICTION;
       }, 500);
-      // this.velocity = MathUtils.scaleVector(MathUtils.vectorNormalize(collisionData.normal),
-      // MathUtils.vectorMag(this.velocity)); 
-
-      // let pushBackVector = MathUtils.vectorNormalize(collisionData.normal);
-      // pushBackVector = MathUtils.scaleVector(pushBackVector, 2);
-      // this.setPosition(MathUtils.addVectors(this.getPosition(),
-      //   pushBackVector));
-      // const collisionOffsetVector = MathUtils.subtractVectors(
-      //   collisionData.colliderPoint.slice(0,3),
-      //   this.getPosition()
-      // );
-      //  let addAngularVelocAngle = MathUtils.angleBetweenVectors(
-      //   this.velocity,
-      //    MathUtils.scaleVector(collisionData.normal, -1)
-      // );
-
-      //  addAngularVelocAngle /= 15;
-      //  addAngularVelocAngle *= MathUtils.vectorMag(this.velocity);
-      //  const addAngularVelocAxis = MathUtils.vectorCross(
-      //   this.velocity,
-      //   MathUtils.scaleVector(collisionData.normal, -1)
-      //  );
-      //  this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
-      //    addAngularVelocAxis, addAngularVelocAngle)
-      //  );
     }
   }, {
     key: "_handleEdgeCollision",
@@ -2574,28 +2569,12 @@ var Character = function (_GameObject) {
         _mixer2.default.play({ buffer: effectBuffers.collect });
         HUD.addPoints(balloonCount);
       }
-      HUD.updateSpeed(MathUtils.vectorMag(this.velocity) * HUD_DISPLAY_SPEED_MULTIPLIER);
-      // this.slope.boxCollidesWithObstacle(
-      //   this.getTransformationMatrix(), this.boxDimensions,
-      //   this.velocity, this.currentSegmentNumber);
 
       if (edgeCollisionData) {
         this._handleEdgeCollision(edgeCollisionData);
         return;
       } else if (obstacleCollisionData) {
         this._handleTreeCollision(obstacleCollisionData);
-      }
-      var nextWorldPos = MathUtils.projectVectorOntoPlane(this.velocity, this.surfacePlaneNormal);
-      MathUtils.addVectorsInPlace(this.getPosition(), nextWorldPos, nextWorldPos);
-      if (this.currentSegmentNumber < this.slope.segmentMatrices.length - 1 && this.slope.positionIsPastSegmentStart(nextWorldPos, this.currentSegmentNumber + 1)) {
-        ++this.currentSegmentNumber;
-        if (this.slope.notifyOfCharacterSegmentNumber(this.currentSegmentNumber)) {
-          --this.currentSegmentNumber;
-        }
-        var triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos, this.currentSegmentNumber) || this.floorTriangle;
-      } else if (this.currentSegmentNumber > 0 && !this.slope.positionIsPastSegmentStart(nextWorldPos, this.currentSegmentNumber)) {
-        --this.currentSegmentNumber;
-        var _triangleAfterMove = this.slope.getSurroundingTriangle(nextWorldPos, this.currentSegmentNumber) || this.floorTriangle;
       }
     }
   }]);
@@ -2811,6 +2790,7 @@ var BALLOON_RADIUS = 4.2;
 var BOX_COLLIDER = "BOX_COLLIDER";
 var BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 var CLIFF_PROBABILITY = 0.05;
+var COURSE_LENGTH = 200;
 
 function createSlope() {
   var transformationMatrix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : MathUtils.identityMatrix4;
@@ -3072,6 +3052,11 @@ var Slope = function (_GameObject) {
       var offsetVector = MathUtils.subtractVectors(pos, MathUtils.mat4TranslationComponent(this.segmentMatrices[segmentNumber]));
       var result = MathUtils.vectorDot(offsetVector, segmentStartNormal);
       return result < 0;
+    }
+  }, {
+    key: "segmentIsPastFinish",
+    value: function segmentIsPastFinish(segmentNumber) {
+      return segmentNumber > COURSE_LENGTH;
     }
   }, {
     key: "boxCollidesWithObstacle",
