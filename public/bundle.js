@@ -2763,8 +2763,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var SEGMENT_WIDTH = 90;
 var SEGMENT_LENGTH = 50;
 var EDGE_LOOP_RESOLUTION = 5;
-var SLOPE_BUFFER_AMOUNT = 30;
-var BACK_BUFFER_ANOUNT = 10;
+
 var TURN_TYPE_SWITCH_FREQUENCY = 3;
 var SHARP_TURN = 0.35;
 var SHARP_TURN_BANK = 0.25;
@@ -2785,7 +2784,14 @@ var BALLOON_RADIUS = 4.2;
 var BOX_COLLIDER = "BOX_COLLIDER";
 var BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 var CLIFF_PROBABILITY = 0.05;
-var COURSE_LENGTH = 20;
+
+var SLOPE = -0.25;
+var CLIFF_SLOPE = -Math.PI / 3;
+
+var SLOPE_BUFFER_AMOUNT = 20;
+var BACK_BUFFER_ANOUNT = 10;
+var COURSE_LENGTH = 200;
+var FINISH_LINE_LENGTH = 10;
 
 function createSlope() {
   var transformationMatrix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : MathUtils.identityMatrix4;
@@ -2845,7 +2851,7 @@ var Slope = function (_GameObject) {
     _this.obstacles = [];
     _this.balloons = [];
     _this.balloonsCreatedSinceStart = 0;
-    //this.segmentRotation[0] = 0;
+
     _this._setupTreeMesh();
     var firstLoop = _this._createEdgeLoop();
     var unpackedVertices = void 0;
@@ -2995,8 +3001,14 @@ var Slope = function (_GameObject) {
   }, {
     key: "_generateFinishLine",
     value: function _generateFinishLine() {
+      var interpolateTowardX = 0.3;
+      var interpolateTowardZ = 0;
+      var rotation = this.segmentRotation;
+      rotation[1] = 0;
       for (var i = 0; i < FINISH_LINE_LENGTH; ++i) {
-        this._generateSegment();
+        rotation[0] = (rotation[0] * 2 + interpolateTowardX) / 3;
+        rotation[2] = (rotation[2] * 2 + interpolateTowardZ) / 3;
+        this._extrapolateNextSegment(rotation);
       }
     }
   }, {
@@ -3006,10 +3018,8 @@ var Slope = function (_GameObject) {
         return idx + 1;
       } else {
         console.log(this.segmentsSinceStart);
-        if (this.segmentsSinceStart < COURSE_LENGTH) {
+        if (this.segmentsSinceStart <= COURSE_LENGTH) {
           this._generateSegment();
-        } else if (this.segmentsSinceStart == COURSE_LENGTH) {
-          this._generateFinishLine();
         }
         this.deleteSegment();
         return idx;
@@ -3049,8 +3059,12 @@ var Slope = function (_GameObject) {
           this.segmentRotation[1] = Math.random() * 0.03;
           break;
       }
-      //this.segmentRotation[2] += -0.2;
-      //this.segmentRotation[0] -= 0.05;
+
+      if (Math.random() <= CLIFF_PROBABILITY) {
+        this.segmentRotation[0] = CLIFF_SLOPE;
+      } else {
+        this.segmentRotation[0] = SLOPE;
+      }
     }
   }, {
     key: "positionIsPastSegmentStart",
@@ -3201,18 +3215,13 @@ var Slope = function (_GameObject) {
       return false;
     }
   }, {
-    key: "_generateSegment",
-    value: function _generateSegment() {
+    key: "_extrapolateNextSegment",
+    value: function _extrapolateNextSegment(segmentRotation) {
       var pos = this.segmentPosition;
-      this.generateNewSegmentRotation();
-
       var transformationMatrix = MathUtils.translationMatrix(pos[0], pos[1], pos[2]);
-      var xRot = MathUtils.xRotationMatrix(this.segmentRotation[0]);
-      if (Math.random() <= CLIFF_PROBABILITY) {
-        xRot = MathUtils.xRotationMatrix(-Math.PI / 3);
-      }
-      var yRot = MathUtils.yRotationMatrix(this.segmentRotation[1]);
-      var zRot = MathUtils.zRotationMatrix(this.segmentRotation[2]);
+      var xRot = MathUtils.xRotationMatrix(segmentRotation[0]);
+      var yRot = MathUtils.yRotationMatrix(segmentRotation[1]);
+      var zRot = MathUtils.zRotationMatrix(segmentRotation[2]);
       transformationMatrix = MathUtils.mat_4_multiply(yRot, MathUtils.mat_4_multiply(xRot, MathUtils.mat_4_multiply(zRot, transformationMatrix)));
       this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix, [0, SEGMENT_LENGTH, 0, 1]);
 
@@ -3237,6 +3246,16 @@ var Slope = function (_GameObject) {
       this.segmentMatrices.push(transformationMatrix);
       this._addUvsSegment();
       this.uvH += SEGMENT_LENGTH / SEGMENT_WIDTH;
+    }
+  }, {
+    key: "_generateSegment",
+    value: function _generateSegment() {
+      if (this.segmentsSinceStart == COURSE_LENGTH) {
+        this._generateFinishLine();
+      } else {
+        this.generateNewSegmentRotation();
+        this._extrapolateNextSegment(this.segmentRotation);
+      }
     }
   }, {
     key: "_addEdgeLoop",

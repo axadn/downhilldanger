@@ -1,8 +1,7 @@
 const SEGMENT_WIDTH = 90;
 const SEGMENT_LENGTH = 50;
 const EDGE_LOOP_RESOLUTION = 5;
-const SLOPE_BUFFER_AMOUNT = 30;
-const BACK_BUFFER_ANOUNT = 10;
+
 const TURN_TYPE_SWITCH_FREQUENCY = 3;
 const SHARP_TURN = 0.35;
 const SHARP_TURN_BANK = 0.25;
@@ -23,7 +22,14 @@ const BALLOON_RADIUS = 4.2;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 const CLIFF_PROBABILITY = 0.05;
-const COURSE_LENGTH = 20;
+
+const SLOPE = -0.25;
+const CLIFF_SLOPE = -Math.PI/3;
+
+const SLOPE_BUFFER_AMOUNT = 20;
+const BACK_BUFFER_ANOUNT = 10;
+const COURSE_LENGTH = 200;
+const FINISH_LINE_LENGTH = 10;
 
 import balloonMesh from "../balloon";
 import TreePool from "./object_pools/tree_pool";
@@ -87,7 +93,7 @@ class Slope extends GameObject{
     this.obstacles = [];
     this.balloons = [];
     this.balloonsCreatedSinceStart = 0;
-    //this.segmentRotation[0] = 0;
+
     this._setupTreeMesh();
     const firstLoop = this._createEdgeLoop();
     let unpackedVertices;
@@ -229,8 +235,14 @@ class Slope extends GameObject{
     return vertices;
   }
   _generateFinishLine(){
+    const interpolateTowardX =  0.3;
+    const interpolateTowardZ = 0;
+    const rotation = this.segmentRotation;
+    rotation[1] = 0;
     for(let i =0; i < FINISH_LINE_LENGTH; ++i){
-      this._generateSegment();
+      rotation[0] = (rotation[0] *2 + interpolateTowardX) / 3;
+      rotation[2] = (rotation[2] *2 + interpolateTowardZ) / 3;
+      this._extrapolateNextSegment(rotation);
     }
   }
   updateCharacterSegmentNumber(idx){
@@ -239,11 +251,8 @@ class Slope extends GameObject{
     }
     else{
       console.log(this.segmentsSinceStart);
-      if(this.segmentsSinceStart < COURSE_LENGTH){
+      if(this.segmentsSinceStart <= COURSE_LENGTH){
         this._generateSegment();
-      }
-      else if (this.segmentsSinceStart == COURSE_LENGTH){
-        this._generateFinishLine();
       }
       this.deleteSegment();
       return idx;
@@ -284,8 +293,14 @@ class Slope extends GameObject{
         this.segmentRotation[1] = Math.random() *0.03;
         break;
     }
-    //this.segmentRotation[2] += -0.2;
-    //this.segmentRotation[0] -= 0.05;
+
+    if(Math.random()<= CLIFF_PROBABILITY){
+      this.segmentRotation[0] = CLIFF_SLOPE;
+    }
+    else{
+      this.segmentRotation[0] = SLOPE;
+    }
+
   }
 
   positionIsPastSegmentStart(pos, segmentNumber){
@@ -468,19 +483,14 @@ class Slope extends GameObject{
     return false;
   }
 
-  _generateSegment(){
+  _extrapolateNextSegment(segmentRotation){
     const pos = this.segmentPosition;
-    this.generateNewSegmentRotation();
-
     let transformationMatrix = MathUtils.translationMatrix(
       pos[0], pos[1], pos[2]
     );
-    let xRot = MathUtils.xRotationMatrix(this.segmentRotation[0]);
-    if(Math.random()<= CLIFF_PROBABILITY){
-      xRot = MathUtils.xRotationMatrix(-Math.PI/3);
-    }
-    let yRot = MathUtils.yRotationMatrix(this.segmentRotation[1]);
-    let zRot = MathUtils.zRotationMatrix(this.segmentRotation[2]);
+    let xRot = MathUtils.xRotationMatrix(segmentRotation[0]);
+    let yRot = MathUtils.yRotationMatrix(segmentRotation[1]);
+    let zRot = MathUtils.zRotationMatrix(segmentRotation[2]);
     transformationMatrix = MathUtils.mat_4_multiply(
       yRot,
       MathUtils.mat_4_multiply(
@@ -515,6 +525,15 @@ class Slope extends GameObject{
     this.segmentMatrices.push(transformationMatrix);
     this._addUvsSegment();
     this.uvH += SEGMENT_LENGTH/SEGMENT_WIDTH;
+  }
+  _generateSegment(){
+    if (this.segmentsSinceStart == COURSE_LENGTH){
+      this._generateFinishLine();
+    }
+    else{
+      this.generateNewSegmentRotation();
+      this._extrapolateNextSegment(this.segmentRotation);
+    }
   }
 
   _addEdgeLoop(vertices){
