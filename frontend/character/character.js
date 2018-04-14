@@ -275,11 +275,11 @@ class Character extends GameObject{
       influence = this.currentAnimations[currentKeys[idx]].influence;
       for(let transformIdx = 0; transformIdx < anim.length; ++transformIdx){
         this.mixedAnimations[transformIdx] += 
-          anim[transformIdx] * influ_ence;
+          anim[transformIdx] * influence;
       }
     }
   }
-  normalizeAnimationInfluence(){
+  _normalizeAnimationInfluence(){
     const magnitude = Object.values(this.currentAnimations).reduce(
       (accum,anim)=>accum + anim.influence, 0);
     Object.values(this.currentAnimations).forEach(
@@ -375,10 +375,7 @@ class Character extends GameObject{
     if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
       this.slope.positionIsPastSegmentStart(this.getPosition(),
       this.currentSegmentNumber + 1)){
-      ++this.currentSegmentNumber;
-      if(this.slope.notifyOfCharacterSegmentNumber(this.currentSegmentNumber)){
-        --this.currentSegmentNumber;
-      }
+      this.currentSegmentNumber = this.slope.updateCharacterSegmentNumber(this.currentSegmentNumber);
       let triangleAfterMove = this.slope.getSurroundingTriangle(this.getPosition(),
          this.currentSegmentNumber) || this.floorTriangle;
     }

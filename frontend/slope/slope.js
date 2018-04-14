@@ -228,13 +228,15 @@ class Slope extends GameObject{
     }
     return vertices;
   }
-  notifyOfCharacterSegmentNumber(idx){
+  updateCharacterSegmentNumber(idx){
     if(idx < BACK_BUFFER_ANOUNT){
-      return false;
+      return idx + 1;
     }
-    this.generateSegment();
-    this.deleteSegment();
-    return true;
+    else{
+      this.generateSegment();
+      this.deleteSegment();
+      return idx;
+    }
   }
   generateNewSegmentRotation(){
     let randomTurn = Math.random();

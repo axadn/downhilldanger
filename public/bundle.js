@@ -2403,13 +2403,13 @@ var Character = function (_GameObject) {
         anim = this.mesh.animations[currentKeys[idx]][this.currentAnimations[currentKeys[idx]].frame];
         influence = this.currentAnimations[currentKeys[idx]].influence;
         for (var transformIdx = 0; transformIdx < anim.length; ++transformIdx) {
-          this.mixedAnimations[transformIdx] += anim[transformIdx] * influ_ence;
+          this.mixedAnimations[transformIdx] += anim[transformIdx] * influence;
         }
       }
     }
   }, {
-    key: "normalizeAnimationInfluence",
-    value: function normalizeAnimationInfluence() {
+    key: "_normalizeAnimationInfluence",
+    value: function _normalizeAnimationInfluence() {
       var magnitude = Object.values(this.currentAnimations).reduce(function (accum, anim) {
         return accum + anim.influence;
       }, 0);
@@ -2512,10 +2512,7 @@ var Character = function (_GameObject) {
     key: "_updateSegmentNumber",
     value: function _updateSegmentNumber() {
       if (this.currentSegmentNumber < this.slope.segmentMatrices.length - 1 && this.slope.positionIsPastSegmentStart(this.getPosition(), this.currentSegmentNumber + 1)) {
-        ++this.currentSegmentNumber;
-        if (this.slope.notifyOfCharacterSegmentNumber(this.currentSegmentNumber)) {
-          --this.currentSegmentNumber;
-        }
+        this.currentSegmentNumber = this.slope.updateCharacterSegmentNumber(this.currentSegmentNumber);
         var triangleAfterMove = this.slope.getSurroundingTriangle(this.getPosition(), this.currentSegmentNumber) || this.floorTriangle;
       } else if (this.currentSegmentNumber > 0 && !this.slope.positionIsPastSegmentStart(this.getPosition(), this.currentSegmentNumber)) {
         --this.currentSegmentNumber;
@@ -2998,14 +2995,15 @@ var Slope = function (_GameObject) {
       return vertices;
     }
   }, {
-    key: "notifyOfCharacterSegmentNumber",
-    value: function notifyOfCharacterSegmentNumber(idx) {
+    key: "updateCharacterSegmentNumber",
+    value: function updateCharacterSegmentNumber(idx) {
       if (idx < BACK_BUFFER_ANOUNT) {
-        return false;
+        return idx + 1;
+      } else {
+        this.generateSegment();
+        this.deleteSegment();
+        return idx;
       }
-      this.generateSegment();
-      this.deleteSegment();
-      return true;
     }
   }, {
     key: "generateNewSegmentRotation",
