@@ -28,7 +28,7 @@ const CLIFF_SLOPE = -Math.PI/3;
 
 const SLOPE_BUFFER_AMOUNT = 20;
 const BACK_BUFFER_ANOUNT = 10;
-const COURSE_LENGTH = 20;
+const COURSE_LENGTH = 200;
 const FINISH_LINE_LENGTH = 10;
 
 import balloonMesh from "../balloon";
@@ -230,7 +230,6 @@ class Slope extends GameObject{
     const interpolateTowardX =  0.3;
     const interpolateTowardY = 0;
     const rotation = this.segmentRotation;
-    debugger;
     const lastMatrix = this.segmentMatrices[this.segmentMatrices.length - 1];
     const finishLine =   new GameObject(this.finishLineMesh,
       undefined, true);   
