@@ -23,7 +23,7 @@ const BALLOON_RADIUS = 4.2;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 const CLIFF_PROBABILITY = 0.05;
-const COURSE_LENGTH = 200;
+const COURSE_LENGTH = 20;
 
 import balloonMesh from "../balloon";
 import TreePool from "./object_pools/tree_pool";
@@ -89,7 +89,7 @@ class Slope extends GameObject{
     this.balloonsCreatedSinceStart = 0;
     //this.segmentRotation[0] = 0;
     this._setupTreeMesh();
-    const firstLoop = this.createEdgeLoop();
+    const firstLoop = this._createEdgeLoop();
     let unpackedVertices;
 
     this.segmentsSinceStart = 0;
@@ -102,7 +102,7 @@ class Slope extends GameObject{
       }
     }
     for(let i = 0; i < SLOPE_BUFFER_AMOUNT + BACK_BUFFER_ANOUNT ; ++i ){
-      this.generateSegment();
+      this._generateSegment();
     }
 
   }
@@ -221,19 +221,30 @@ class Slope extends GameObject{
       delete this.rasterizer.objects[deletedSegment[key].id];
     });
   }
-  createEdgeLoop(){
+  _createEdgeLoop(){
     const vertices = [];
     for(let i = 0; i <= EDGE_LOOP_RESOLUTION; ++i){
       vertices.push(SEGMENT_WIDTH/ EDGE_LOOP_RESOLUTION * i - SEGMENT_WIDTH/2, 0, 0);
     }
     return vertices;
   }
+  _generateFinishLine(){
+    for(let i =0; i < FINISH_LINE_LENGTH; ++i){
+      this._generateSegment();
+    }
+  }
   updateCharacterSegmentNumber(idx){
     if(idx < BACK_BUFFER_ANOUNT){
       return idx + 1;
     }
     else{
-      this.generateSegment();
+      console.log(this.segmentsSinceStart);
+      if(this.segmentsSinceStart < COURSE_LENGTH){
+        this._generateSegment();
+      }
+      else if (this.segmentsSinceStart == COURSE_LENGTH){
+        this._generateFinishLine();
+      }
       this.deleteSegment();
       return idx;
     }
@@ -457,7 +468,7 @@ class Slope extends GameObject{
     return false;
   }
 
-  generateSegment(){
+  _generateSegment(){
     const pos = this.segmentPosition;
     this.generateNewSegmentRotation();
 
@@ -483,7 +494,7 @@ class Slope extends GameObject{
     this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix,
        [0, SEGMENT_LENGTH, 0,1]);
 
-     let newSegment = this.createEdgeLoop();
+     let newSegment = this._createEdgeLoop();
     // let transformedSegment = MathUtils.addVectors(newSegment, this.segmentPosition);
      let transformedSegment = [];
      let transformedPos;
@@ -495,7 +506,7 @@ class Slope extends GameObject{
          transformedSegment.push(transformedPos[i]);
        }
      }
-    this._addSegment(transformedSegment);
+    this._addEdgeLoop(transformedSegment);
     this._addSideGeometrySegment();
     this._addObstacleSegment();
     this._addBalloonsSegment();
@@ -506,7 +517,7 @@ class Slope extends GameObject{
     this.uvH += SEGMENT_LENGTH/SEGMENT_WIDTH;
   }
 
-  _addSegment(vertices){
+  _addEdgeLoop(vertices){
     const startIdx = this.mesh.vertices.length/3 - 1 - EDGE_LOOP_RESOLUTION;
     for(let i =0; i< vertices.length; ++i){
       this.mesh.vertices.push(vertices[i]);

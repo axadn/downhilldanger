@@ -36,7 +36,6 @@ function assetsLoaded({character, slope, skybox}){
     window.requestAnimationFrame(gameLoop);
     window.rasterizer = rasterizer;
     rasterizer.cameraTarget = character;
-    slope.generateSegment();
     
     rasterizer.position[1] -= 2;
     rasterizer.position[0] += 0.3;

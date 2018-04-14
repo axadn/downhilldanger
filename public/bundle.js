@@ -1312,7 +1312,6 @@ function assetsLoaded(_ref2) {
   window.requestAnimationFrame(gameLoop);
   window.rasterizer = rasterizer;
   rasterizer.cameraTarget = character;
-  slope.generateSegment();
 
   rasterizer.position[1] -= 2;
   rasterizer.position[0] += 0.3;
@@ -2343,7 +2342,6 @@ var Character = function (_GameObject) {
     key: "_ensureAboveSurface",
     value: function _ensureAboveSurface() {
       if (!this.floorTriangle) {
-        debugger;
         return;
       }
       if (!MathUtils.pointIsAbovePlane(this.getPosition(), this.floorTriangle[0], this.floorTriangle[1], this.floorTriangle[2])) {
@@ -2787,7 +2785,7 @@ var BALLOON_RADIUS = 4.2;
 var BOX_COLLIDER = "BOX_COLLIDER";
 var BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 var CLIFF_PROBABILITY = 0.05;
-var COURSE_LENGTH = 200;
+var COURSE_LENGTH = 20;
 
 function createSlope() {
   var transformationMatrix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : MathUtils.identityMatrix4;
@@ -2849,7 +2847,7 @@ var Slope = function (_GameObject) {
     _this.balloonsCreatedSinceStart = 0;
     //this.segmentRotation[0] = 0;
     _this._setupTreeMesh();
-    var firstLoop = _this.createEdgeLoop();
+    var firstLoop = _this._createEdgeLoop();
     var unpackedVertices = void 0;
 
     _this.segmentsSinceStart = 0;
@@ -2860,7 +2858,7 @@ var Slope = function (_GameObject) {
       }
     }
     for (var _i = 0; _i < SLOPE_BUFFER_AMOUNT + BACK_BUFFER_ANOUNT; ++_i) {
-      _this.generateSegment();
+      _this._generateSegment();
     }
 
     return _this;
@@ -2986,8 +2984,8 @@ var Slope = function (_GameObject) {
       });
     }
   }, {
-    key: "createEdgeLoop",
-    value: function createEdgeLoop() {
+    key: "_createEdgeLoop",
+    value: function _createEdgeLoop() {
       var vertices = [];
       for (var i = 0; i <= EDGE_LOOP_RESOLUTION; ++i) {
         vertices.push(SEGMENT_WIDTH / EDGE_LOOP_RESOLUTION * i - SEGMENT_WIDTH / 2, 0, 0);
@@ -2995,12 +2993,24 @@ var Slope = function (_GameObject) {
       return vertices;
     }
   }, {
+    key: "_generateFinishLine",
+    value: function _generateFinishLine() {
+      for (var i = 0; i < FINISH_LINE_LENGTH; ++i) {
+        this._generateSegment();
+      }
+    }
+  }, {
     key: "updateCharacterSegmentNumber",
     value: function updateCharacterSegmentNumber(idx) {
       if (idx < BACK_BUFFER_ANOUNT) {
         return idx + 1;
       } else {
-        this.generateSegment();
+        console.log(this.segmentsSinceStart);
+        if (this.segmentsSinceStart < COURSE_LENGTH) {
+          this._generateSegment();
+        } else if (this.segmentsSinceStart == COURSE_LENGTH) {
+          this._generateFinishLine();
+        }
         this.deleteSegment();
         return idx;
       }
@@ -3191,8 +3201,8 @@ var Slope = function (_GameObject) {
       return false;
     }
   }, {
-    key: "generateSegment",
-    value: function generateSegment() {
+    key: "_generateSegment",
+    value: function _generateSegment() {
       var pos = this.segmentPosition;
       this.generateNewSegmentRotation();
 
@@ -3206,7 +3216,7 @@ var Slope = function (_GameObject) {
       transformationMatrix = MathUtils.mat_4_multiply(yRot, MathUtils.mat_4_multiply(xRot, MathUtils.mat_4_multiply(zRot, transformationMatrix)));
       this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix, [0, SEGMENT_LENGTH, 0, 1]);
 
-      var newSegment = this.createEdgeLoop();
+      var newSegment = this._createEdgeLoop();
       // let transformedSegment = MathUtils.addVectors(newSegment, this.segmentPosition);
       var transformedSegment = [];
       var transformedPos = void 0;
@@ -3218,7 +3228,7 @@ var Slope = function (_GameObject) {
           transformedSegment.push(transformedPos[_i4]);
         }
       }
-      this._addSegment(transformedSegment);
+      this._addEdgeLoop(transformedSegment);
       this._addSideGeometrySegment();
       this._addObstacleSegment();
       this._addBalloonsSegment();
@@ -3229,8 +3239,8 @@ var Slope = function (_GameObject) {
       this.uvH += SEGMENT_LENGTH / SEGMENT_WIDTH;
     }
   }, {
-    key: "_addSegment",
-    value: function _addSegment(vertices) {
+    key: "_addEdgeLoop",
+    value: function _addEdgeLoop(vertices) {
       var startIdx = this.mesh.vertices.length / 3 - 1 - EDGE_LOOP_RESOLUTION;
       for (var i = 0; i < vertices.length; ++i) {
         this.mesh.vertices.push(vertices[i]);

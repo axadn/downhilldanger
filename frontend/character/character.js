@@ -206,7 +206,6 @@ class Character extends GameObject{
   }
   _ensureAboveSurface(){
     if(!this.floorTriangle){
-      debugger;
        return;
     }
     if(!MathUtils.pointIsAbovePlane(this.getPosition(), this.floorTriangle[0],
