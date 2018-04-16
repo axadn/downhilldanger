@@ -48,15 +48,17 @@ export class Mesh {
     if(mode2){
       this.vertices = data.vertexPositions;
       this.faces = data.vertexPositionIndices;
-      this.uvs = [];
-      for(let i = 0;i < data.vertexPositions.length / 3 * 2; ++i){
-        this.uvs.push(0);
-      }
-      let outputIdx;
-      for(let i = 0; i < data.vertexUVIndices.length; ++i){
-        outputIdx = data.vertexPositionIndices[i] * 2;
-        this.uvs[outputIdx] = data.vertexUVs[i * 2];
-        this.uvs[outputIdx + 1] = data.vertexUVs[i * 2 + 1];
+      if(textured){
+        this.uvs = [];
+        for(let i = 0;i < data.vertexPositions.length / 3 * 2; ++i){
+          this.uvs.push(0);
+        }
+        let outputIdx;
+        for(let i = 0; i < data.vertexUVIndices.length; ++i){
+          outputIdx = data.vertexPositionIndices[i] * 2;
+          this.uvs[outputIdx] = data.vertexUVs[i * 2];
+          this.uvs[outputIdx + 1] = data.vertexUVs[i * 2 + 1];
+        }
       }
       if(colored){
         this.colors = Array(this.vertices.length);

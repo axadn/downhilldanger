@@ -1,11 +1,11 @@
 const SEGMENT_WIDTH = 90;
-const SEGMENT_LENGTH = 50;
+const SEGMENT_LENGTH = 27;
 const EDGE_LOOP_RESOLUTION = 5;
 
 const TURN_TYPE_SWITCH_FREQUENCY = 3;
-const SHARP_TURN = 0.35;
-const SHARP_TURN_BANK = 0.25;
-const GRADUAL_TURN = 0.14;
+const SHARP_TURN = 0.2;
+const SHARP_TURN_BANK = 0.2;
+const GRADUAL_TURN = 0.1;
 const GRADUAL_TURN_BANK = 0.1;
 const TILES_PER_SEGMENT = 1;
 const TREES_PER_SEGMENT = 2;
@@ -13,12 +13,12 @@ const TREE_COLLIDER = "TREE_COLLIDER";
 const TREE_RADIUS = 3;
 const TREE_SEGMENT = "TREE_SEGMENT";
 const SNOW_SEGMENT = "SNOW_SEGMENT";
-const TREE_PROBABILITY_LENGTHWISE = 0.58
+const TREE_PROBABILITY_LENGTHWISE = 0.3
 const TREE_MAX_DENSITY_WIDTHWISE = 4;
-const BALLOON_PROBABILITY_LENGTHWISE = 0.22;
+const BALLOON_PROBABILITY_LENGTHWISE =1;
 const BALLOON_DENSITY_WIDTHWISE = 2;
 const BALLOON_FLOAT_HEIGHT = 6;
-const BALLOON_RADIUS = 4.2;
+const BALLOON_RADIUS = 8;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 const CLIFF_PROBABILITY = 0.05;
@@ -26,9 +26,9 @@ const CLIFF_PROBABILITY = 0.05;
 const SLOPE = -0.25;
 const CLIFF_SLOPE = -Math.PI/3;
 
-const SLOPE_BUFFER_AMOUNT = 20;
-const BACK_BUFFER_ANOUNT = 10;
-const COURSE_LENGTH = 50;
+const SLOPE_BUFFER_AMOUNT = 40;
+const BACK_BUFFER_ANOUNT = 20;
+const COURSE_LENGTH = 200;
 const FINISH_LINE_LENGTH = 10;
 
 import balloonMesh from "../balloon";
@@ -40,6 +40,8 @@ import createMesh from "../game_object/mesh";
 import GameObject from "../game_object/game_object";
 import treeMesh from "../tree";
 import finishLineMesh from "../finish_line";
+import iceBlock from "../ice_block";
+let iceBlockMesh;
 export default function createSlope(transformationMatrix = MathUtils.identityMatrix4, rasterizer){
   treeMesh.textured = true;
   balloonMesh.colored = true;
@@ -57,6 +59,8 @@ export default function createSlope(transformationMatrix = MathUtils.identityMat
     rasterizer
   })
   .then(processedMesh => args.push(processedMesh))
+  .then(()=>createMesh({data: iceBlock, mode2: true, colored: true}))
+  .then(processedMesh => iceBlockMesh = processedMesh)
   .then(()=>args.push(MathUtils.identityMatrix4.slice(0,16)))
   .then(()=>createMesh(treeMesh))
   .then(processedMesh=> args.push(new TreePool(processedMesh)))
@@ -71,8 +75,8 @@ export default function createSlope(transformationMatrix = MathUtils.identityMat
 };
 class Slope extends GameObject{
   constructor(mesh, transformationMatrix, treePool, balloonMesh, finishLineMesh){
-    debugger;
     super(mesh, undefined);
+    window.slope = this;
     this.treePool = treePool;
     this.balloonMesh = balloonMesh;
     this.finishLineMesh = finishLineMesh;
@@ -83,8 +87,8 @@ class Slope extends GameObject{
     this.segmentRotation = [-0.25,0,0];
     this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix,
       [0,SEGMENT_LENGTH,0,1]).slice(0,3);
-    this.obstacles = [];
-    this.balloons = [];
+    this.obstacles = [{}];
+    this.balloons = [[]];
     this.balloonsCreatedSinceStart = 0;
 
     this._setupTreeMesh();
@@ -107,7 +111,7 @@ class Slope extends GameObject{
     
   }
   _setupTreeMesh(){
-    this.sideGeometry = [];
+    this.sideGeometry = [[]];
     this.currentSideGeometryType = TREE_SEGMENT;
     this.treesCreatedSinceStart = 0;
   }
@@ -126,41 +130,35 @@ class Slope extends GameObject{
   _addSideGeometrySegment(){
 
     if(this.currentSideGeometryType === TREE_SEGMENT){
-      const trees = [];
+      const objects = [];
 
       let leftRightToggle = -1;
       for(let i = 0; i < 2; ++i){
         let transformationMatrix = this.segmentMatrices[this.segmentMatrices.length -1];
         transformationMatrix = MathUtils.mat_4_multiply(
-          MathUtils.translationMatrix(leftRightToggle * SEGMENT_WIDTH/2, 0, 0),
+          MathUtils.translationMatrix(leftRightToggle * (SEGMENT_WIDTH/2 + 20), 0, 0),
           transformationMatrix
         );
-        let tree;
-        for(let i = 0; i < TREES_PER_SEGMENT; ++i){
+        let object;
 
-          transformationMatrix =
-          MathUtils.mat_4_multiply(
-            MathUtils.translationMatrix(0, SEGMENT_LENGTH * i / TREES_PER_SEGMENT, 0,1),
-            transformationMatrix );
-          tree = this.treePool.pullTree(this.treesCreatedSinceStart);
-          tree.setPosition(MathUtils.mat4TranslationComponent(transformationMatrix));
-          this.rasterizer.objects[tree.id] = tree;
+          object = new GameObject(iceBlockMesh,transformationMatrix,true);
+          object.id = `iceblock${this.treesCreatedSinceStart}`;
+          //tree.setPosition(MathUtils.mat4TranslationComponent(transformationMatrix));
+          this.rasterizer.objects[object.id] = object;
           ++this.treesCreatedSinceStart;
-          trees.push(tree);
-        }
+          objects.push(object);
         leftRightToggle *= -1;
       }
-      this.sideGeometry.push({trees, type: TREE_SEGMENT});
+      this.sideGeometry.push(objects);
     }
   }
   _deleteSideGeometrySegment(){
-    if(this.sideGeometry[0].type === TREE_SEGMENT){
-      const treesSeg = this.sideGeometry.shift();
-      for(let i = 0; i < treesSeg.trees.length; ++i){
-        this.treePool.releaseTree(treesSeg.trees[i]);
-        delete this.rasterizer.objects[treesSeg.trees[i].id];
+      
+      const objects = this.sideGeometry.shift();
+      for(let i = 0; i < objects.length; ++i){
+        //this.treePool.releaseTree(treesSeg.trees[i]);
+        delete this.rasterizer.objects[objects[i].id];
       }
-    }
   }
   _addObstacleSegment(){
     const obstacleSegment =[];
@@ -228,26 +226,7 @@ class Slope extends GameObject{
     }
     return vertices;
   }
-  _generateFinishLine(){
-    const interpolateTowardX =  0.3;
-    const interpolateTowardY = 0;
-    const rotation = this.segmentRotation;
-    const lastMatrix = this.segmentMatrices[this.segmentMatrices.length - 1];
-    const finishLine =   new GameObject(this.finishLineMesh,
-      undefined, true);   
-    rasterizer.objects["finish_line"] = finishLine;
-    finishLine.setPosition(MathUtils.mat4TranslationComponent(lastMatrix));
-    
-    //figures out the appropriate zRotation
-
-    finishLine.setRotation(MathUtils.axisAngleToQuaternion([0,0,1],-1 * this.segmentRotation[2]));
-
-    for(let i =0; i < FINISH_LINE_LENGTH; ++i){
-      rotation[0] = (rotation[0] *2 + interpolateTowardX) / 3;
-      rotation[1] = (rotation[1] *2 + interpolateTowardY) / 3;
-      this._extrapolateNextSegment(rotation);
-    }
-  }
+  
   updateCharacterSegmentNumber(idx){
     if(idx < BACK_BUFFER_ANOUNT){
       return idx + 1;
@@ -365,6 +344,17 @@ class Slope extends GameObject{
         delete this.balloons[segment_number][key];
       }
     });
+    if(segment_number < this.balloons.length - 1){
+
+      Object.keys(this.balloons[segment_number + 1]).forEach(key=>{
+        if(CollisionUtils.sphereCollidesCapsule(this.balloons[segment_number + 1][key].getPosition(),
+         BALLOON_RADIUS,capsulePointA, capsulePointB,capsuleRadius)){
+          ++points;
+          delete this.rasterizer.objects[this.balloons[segment_number + 1][key].id];
+          delete this.balloons[segment_number + 1][key];
+        }
+      })
+    }
     return points;
   }
 
@@ -520,9 +510,6 @@ class Slope extends GameObject{
        }
      }
     this._addEdgeLoop(transformedSegment);
-    this._addSideGeometrySegment();
-    this._addObstacleSegment();
-    this._addBalloonsSegment();
     //this.segmentPosition =
     //  MathUtils.mat4TranslationComponent(segmentMatrix);
     this.segmentMatrices.push(transformationMatrix);
@@ -536,6 +523,32 @@ class Slope extends GameObject{
     else{
       this.generateNewSegmentRotation();
       this._extrapolateNextSegment(this.segmentRotation);
+      this._addSideGeometrySegment();
+      this._addObstacleSegment();
+      this._addBalloonsSegment();
+    }
+  }
+  _generateFinishLine(){
+    const interpolateTowardX =  0.3;
+    const interpolateTowardY = 0;
+    const rotation = this.segmentRotation;
+    const lastMatrix = this.segmentMatrices[this.segmentMatrices.length - 1];
+    const finishLine =   new GameObject(this.finishLineMesh,
+      undefined, true);   
+    rasterizer.objects["finish_line"] = finishLine;
+    finishLine.setPosition(MathUtils.mat4TranslationComponent(lastMatrix));
+    
+    //figures out the appropriate zRotation
+
+    finishLine.setRotation(MathUtils.axisAngleToQuaternion([0,0,1],-1 * this.segmentRotation[2]));
+
+    for(let i =0; i < FINISH_LINE_LENGTH; ++i){
+      rotation[0] = (rotation[0] *2 + interpolateTowardX) / 3;
+      rotation[1] = (rotation[1] *2 + interpolateTowardY) / 3;
+      this._extrapolateNextSegment(rotation);
+      this._addSideGeometrySegment();
+      this.obstacles.push([]);
+      this.balloons.push([]);
     }
   }
 

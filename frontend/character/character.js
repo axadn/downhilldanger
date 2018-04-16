@@ -69,6 +69,7 @@ export default function createCharacter(slope){
 class Character extends GameObject{
   constructor({mesh, boundingBox, slope, transformationMatrix}){
     super(mesh, transformationMatrix || MathUtils.identityMatrix4);
+    window.character = this;
     this.mesh = mesh;
     this.boundingBox = boundingBox;
     this.state = "ground";
