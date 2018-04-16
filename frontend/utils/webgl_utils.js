@@ -236,45 +236,10 @@ export class ObjectsRasterizer{
       this.gl.vertexAttribPointer(boneIndicesIndex, BONE_INFLUENCES, this.gl.UNSIGNED_BYTE, false, strideLength, offset);
       this.gl.enableVertexAttribArray(boneIndicesIndex);
       offset += BONE_INFLUENCES;
-
-      //fill the bones with identity matrix
-    //  let identities = [];
-    //  for(let i = 0; i < 20; ++i){
-      //  identities = identities.concat(MathUtils.identityMatrix4);
-    //  }
-        // let composed = [];
-        // let
-        // const boneTransforms = obj.keys(currentAnimations).reduce(
-        //   (accum, anim)=>{
-
-        //   }
-        // );
-         const boneTransforms = obj.mixedAnimations;
-        // for(let i = 0; i < boneTransforms.length; ++i){
-        //   if(obj.mesh.bones[i].parent !== -1){
-        //     composed.push(MathUtils.mat_4_multiply(
-        //       composed[obj.mesh.bones[i].parent], boneTransforms[i]));
-        //   }
-        //   else{
-        //     composed.push(boneTransforms[i]);
-        //   }
-        // }
-        // let unBound = [];
-        // for(let i = 0; i < boneTransforms.length; ++i){
-        //   unBound = unBound.concat(MathUtils.mat_4_multiply(
-        //     boneTransforms[i],
-        //     MathUtils.inverse_mat4_rot_pos(obj.mesh.bones[i].bindPose)
-        //     ));
-        // }
-        //for(let i = 0; i < boneTransforms.length; ++i){
-        //  inverselyBound = inverselyBound.concat(
-        //    MathUtils.mat_4_multiply(
-        //      MathUtils.inverse_mat4_rot_pos(obj.mesh.bones[i].bindPose),
-        //        boneTransforms[i],
-        //    ));
-        //}
-        const boneTransformsLocation = this.gl.getUniformLocation(program, "boneTransforms");
-        this.gl.uniform4fv(boneTransformsLocation, boneTransforms);
+      const boneTransforms = obj.mixedAnimations;
+        
+      const boneTransformsLocation = this.gl.getUniformLocation(program, "boneTransforms");
+      this.gl.uniform4fv(boneTransformsLocation, boneTransforms);
     }
 
     if(obj.mesh.textured){
@@ -283,8 +248,8 @@ export class ObjectsRasterizer{
       this.gl.enableVertexAttribArray(uvsAttrIndex);
       offset += 8;
       this.gl.bindTexture(this.gl.TEXTURE_2D, obj.mesh.texture);
-
-      // Fill the texture with a 1x1 blue pixel. TODO: Use actual image textures
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
     }
     else if(obj.mesh.colored){
       const colorsAttrIndex = this.gl.getAttribLocation(program, "vColor");

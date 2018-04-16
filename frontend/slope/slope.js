@@ -28,7 +28,7 @@ const CLIFF_SLOPE = -Math.PI/3;
 
 const SLOPE_BUFFER_AMOUNT = 20;
 const BACK_BUFFER_ANOUNT = 10;
-const COURSE_LENGTH = 200;
+const COURSE_LENGTH = 50;
 const FINISH_LINE_LENGTH = 10;
 
 import balloonMesh from "../balloon";
@@ -62,7 +62,8 @@ export default function createSlope(transformationMatrix = MathUtils.identityMat
   .then(processedMesh=> args.push(new TreePool(processedMesh)))
   .then(()=>createMesh(balloonMesh))
   .then(processedMesh=> args.push(processedMesh))
-  .then(()=>createMesh({data: finishLineMesh, mode2: true}))
+  .then(()=>createMesh({data: finishLineMesh, mode2: true,
+     img_src: "finish_line.jpg", textured: true}))
   .then(processedMesh=>{
     args.push(processedMesh);
   })
@@ -70,6 +71,7 @@ export default function createSlope(transformationMatrix = MathUtils.identityMat
 };
 class Slope extends GameObject{
   constructor(mesh, transformationMatrix, treePool, balloonMesh, finishLineMesh){
+    debugger;
     super(mesh, undefined);
     this.treePool = treePool;
     this.balloonMesh = balloonMesh;
