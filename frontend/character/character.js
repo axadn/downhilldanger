@@ -142,12 +142,14 @@ class Character extends GameObject{
         if(MathUtils.vectorDot(this.localUp, this.velocity) <= 0){  
           this.state = "air";
         }
+        this._upAlign();
         break;
       case "air":
         if(distanceFromSurface <= this.capsuleRadius){
           this.state = "ground";
         }
         this.snowSound.setVolume(0);
+        this._upAlign();
         break;
     }
 
@@ -226,6 +228,15 @@ class Character extends GameObject{
       surfaceNormalLocal);
     this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
       planeAlignAxis, planeAlignAngle/5));
+  }
+  _upAlign(){
+    const upLocal = this.inverseTransformDirection([0,0,1]);
+    const planeAlignAxis = MathUtils.vectorCross(
+      upLocal, [0,0,1]);
+    const planeAlignAngle = MathUtils.angleBetweenVectors([0,0,1],
+      upLocal);
+    this.addAngularVelocity(MathUtils.axisAngleToQuaternion(
+      planeAlignAxis, planeAlignAngle/35));
   }
   _applyFriction(localVelocity){
     let signFlip;
