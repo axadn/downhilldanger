@@ -3,7 +3,6 @@ const BONE_INFLUENCES = 2;
 
 import * as MathUtils from "./math_utils";
 import GameObject from "../game_object/game_object";
-import * as HUD from "../hud/hud";
 import { vectorMag } from "./math_utils";
 
 export class ObjectsRasterizer{
@@ -318,7 +317,6 @@ export class ObjectsRasterizer{
   }
 
   drawObjects(timestamp){
-    HUD.updateTime(Date.now());
     this.adjustToCanvas();
     this.gl.clearColor(0.8, 0.8, 0.81, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);

@@ -18,7 +18,7 @@ const TREE_MAX_DENSITY_WIDTHWISE = 4;
 const BALLOON_PROBABILITY_LENGTHWISE =0.3;
 const BALLOON_DENSITY_WIDTHWISE = 2;
 const BALLOON_FLOAT_HEIGHT = 6;
-const BALLOON_RADIUS = 8;
+const BALLOON_RADIUS = 5;
 const BOX_COLLIDER = "BOX_COLLIDER";
 const BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 const CLIFF_PROBABILITY = 0.05;
@@ -26,9 +26,9 @@ const CLIFF_PROBABILITY = 0.05;
 const SLOPE = -0.25;
 const CLIFF_SLOPE = -Math.PI/3;
 
-const SLOPE_BUFFER_AMOUNT = 40;
-const BACK_BUFFER_ANOUNT = 20;
-const COURSE_LENGTH = 200;
+const SLOPE_BUFFER_AMOUNT = 20;
+const BACK_BUFFER_ANOUNT = 10;
+export const COURSE_LENGTH = 300;
 const FINISH_LINE_LENGTH = 10;
 
 import balloonMesh from "../balloon";
@@ -42,7 +42,7 @@ import treeMesh from "../tree";
 import finishLineMesh from "../finish_line";
 import iceBlock from "../ice_block";
 let iceBlockMesh;
-export default function createSlope(transformationMatrix = MathUtils.identityMatrix4, rasterizer){
+export function createSlope(transformationMatrix = MathUtils.identityMatrix4, rasterizer){
   treeMesh.textured = true;
   balloonMesh.colored = true;
   treeMesh.img_src = "tree.png";
@@ -81,6 +81,10 @@ class Slope extends GameObject{
     this.balloonMesh = balloonMesh;
     this.finishLineMesh = finishLineMesh;
     this.rasterizer = rasterizer;
+    this._setup();
+  }
+  _setup(){
+    const transformationMatrix = this.getTransformationMatrix();
     this.bufferedSegments = 0;
     this.uvH = 0;
     this.segmentMatrices = [transformationMatrix];
@@ -90,8 +94,9 @@ class Slope extends GameObject{
     this.obstacles = [{}];
     this.balloons = [[]];
     this.balloonsCreatedSinceStart = 0;
-
-    this._setupTreeMesh();
+    this.sideGeometry = [[]];
+    this.currentSideGeometryType = TREE_SEGMENT;
+    this.treesCreatedSinceStart = 0;
     const firstLoop = this._createEdgeLoop();
     let unpackedVertices;
     this.turnDirection = "left";
@@ -108,12 +113,12 @@ class Slope extends GameObject{
     for(let i = 0; i < SLOPE_BUFFER_AMOUNT + BACK_BUFFER_ANOUNT ; ++i ){
       this._generateSegment();
     }
-    
   }
-  _setupTreeMesh(){
-    this.sideGeometry = [[]];
-    this.currentSideGeometryType = TREE_SEGMENT;
-    this.treesCreatedSinceStart = 0;
+  reset(){
+    while(this.segmentMatrices.length > 0){
+      this.deleteSegment();
+    }
+    this._setup();
   }
   _addUvsSegment(){
     for(let i = 0; i <= EDGE_LOOP_RESOLUTION; ++i){
@@ -232,7 +237,6 @@ class Slope extends GameObject{
       return idx + 1;
     }
     else{
-      console.log(this.segmentsSinceStart);
       if(this.segmentsSinceStart <= COURSE_LENGTH){
         this._generateSegment();
       }

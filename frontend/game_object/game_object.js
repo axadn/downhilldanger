@@ -14,10 +14,17 @@ export default class GameObject {
     this._position = MathUtils.mat4TranslationComponent(transformationMatrix);
     this._rotation = MathUtils.IdentityQuaternion;
     this.velocity = [0,0,0];
-    if(!this.isStatic)setInterval(this.update.bind(this), UPDATE_INTERVAL);
-    this.angularVelocity = MathUtils.IdentityQuaternion;
+    this.start();
+    this.angularVelocity = MathUtils.IdentityQuaternion.slice(0,4);
   }
-
+  start(){
+    if(!this.isStatic){
+      this.updateHandle = setInterval(this.update.bind(this), UPDATE_INTERVAL);
+    }
+  }
+  stop(){
+    clearInterval(this.updateHandle);
+  }
   update(timestamp){
     this._applyVelocityStep();
     this._applyAngularVelocityStep();
@@ -45,6 +52,10 @@ export default class GameObject {
   }
   _applyAngularDragStep(){
     this.angularVelocity = MathUtils.scaleQuaternion(this.angularVelocity, 1 - ANGULAR_DRAG);
+  }
+
+  setAngularVelocity(quat){
+    this.angularVelocity = quat.slice(0,4);
   }
 
   transformPoint(point){

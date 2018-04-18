@@ -595,11 +595,23 @@ var GameObject = function () {
     this._position = MathUtils.mat4TranslationComponent(transformationMatrix);
     this._rotation = MathUtils.IdentityQuaternion;
     this.velocity = [0, 0, 0];
-    if (!this.isStatic) setInterval(this.update.bind(this), UPDATE_INTERVAL);
-    this.angularVelocity = MathUtils.IdentityQuaternion;
+    this.start();
+    this.angularVelocity = MathUtils.IdentityQuaternion.slice(0, 4);
   }
 
   _createClass(GameObject, [{
+    key: "start",
+    value: function start() {
+      if (!this.isStatic) {
+        this.updateHandle = setInterval(this.update.bind(this), UPDATE_INTERVAL);
+      }
+    }
+  }, {
+    key: "stop",
+    value: function stop() {
+      clearInterval(this.updateHandle);
+    }
+  }, {
     key: "update",
     value: function update(timestamp) {
       this._applyVelocityStep();
@@ -637,6 +649,11 @@ var GameObject = function () {
     key: "_applyAngularDragStep",
     value: function _applyAngularDragStep() {
       this.angularVelocity = MathUtils.scaleQuaternion(this.angularVelocity, 1 - ANGULAR_DRAG);
+    }
+  }, {
+    key: "setAngularVelocity",
+    value: function setAngularVelocity(quat) {
+      this.angularVelocity = quat.slice(0, 4);
     }
   }, {
     key: "transformPoint",
@@ -852,127 +869,82 @@ var Mesh = exports.Mesh = function () {
     this.boneIndices = skinIndices;
     this.animations = {};
     if (mode2) {
-      this.boneWeights = [];
-      this.boneIndices = [];
-      var boneIndices = void 0;
-      this.numBones = Object.keys(data.jointNamePositionIndex).length;
-      data.vertexJointWeights.forEach(function (weights, vertexIdx) {
-        boneIndices = Object.keys(weights);
-        _this.boneWeights.push(weights[boneIndices[0]]);
-        _this.boneIndices.push(parseInt(boneIndices[0]));
-        if (boneIndices[1]) {
-          _this.boneWeights.push(weights[boneIndices[1]]);
-          _this.boneIndices.push(parseInt(boneIndices[1]));
-        } else {
-          _this.boneWeights.push(0);
-          _this.boneIndices.push(0);
-        }
-      });
       this.vertices = data.vertexPositions;
       this.faces = data.vertexPositionIndices;
+      if (textured) {
+        this.uvs = [];
+        for (var i = 0; i < data.vertexPositions.length / 3 * 2; ++i) {
+          this.uvs.push(0);
+        }
+        var outputIdx = void 0;
+        for (var _i = 0; _i < data.vertexUVIndices.length; ++_i) {
+          outputIdx = data.vertexPositionIndices[_i] * 2;
+          this.uvs[outputIdx] = data.vertexUVs[_i * 2];
+          this.uvs[outputIdx + 1] = data.vertexUVs[_i * 2 + 1];
+        }
+      }
       if (colored) {
         this.colors = Array(this.vertices.length);
         data.vertexColorIndices.forEach(function (colorIdx, positionInArray) {
           var outputPosition = _this.faces[positionInArray] * 3;
-          for (var i = 0; i < 3; ++i) {
-            _this.colors[outputPosition + i] = data.vertexColors[colorIdx * 3 + i];
+          for (var _i2 = 0; _i2 < 3; ++_i2) {
+            _this.colors[outputPosition + _i2] = data.vertexColors[colorIdx * 3 + _i2];
           }
         });
       }
-
-      var nameToAnimPosition = {};
-      Object.keys(action_file.jointNameIndices).forEach(function (jointName) {
-        nameToAnimPosition[jointName.replace(".", "_")] = action_file.jointNameIndices[jointName];
-      });
-
-      var boneOrder = Object.entries(data.jointNamePositionIndex).sort(function (nameIndex0, nameIndex1) {
-        return nameIndex0[1] < nameIndex1[1] ? -1 : 1;
-      }).map(function (entry) {
-        return nameToAnimPosition[entry[0]];
-      });
-
-      var frame = void 0,
-          newAction = void 0,
-          matrix = void 0;
-      Object.keys(action_file.actions).forEach(function (actionName) {
-        newAction = [];
-        Object.keys(action_file.actions[actionName]).forEach(function (keyFrame) {
-          frame = [];
-          boneOrder.forEach(function (animBoneIdx) {
-            if (animBoneIdx === undefined) {
-              matrix = MathUtils.identityMatrix4;
-            } else {
-              matrix = action_file.actions[actionName][keyFrame][animBoneIdx];
-            }
-            matrix = MathUtils.mat_4_transpose(MathUtils.mat_4_multiply(matrix, action_file.inverseBindPoses[animBoneIdx]));
-            mat4ToDualQuat(matrix).forEach(function (el) {
-              return frame.push(el);
-            });
-          });
-          newAction.push(frame);
+      if (action_file) {
+        this.boneWeights = [];
+        this.boneIndices = [];
+        var boneIndices = void 0;
+        this.numBones = Object.keys(data.jointNamePositionIndex).length;
+        data.vertexJointWeights.forEach(function (weights, vertexIdx) {
+          boneIndices = Object.keys(weights);
+          _this.boneWeights.push(weights[boneIndices[0]]);
+          _this.boneIndices.push(parseInt(boneIndices[0]));
+          if (boneIndices[1]) {
+            _this.boneWeights.push(weights[boneIndices[1]]);
+            _this.boneIndices.push(parseInt(boneIndices[1]));
+          } else {
+            _this.boneWeights.push(0);
+            _this.boneIndices.push(0);
+          }
         });
-        _this.animations[actionName] = newAction;
-      });
+
+        var nameToAnimPosition = {};
+        Object.keys(action_file.jointNameIndices).forEach(function (jointName) {
+          nameToAnimPosition[jointName.replace(".", "_")] = action_file.jointNameIndices[jointName];
+        });
+
+        var boneOrder = Object.entries(data.jointNamePositionIndex).sort(function (nameIndex0, nameIndex1) {
+          return nameIndex0[1] < nameIndex1[1] ? -1 : 1;
+        }).map(function (entry) {
+          return nameToAnimPosition[entry[0]];
+        });
+
+        var frame = void 0,
+            newAction = void 0,
+            matrix = void 0;
+        Object.keys(action_file.actions).forEach(function (actionName) {
+          newAction = [];
+          Object.keys(action_file.actions[actionName]).forEach(function (keyFrame) {
+            frame = [];
+            boneOrder.forEach(function (animBoneIdx) {
+              if (animBoneIdx === undefined) {
+                matrix = MathUtils.identityMatrix4;
+              } else {
+                matrix = action_file.actions[actionName][keyFrame][animBoneIdx];
+              }
+              matrix = MathUtils.mat_4_transpose(MathUtils.mat_4_multiply(matrix, action_file.inverseBindPoses[animBoneIdx]));
+              mat4ToDualQuat(matrix).forEach(function (el) {
+                return frame.push(el);
+              });
+            });
+            newAction.push(frame);
+          });
+          _this.animations[actionName] = newAction;
+        });
+      }
     }
-    //   if(animations && animations.length) {
-    //     this.boneWeights = skinWeights;
-    //     this.boneIndices = skinIndices;
-    //     let frame, frameMultiplied;
-    //     let matrix;
-    //     let bindMats = [];
-    //     bones.forEach(bone=>{
-    //       let rot; 
-    //       if(isZeroQuat(bone.rotq)){
-    //         rot = MathUtils.identityMatrix4;
-    //       }
-    //       rot = MathUtils.quaternionToMatrix(bone.rotq);
-    //       let matrix;
-    //       matrix = MathUtils.mat_4_multiply(
-    //         rot,
-    //         MathUtils.translationMatrix(...bone.pos)
-    //       );
-    //       if(bone.parent !== -1){
-    //         matrix = MathUtils.mat_4_multiply(
-    //           matrix,
-    //           bindMats[bone.parent],
-    //         );
-    //      }
-    //      bindMats.push(
-    //        matrix
-    //      );
-    //    });
-    //    bindMats = bindMats.map(mat=> MathUtils.inverse_mat4_rot_pos(mat));
-    //     animations.forEach(anim=>{
-    //       const frames = [];
-    //       const numFrames = anim.hierarchy[0].keys.length;
-    //       for(let i = 0; i < numFrames ; ++i){
-    //         frame = [];
-    //         anim.hierarchy.forEach((bone, boneIdx)=> {
-    //           let rot;
-    //           if(isZeroQuat(bone.keys[i].rot)){
-    //             rot = MathUtils.identityMatrix4;
-    //           }
-    //           rot = MathUtils.quaternionToMatrix(bone.keys[i].rot);
-
-    //           matrix =
-    //               MathUtils.mat_4_multiply(
-    //                rot,
-    //                MathUtils.translationMatrix(...bone.keys[i].pos)
-    //              );
-    //           if(bones[boneIdx].parent != -1){
-    //              matrix = MathUtils.mat_4_multiply(matrix, frame[bones[boneIdx].parent]);
-    //           }
-    //           frame.push(matrix);
-    //         });
-    //         frameMultiplied = [];
-    //         frame.forEach((mat,matIdx)=> MathUtils.mat_4_transpose(
-    //           MathUtils.mat_4_multiply(bindMats[matIdx], mat)).forEach(el=>frameMultiplied.push(el)));
-    //         frames.push(frameMultiplied);
-    //       }
-
-    //       this.animations[anim.name] = frames;
-    //     });
-    //  } 
   }
 
   _createClass(Mesh, [{
@@ -1016,10 +988,37 @@ var Mesh = exports.Mesh = function () {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.loadAsset = loadAsset;
+function loadAsset(url) {
+    var responseType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("get", url);
+    xhr.responseType = responseType;
+    return new Promise(function (resolve, reject) {
+        xhr.onload = resolve;
+        xhr.onerror = reject;
+        xhr.send();
+    });
+}
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 exports.addPoints = addPoints;
 exports.updateSpeed = updateSpeed;
 exports.updateTime = updateTime;
 exports.setStartTime = setStartTime;
+exports.startGameplayHUD = startGameplayHUD;
+exports.doStartMenuHUD = doStartMenuHUD;
+exports.displayScoresStructure = displayScoresStructure;
 var state = { time: 0, startTime: 0,
     bestTime: 0, points: 0, speed: 0 };
 
@@ -1066,28 +1065,28 @@ function renderMilliseconds(milliseconds) {
     if (m < 10) return "00" + m;else if (m < 100) return "0" + m;else return "" + m;
 }
 
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
+function startGameplayHUD() {
+    state = { time: 0, startTime: 0,
+        bestTime: 0, points: 0, speed: 0 };
+    document.querySelector('.hud').innerHTML = "<div class = \"hud-left\">\n            <div class = \"hud-time\">\n              TIME <div class=\"hud-time_val\">00'00\"00</div>\n            </div>\n            <div class = \"hud-best-time\">\n              BEST 00:00:00\n            </div>\n          </div>\n          <div class = \"hud-right\">\n            <div class= \"hud-speed\">\n              SPEED <div class=\"hud-speed_val\">0</div> Km/h\n            </div>\n            <div class= \"hud-points\">\n              <div class=\"hud-points_val\">0</div> POINTS\n            </div>\n    </div>";
+}
 
-"use strict";
+function doStartMenuHUD(callback) {
+    var startButton = document.createElement("button");
+    startButton.classList.add('start-button');
+    startButton.onclick = callback;
+    startButton.textContent = "START";
+    var startMenu = document.createElement("div");
+    startMenu.appendChild(startButton);
+    startMenu.classList.add("start-menu");
+    var hud = document.querySelector('.hud');
+    hud.innerHTML = "";
+    hud.appendChild(startMenu);
+}
 
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.loadAsset = loadAsset;
-function loadAsset(url) {
-    var responseType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("get", url);
-    xhr.responseType = responseType;
-    return new Promise(function (resolve, reject) {
-        xhr.onload = resolve;
-        xhr.onerror = reject;
-        xhr.send();
-    });
+function displayScoresStructure() {
+    var hud = document.querySelector(".hud");
+    hud.innerHTML = "FINISHED";
 }
 
 /***/ }),
@@ -1233,6 +1232,8 @@ var boxColliderToPoints = exports.boxColliderToPoints = function boxColliderToPo
 "use strict";
 
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _math_utils = __webpack_require__(0);
 
 var MathUtils = _interopRequireWildcard(_math_utils);
@@ -1241,7 +1242,7 @@ var _webgl_utils = __webpack_require__(7);
 
 var WebGLUtils = _interopRequireWildcard(_webgl_utils);
 
-var _asset_utils = __webpack_require__(4);
+var _asset_utils = __webpack_require__(3);
 
 var AssetUtils = _interopRequireWildcard(_asset_utils);
 
@@ -1263,13 +1264,11 @@ var _character2 = _interopRequireDefault(_character);
 
 var _slope = __webpack_require__(21);
 
-var _slope2 = _interopRequireDefault(_slope);
-
 var _mesh = __webpack_require__(2);
 
 var _mesh2 = _interopRequireDefault(_mesh);
 
-var _hud = __webpack_require__(3);
+var _hud = __webpack_require__(4);
 
 var HUD = _interopRequireWildcard(_hud);
 
@@ -1277,15 +1276,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var HUD_DISPLAY_SPEED_MULTIPLIER = 8;
 document.addEventListener("DOMContentLoaded", main);
-function gameLoop(timestamp) {
-  HUD.updateTime(timestamp);
-  rasterizer.drawObjects.bind(rasterizer)(timestamp);
-  window.requestAnimationFrame(gameLoop);
-}
 function main() {
   var rasterizer = new WebGLUtils.ObjectsRasterizer();
-  (0, _slope2.default)(MathUtils.translationMatrix(0, -3, -4), rasterizer).then(function (slope) {
+  (0, _slope.createSlope)(MathUtils.translationMatrix(0, -3, -4), rasterizer).then(function (slope) {
     return (0, _character2.default)(slope).then(function (character) {
       return { character: character, slope: slope };
     });
@@ -1308,22 +1305,86 @@ function assetsLoaded(_ref2) {
   skybox.mesh.buffers = rasterizer.sendMeshToGPU(skybox.mesh);
   rasterizer.skyBox = skybox;
   rasterizer.objects.character = character;
-  HUD.setStartTime(Date.now());
-  window.requestAnimationFrame(gameLoop);
   window.rasterizer = rasterizer;
   rasterizer.cameraTarget = character;
-
   rasterizer.position[1] -= 2;
   rasterizer.position[0] += 0.3;
   rasterizer.rotation[0] -= 0.4;
   rasterizer.position[2] += 0.7;
   rasterizer.objects.slope = slope;
   rasterizer.position = [0, -6, 0];
-
-  window.addEventListener("keydown", Input.keyDown(character));
-  window.addEventListener("keyup", Input.keyUp(character));
-  window.addEventListener("blur", Input.releaseKeys(character));
+  var game = new Game(slope, character);
+  game.startMenu();
 };
+
+var Game = function () {
+  function Game(slope, character) {
+    _classCallCheck(this, Game);
+
+    this.slope = slope;
+    this.character = character;
+    this.character.stop();
+    this.keyDown = Input.keyDown(character);
+    this.keyUp = Input.keyUp(character);
+    this.blur = Input.releaseKeys(character);
+    rasterizer.drawObjects.bind(rasterizer)();
+    this.run = this.run.bind(this);
+    this.start = this.start.bind(this);
+    this.restart = this.restart.bind(this);
+  }
+
+  _createClass(Game, [{
+    key: "startMenu",
+    value: function startMenu() {
+      HUD.doStartMenuHUD(this.start);
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      HUD.startGameplayHUD();
+      HUD.setStartTime(Date.now());
+
+      this.character.start();
+
+      window.addEventListener("keydown", this.keyDown);
+      window.addEventListener("keyup", this.keyUp);
+      window.addEventListener("blur", this.blur);
+
+      this.animationHandle = window.requestAnimationFrame(this.run);
+    }
+  }, {
+    key: "run",
+    value: function run(timestamp) {
+      HUD.updateTime(Date.now());
+      HUD.updateSpeed(MathUtils.vectorMag(this.character.velocity) * HUD_DISPLAY_SPEED_MULTIPLIER);
+      rasterizer.drawObjects.bind(rasterizer)(timestamp);
+      if (this.character.segmentsSinceStart > _slope.COURSE_LENGTH) {
+        this.displayScores();
+      } else {
+        window.requestAnimationFrame(this.run);
+      }
+    }
+  }, {
+    key: "displayScores",
+    value: function displayScores() {
+      HUD.displayScoresStructure();
+      this.character.stop();
+      window.removeEventListener("keydown", this.keyDown);
+      window.removeEventListener("keyup", this.keyUp);
+      window.removeEventListener("blur", this.blur);
+      setTimeout(this.restart, 1000);
+    }
+  }, {
+    key: "restart",
+    value: function restart() {
+      this.character.reset();
+      this.slope.reset();
+      this.start();
+    }
+  }]);
+
+  return Game;
+}();
 
 /***/ }),
 /* 7 */
@@ -1349,10 +1410,6 @@ var MathUtils = _interopRequireWildcard(_math_utils);
 var _game_object = __webpack_require__(1);
 
 var _game_object2 = _interopRequireDefault(_game_object);
-
-var _hud = __webpack_require__(3);
-
-var HUD = _interopRequireWildcard(_hud);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1613,43 +1670,8 @@ var ObjectsRasterizer = exports.ObjectsRasterizer = function () {
         this.gl.vertexAttribPointer(boneIndicesIndex, BONE_INFLUENCES, this.gl.UNSIGNED_BYTE, false, strideLength, offset);
         this.gl.enableVertexAttribArray(boneIndicesIndex);
         offset += BONE_INFLUENCES;
-
-        //fill the bones with identity matrix
-        //  let identities = [];
-        //  for(let i = 0; i < 20; ++i){
-        //  identities = identities.concat(MathUtils.identityMatrix4);
-        //  }
-        // let composed = [];
-        // let
-        // const boneTransforms = obj.keys(currentAnimations).reduce(
-        //   (accum, anim)=>{
-
-        //   }
-        // );
         var boneTransforms = obj.mixedAnimations;
-        // for(let i = 0; i < boneTransforms.length; ++i){
-        //   if(obj.mesh.bones[i].parent !== -1){
-        //     composed.push(MathUtils.mat_4_multiply(
-        //       composed[obj.mesh.bones[i].parent], boneTransforms[i]));
-        //   }
-        //   else{
-        //     composed.push(boneTransforms[i]);
-        //   }
-        // }
-        // let unBound = [];
-        // for(let i = 0; i < boneTransforms.length; ++i){
-        //   unBound = unBound.concat(MathUtils.mat_4_multiply(
-        //     boneTransforms[i],
-        //     MathUtils.inverse_mat4_rot_pos(obj.mesh.bones[i].bindPose)
-        //     ));
-        // }
-        //for(let i = 0; i < boneTransforms.length; ++i){
-        //  inverselyBound = inverselyBound.concat(
-        //    MathUtils.mat_4_multiply(
-        //      MathUtils.inverse_mat4_rot_pos(obj.mesh.bones[i].bindPose),
-        //        boneTransforms[i],
-        //    ));
-        //}
+
         var boneTransformsLocation = this.gl.getUniformLocation(program, "boneTransforms");
         this.gl.uniform4fv(boneTransformsLocation, boneTransforms);
       }
@@ -1660,8 +1682,8 @@ var ObjectsRasterizer = exports.ObjectsRasterizer = function () {
         this.gl.enableVertexAttribArray(uvsAttrIndex);
         offset += 8;
         this.gl.bindTexture(this.gl.TEXTURE_2D, obj.mesh.texture);
-
-        // Fill the texture with a 1x1 blue pixel. TODO: Use actual image textures
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
       } else if (obj.mesh.colored) {
         var colorsAttrIndex = this.gl.getAttribLocation(program, "vColor");
         this.gl.vertexAttribPointer(colorsAttrIndex, 4, this.gl.UNSIGNED_BYTE, true, strideLength, offset);
@@ -1725,7 +1747,6 @@ var ObjectsRasterizer = exports.ObjectsRasterizer = function () {
   }, {
     key: "drawObjects",
     value: function drawObjects(timestamp) {
-      HUD.updateTime(Date.now());
       this.adjustToCanvas();
       this.gl.clearColor(0.8, 0.8, 0.81, 1);
       this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
@@ -2093,7 +2114,7 @@ var _math_utils = __webpack_require__(0);
 
 var MathUtils = _interopRequireWildcard(_math_utils);
 
-var _hud = __webpack_require__(3);
+var _hud = __webpack_require__(4);
 
 var HUD = _interopRequireWildcard(_hud);
 
@@ -2101,7 +2122,7 @@ var _collision_utils = __webpack_require__(5);
 
 var CollisionUtils = _interopRequireWildcard(_collision_utils);
 
-var _asset_utils = __webpack_require__(4);
+var _asset_utils = __webpack_require__(3);
 
 var AssetUtils = _interopRequireWildcard(_asset_utils);
 
@@ -2145,7 +2166,6 @@ var COLLISION_INTENSITY_MIN_VELOCITY = 2;
 var COLLISION_INTENSITY_MAX_VELOCITY = 10;
 var SPEED_VOLUME_INTENSITY_MIN_VELOCITY = 0.2;
 var SPEED_VOLUME_INTENSITY_MAX_VELOCITY = 20;
-var HUD_DISPLAY_SPEED_MULTIPLIER = 8;
 
 window.MathUtils = MathUtils;
 
@@ -2194,45 +2214,61 @@ var Character = function (_GameObject) {
   function Character(_ref) {
     var mesh = _ref.mesh,
         boundingBox = _ref.boundingBox,
-        slope = _ref.slope,
-        transformationMatrix = _ref.transformationMatrix;
+        slope = _ref.slope;
 
     _classCallCheck(this, Character);
 
-    var _this = _possibleConstructorReturn(this, (Character.__proto__ || Object.getPrototypeOf(Character)).call(this, mesh, transformationMatrix || MathUtils.identityMatrix4));
+    var _this = _possibleConstructorReturn(this, (Character.__proto__ || Object.getPrototypeOf(Character)).call(this, mesh));
 
+    window.character = _this;
     _this.mesh = mesh;
     _this.boundingBox = boundingBox;
-    _this.state = "ground";
-    _this.speed = 0.2;
-    _this.fallSpeed = 0.15;
+
     _this.slope = slope;
     _this.currentSegmentNumber = 0;
-    _this.input = { left: false, right: false, back: false, jump: false };
-    _this.velocity = [0, 1, 0];
-    _this.localVelocity = [0, 0, 0];
-    _this.localUp = [0, 0, 1];
-    _this.friction = SNOWBOARD_FRICTION;
-    _this.restitution = SNOWBOARD_RESTITUTION;
-    _this.boxDimensions = [0.5, 5, 0.5];
+
     _this.capsuleRadius = 2;
     _this.setPosition([0, 0, 16]);
     _this.name = "snowboarder";
-    _this.currentAnimations = {
-      "neutral": { influence: 1, loop: true, frame: 0 },
-      "left": { influence: 0, loop: true, frame: 0 },
-      "right": { influence: 0, loop: true, frame: 0 },
-      "brake": { influence: 0, loop: false, frame: 0 }
-    };
-    _this.currentAnimationFrame = 0;
+
     window.character = _this;
     _this.mixedAnimations = Array(_this.mesh.numBones * 8);
     _this.snowSound = _mixer2.default.play({ buffer: effectBuffers.sliding,
       priority: 10, volume: 0, loop: true });
+    _this._setup();
     return _this;
   }
 
   _createClass(Character, [{
+    key: "_setup",
+    value: function _setup() {
+      this.segmentsSinceStart = 0;
+      this.setPosition([0, 0, 16]);
+      this.setRotation(MathUtils.IdentityQuaternion);
+      this.setAngularVelocity(MathUtils.IdentityQuaternion);
+      this.state = "ground";
+      this.speed = 0.3;
+      this.fallSpeed = 0.15;
+      this.input = { left: false, right: false, back: false, jump: false };
+      this.velocity = [0, 1, 0];
+      this.localVelocity = [0, 0, 0];
+      this.localUp = [0, 0, 1];
+      this.friction = SNOWBOARD_FRICTION;
+      this.restitution = SNOWBOARD_RESTITUTION;
+      this.boxDimensions = [0.5, 5, 0.5];
+      this.currentAnimations = {
+        "neutral": { influence: 1, loop: true, frame: 0 },
+        "left": { influence: 0, loop: true, frame: 0 },
+        "right": { influence: 0, loop: true, frame: 0 },
+        "brake": { influence: 0, loop: false, frame: 0 }
+      };
+    }
+  }, {
+    key: "reset",
+    value: function reset() {
+      this._setup();
+    }
+  }, {
     key: "_applyGravityStep",
     value: function _applyGravityStep() {
       this.velocity[2] -= this.fallSpeed;
@@ -2254,7 +2290,6 @@ var Character = function (_GameObject) {
 
       var surfaceOffset = MathUtils.subtractVectors(this.getPosition(), this.surfacePoint);
       var distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
-      HUD.updateSpeed(MathUtils.vectorMag(this.velocity) * HUD_DISPLAY_SPEED_MULTIPLIER);
       switch (this.state) {
         case "ground":
           this._groundControls();
@@ -2279,12 +2314,14 @@ var Character = function (_GameObject) {
           if (MathUtils.vectorDot(this.localUp, this.velocity) <= 0) {
             this.state = "air";
           }
+          this._upAlign();
           break;
         case "air":
           if (distanceFromSurface <= this.capsuleRadius) {
             this.state = "ground";
           }
           this.snowSound.setVolume(0);
+          this._upAlign();
           break;
       }
 
@@ -2356,6 +2393,14 @@ var Character = function (_GameObject) {
       var planeAlignAxis = MathUtils.vectorCross(surfaceNormalLocal, [0, 0, 1]);
       var planeAlignAngle = MathUtils.angleBetweenVectors([0, 0, 1], surfaceNormalLocal);
       this.addAngularVelocity(MathUtils.axisAngleToQuaternion(planeAlignAxis, planeAlignAngle / 5));
+    }
+  }, {
+    key: "_upAlign",
+    value: function _upAlign() {
+      var upLocal = this.inverseTransformDirection([0, 0, 1]);
+      var planeAlignAxis = MathUtils.vectorCross(upLocal, [0, 0, 1]);
+      var planeAlignAngle = MathUtils.angleBetweenVectors([0, 0, 1], upLocal);
+      this.addAngularVelocity(MathUtils.axisAngleToQuaternion(planeAlignAxis, planeAlignAngle / 35));
     }
   }, {
     key: "_applyFriction",
@@ -2510,6 +2555,7 @@ var Character = function (_GameObject) {
     key: "_updateSegmentNumber",
     value: function _updateSegmentNumber() {
       if (this.currentSegmentNumber < this.slope.segmentMatrices.length - 1 && this.slope.positionIsPastSegmentStart(this.getPosition(), this.currentSegmentNumber + 1)) {
+        ++this.segmentsSinceStart;
         this.currentSegmentNumber = this.slope.updateCharacterSegmentNumber(this.currentSegmentNumber);
         var triangleAfterMove = this.slope.getSurroundingTriangle(this.getPosition(), this.currentSegmentNumber) || this.floorTriangle;
       } else if (this.currentSegmentNumber > 0 && !this.slope.positionIsPastSegmentStart(this.getPosition(), this.currentSegmentNumber)) {
@@ -2717,10 +2763,11 @@ exports.default = new Mixer(5);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.COURSE_LENGTH = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-exports.default = createSlope;
+exports.createSlope = createSlope;
 
 var _balloon = __webpack_require__(22);
 
@@ -2750,6 +2797,14 @@ var _tree = __webpack_require__(24);
 
 var _tree2 = _interopRequireDefault(_tree);
 
+var _finish_line = __webpack_require__(25);
+
+var _finish_line2 = _interopRequireDefault(_finish_line);
+
+var _ice_block = __webpack_require__(26);
+
+var _ice_block2 = _interopRequireDefault(_ice_block);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -2761,13 +2816,13 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var SEGMENT_WIDTH = 90;
-var SEGMENT_LENGTH = 50;
+var SEGMENT_LENGTH = 27;
 var EDGE_LOOP_RESOLUTION = 5;
 
 var TURN_TYPE_SWITCH_FREQUENCY = 3;
-var SHARP_TURN = 0.35;
-var SHARP_TURN_BANK = 0.25;
-var GRADUAL_TURN = 0.14;
+var SHARP_TURN = 0.2;
+var SHARP_TURN_BANK = 0.2;
+var GRADUAL_TURN = 0.1;
 var GRADUAL_TURN_BANK = 0.1;
 var TILES_PER_SEGMENT = 1;
 var TREES_PER_SEGMENT = 2;
@@ -2775,12 +2830,12 @@ var TREE_COLLIDER = "TREE_COLLIDER";
 var TREE_RADIUS = 3;
 var TREE_SEGMENT = "TREE_SEGMENT";
 var SNOW_SEGMENT = "SNOW_SEGMENT";
-var TREE_PROBABILITY_LENGTHWISE = 0.58;
+var TREE_PROBABILITY_LENGTHWISE = 0.3;
 var TREE_MAX_DENSITY_WIDTHWISE = 4;
-var BALLOON_PROBABILITY_LENGTHWISE = 0.22;
+var BALLOON_PROBABILITY_LENGTHWISE = 0.3;
 var BALLOON_DENSITY_WIDTHWISE = 2;
 var BALLOON_FLOAT_HEIGHT = 6;
-var BALLOON_RADIUS = 4.2;
+var BALLOON_RADIUS = 5;
 var BOX_COLLIDER = "BOX_COLLIDER";
 var BEGINNING_NO_OBSTACLE_SEGMENTS = 15;
 var CLIFF_PROBABILITY = 0.05;
@@ -2790,92 +2845,108 @@ var CLIFF_SLOPE = -Math.PI / 3;
 
 var SLOPE_BUFFER_AMOUNT = 20;
 var BACK_BUFFER_ANOUNT = 10;
-var COURSE_LENGTH = 200;
+var COURSE_LENGTH = exports.COURSE_LENGTH = 300;
 var FINISH_LINE_LENGTH = 10;
 
+var iceBlockMesh = void 0;
 function createSlope() {
   var transformationMatrix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : MathUtils.identityMatrix4;
   var rasterizer = arguments[1];
 
-  var img_src = "snow.jpg";
-  var tree_img = "tree.png";
   _tree2.default.textured = true;
   _balloon2.default.colored = true;
-  _tree2.default.img_src = tree_img;
+  _tree2.default.img_src = "tree.png";
+  var args = [];
+  window.finishLineMesh = _finish_line2.default;
+  window.createMesh = _mesh2.default;
+
   return (0, _mesh2.default)({
     faces: [],
     vertices: [],
     textured: true,
-    img_src: img_src,
+    img_src: "snow.jpg",
     uvs: [],
     rasterizer: rasterizer
-  }).then(function (slopeMesh) {
-    return (0, _mesh2.default)(_tree2.default).then(function (treeDone) {
-      return { mesh: slopeMesh, treePool: new _tree_pool2.default(treeDone) };
-    });
-  }).then(function (_ref) {
-    var mesh = _ref.mesh,
-        treePool = _ref.treePool;
-
-    return (0, _mesh2.default)(_balloon2.default).then(function (balloonDone) {
-      return { mesh: mesh, treePool: treePool, balloonMesh: balloonDone };
-    });
-  }).then(function (_ref2) {
-    var mesh = _ref2.mesh,
-        treePool = _ref2.treePool,
-        balloonMesh = _ref2.balloonMesh;
-
-    return new Slope(mesh, transformationMatrix, treePool, balloonMesh);
+  }).then(function (processedMesh) {
+    return args.push(processedMesh);
+  }).then(function () {
+    return (0, _mesh2.default)({ data: _ice_block2.default, mode2: true, colored: true });
+  }).then(function (processedMesh) {
+    return iceBlockMesh = processedMesh;
+  }).then(function () {
+    return args.push(MathUtils.identityMatrix4.slice(0, 16));
+  }).then(function () {
+    return (0, _mesh2.default)(_tree2.default);
+  }).then(function (processedMesh) {
+    return args.push(new _tree_pool2.default(processedMesh));
+  }).then(function () {
+    return (0, _mesh2.default)(_balloon2.default);
+  }).then(function (processedMesh) {
+    return args.push(processedMesh);
+  }).then(function () {
+    return (0, _mesh2.default)({ data: _finish_line2.default, mode2: true,
+      img_src: "finish_line.jpg", textured: true });
+  }).then(function (processedMesh) {
+    args.push(processedMesh);
+  }).then(function () {
+    return new (Function.prototype.bind.apply(Slope, [null].concat(args)))();
   });
 };
 
 var Slope = function (_GameObject) {
   _inherits(Slope, _GameObject);
 
-  function Slope(mesh, transformationMatrix, treePool, balloonMesh) {
+  function Slope(mesh, transformationMatrix, treePool, balloonMesh, finishLineMesh) {
     _classCallCheck(this, Slope);
 
-    var _this = _possibleConstructorReturn(this, (Slope.__proto__ || Object.getPrototypeOf(Slope)).call(this, undefined));
+    var _this = _possibleConstructorReturn(this, (Slope.__proto__ || Object.getPrototypeOf(Slope)).call(this, mesh, undefined));
 
-    _this.mesh = mesh;
+    window.slope = _this;
     _this.treePool = treePool;
     _this.balloonMesh = balloonMesh;
-    _this._transformationMatrix = transformationMatrix.slice(0, 16);
+    _this.finishLineMesh = finishLineMesh;
     _this.rasterizer = rasterizer;
-    _this.currentTurn = "none";
-    _this.bufferedSegments = 0;
-    _this.uvH = 0;
-    _this.segmentMatrices = [transformationMatrix];
-    _this.segmentRotation = [-0.25, 0, 0];
-    _this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix, [0, SEGMENT_LENGTH, 0, 1]).slice(0, 3);
-    _this.obstacles = [];
-    _this.balloons = [];
-    _this.balloonsCreatedSinceStart = 0;
-
-    _this._setupTreeMesh();
-    var firstLoop = _this._createEdgeLoop();
-    var unpackedVertices = void 0;
-
-    _this.segmentsSinceStart = 0;
-    for (var i = 0; i < firstLoop.length; i += 3) {
-      unpackedVertices = MathUtils.multiplyVec4ByMatrix4(transformationMatrix, firstLoop.slice(i, i + 3).concat(1)).slice(0, 3);
-      for (var j = 0; j < unpackedVertices.length; ++j) {
-        _this.mesh.vertices.push(unpackedVertices[j]);
-      }
-    }
-    for (var _i = 0; _i < SLOPE_BUFFER_AMOUNT + BACK_BUFFER_ANOUNT; ++_i) {
-      _this._generateSegment();
-    }
-
+    _this._setup();
     return _this;
   }
 
   _createClass(Slope, [{
-    key: "_setupTreeMesh",
-    value: function _setupTreeMesh() {
-      this.sideGeometry = [];
+    key: "_setup",
+    value: function _setup() {
+      var transformationMatrix = this.getTransformationMatrix();
+      this.bufferedSegments = 0;
+      this.uvH = 0;
+      this.segmentMatrices = [transformationMatrix];
+      this.segmentRotation = [-0.25, 0, 0];
+      this.segmentPosition = MathUtils.multiplyVec4ByMatrix4(transformationMatrix, [0, SEGMENT_LENGTH, 0, 1]).slice(0, 3);
+      this.obstacles = [{}];
+      this.balloons = [[]];
+      this.balloonsCreatedSinceStart = 0;
+      this.sideGeometry = [[]];
       this.currentSideGeometryType = TREE_SEGMENT;
       this.treesCreatedSinceStart = 0;
+      var firstLoop = this._createEdgeLoop();
+      var unpackedVertices = void 0;
+      this.turnDirection = "left";
+      this.currentTurn = "right";
+      this.segmentsSinceStart = 0;
+      for (var i = 0; i < firstLoop.length; i += 3) {
+        unpackedVertices = MathUtils.multiplyVec4ByMatrix4(transformationMatrix, firstLoop.slice(i, i + 3).concat(1)).slice(0, 3);
+        for (var j = 0; j < unpackedVertices.length; ++j) {
+          this.mesh.vertices.push(unpackedVertices[j]);
+        }
+      }
+      for (var _i = 0; _i < SLOPE_BUFFER_AMOUNT + BACK_BUFFER_ANOUNT; ++_i) {
+        this._generateSegment();
+      }
+    }
+  }, {
+    key: "reset",
+    value: function reset() {
+      while (this.segmentMatrices.length > 0) {
+        this.deleteSegment();
+      }
+      this._setup();
     }
   }, {
     key: "_addUvsSegment",
@@ -2897,36 +2968,33 @@ var Slope = function (_GameObject) {
     value: function _addSideGeometrySegment() {
 
       if (this.currentSideGeometryType === TREE_SEGMENT) {
-        var trees = [];
+        var objects = [];
 
         var leftRightToggle = -1;
         for (var i = 0; i < 2; ++i) {
           var transformationMatrix = this.segmentMatrices[this.segmentMatrices.length - 1];
-          transformationMatrix = MathUtils.mat_4_multiply(MathUtils.translationMatrix(leftRightToggle * SEGMENT_WIDTH / 2, 0, 0), transformationMatrix);
-          var tree = void 0;
-          for (var _i2 = 0; _i2 < TREES_PER_SEGMENT; ++_i2) {
+          transformationMatrix = MathUtils.mat_4_multiply(MathUtils.translationMatrix(leftRightToggle * (SEGMENT_WIDTH / 2 + 20), 0, 0), transformationMatrix);
+          var _object = void 0;
 
-            transformationMatrix = MathUtils.mat_4_multiply(MathUtils.translationMatrix(0, SEGMENT_LENGTH * _i2 / TREES_PER_SEGMENT, 0, 1), transformationMatrix);
-            tree = this.treePool.pullTree(this.treesCreatedSinceStart);
-            tree.setPosition(MathUtils.mat4TranslationComponent(transformationMatrix));
-            this.rasterizer.objects[tree.id] = tree;
-            ++this.treesCreatedSinceStart;
-            trees.push(tree);
-          }
+          _object = new _game_object2.default(iceBlockMesh, transformationMatrix, true);
+          _object.id = "iceblock" + this.treesCreatedSinceStart;
+          //tree.setPosition(MathUtils.mat4TranslationComponent(transformationMatrix));
+          this.rasterizer.objects[_object.id] = _object;
+          ++this.treesCreatedSinceStart;
+          objects.push(_object);
           leftRightToggle *= -1;
         }
-        this.sideGeometry.push({ trees: trees, type: TREE_SEGMENT });
+        this.sideGeometry.push(objects);
       }
     }
   }, {
     key: "_deleteSideGeometrySegment",
     value: function _deleteSideGeometrySegment() {
-      if (this.sideGeometry[0].type === TREE_SEGMENT) {
-        var treesSeg = this.sideGeometry.shift();
-        for (var i = 0; i < treesSeg.trees.length; ++i) {
-          this.treePool.releaseTree(treesSeg.trees[i]);
-          delete this.rasterizer.objects[treesSeg.trees[i].id];
-        }
+
+      var objects = this.sideGeometry.shift();
+      for (var i = 0; i < objects.length; ++i) {
+        //this.treePool.releaseTree(treesSeg.trees[i]);
+        delete this.rasterizer.objects[objects[i].id];
       }
     }
   }, {
@@ -2999,25 +3067,11 @@ var Slope = function (_GameObject) {
       return vertices;
     }
   }, {
-    key: "_generateFinishLine",
-    value: function _generateFinishLine() {
-      var interpolateTowardX = 0.3;
-      var interpolateTowardZ = 0;
-      var rotation = this.segmentRotation;
-      rotation[1] = 0;
-      for (var i = 0; i < FINISH_LINE_LENGTH; ++i) {
-        rotation[0] = (rotation[0] * 2 + interpolateTowardX) / 3;
-        rotation[2] = (rotation[2] * 2 + interpolateTowardZ) / 3;
-        this._extrapolateNextSegment(rotation);
-      }
-    }
-  }, {
     key: "updateCharacterSegmentNumber",
     value: function updateCharacterSegmentNumber(idx) {
       if (idx < BACK_BUFFER_ANOUNT) {
         return idx + 1;
       } else {
-        console.log(this.segmentsSinceStart);
         if (this.segmentsSinceStart <= COURSE_LENGTH) {
           this._generateSegment();
         }
@@ -3102,8 +3156,8 @@ var Slope = function (_GameObject) {
         collisionData = CollisionUtils.sphereCollidesCapsule(MathUtils.mat4TranslationComponent(obstacle.getTransformationMatrix()), TREE_RADIUS, capsulePointA, capsulePointB, capsuleRadius);
         if (collisionData) return collisionData;
       }
-      for (var _i3 = 0; _i3 < this.obstacles[segment_number + 1].length; ++_i3) {
-        obstacle = this.obstacles[segment_number + 1][_i3];
+      for (var _i2 = 0; _i2 < this.obstacles[segment_number + 1].length; ++_i2) {
+        obstacle = this.obstacles[segment_number + 1][_i2];
         collisionData = CollisionUtils.sphereCollidesCapsule(MathUtils.mat4TranslationComponent(obstacle.getTransformationMatrix()), TREE_RADIUS, capsulePointA, capsulePointB, capsuleRadius);
         if (collisionData) return collisionData;
       }
@@ -3123,6 +3177,16 @@ var Slope = function (_GameObject) {
           delete _this3.balloons[segment_number][key];
         }
       });
+      if (segment_number < this.balloons.length - 1) {
+
+        Object.keys(this.balloons[segment_number + 1]).forEach(function (key) {
+          if (CollisionUtils.sphereCollidesCapsule(_this3.balloons[segment_number + 1][key].getPosition(), BALLOON_RADIUS, capsulePointA, capsulePointB, capsuleRadius)) {
+            ++points;
+            delete _this3.rasterizer.objects[_this3.balloons[segment_number + 1][key].id];
+            delete _this3.balloons[segment_number + 1][key];
+          }
+        });
+      }
       return points;
     }
   }, {
@@ -3233,14 +3297,11 @@ var Slope = function (_GameObject) {
         transformedPos = newSegment.slice(i, i + 3);
         transformedPos.push(1);
         transformedPos = MathUtils.multiplyVec4ByMatrix4(transformationMatrix, transformedPos);
-        for (var _i4 = 0; _i4 < 3; ++_i4) {
-          transformedSegment.push(transformedPos[_i4]);
+        for (var _i3 = 0; _i3 < 3; ++_i3) {
+          transformedSegment.push(transformedPos[_i3]);
         }
       }
       this._addEdgeLoop(transformedSegment);
-      this._addSideGeometrySegment();
-      this._addObstacleSegment();
-      this._addBalloonsSegment();
       //this.segmentPosition =
       //  MathUtils.mat4TranslationComponent(segmentMatrix);
       this.segmentMatrices.push(transformationMatrix);
@@ -3255,6 +3316,33 @@ var Slope = function (_GameObject) {
       } else {
         this.generateNewSegmentRotation();
         this._extrapolateNextSegment(this.segmentRotation);
+        this._addSideGeometrySegment();
+        this._addObstacleSegment();
+        this._addBalloonsSegment();
+      }
+    }
+  }, {
+    key: "_generateFinishLine",
+    value: function _generateFinishLine() {
+      var interpolateTowardX = 0.3;
+      var interpolateTowardY = 0;
+      var rotation = this.segmentRotation;
+      var lastMatrix = this.segmentMatrices[this.segmentMatrices.length - 1];
+      var finishLine = new _game_object2.default(this.finishLineMesh, undefined, true);
+      rasterizer.objects["finish_line"] = finishLine;
+      finishLine.setPosition(MathUtils.mat4TranslationComponent(lastMatrix));
+
+      //figures out the appropriate zRotation
+
+      finishLine.setRotation(MathUtils.axisAngleToQuaternion([0, 0, 1], -1 * this.segmentRotation[2]));
+
+      for (var i = 0; i < FINISH_LINE_LENGTH; ++i) {
+        rotation[0] = (rotation[0] * 2 + interpolateTowardX) / 3;
+        rotation[1] = (rotation[1] * 2 + interpolateTowardY) / 3;
+        this._extrapolateNextSegment(rotation);
+        this._addSideGeometrySegment();
+        this.obstacles.push([]);
+        this.balloons.push([]);
       }
     }
   }, {
@@ -3264,16 +3352,16 @@ var Slope = function (_GameObject) {
       for (var i = 0; i < vertices.length; ++i) {
         this.mesh.vertices.push(vertices[i]);
       }
-      for (var _i5 = startIdx; _i5 < startIdx + EDGE_LOOP_RESOLUTION; ++_i5) {
+      for (var _i4 = startIdx; _i4 < startIdx + EDGE_LOOP_RESOLUTION; ++_i4) {
         //first triangle
-        this.mesh.faces.push(_i5);
-        this.mesh.faces.push(_i5 + 1);
-        this.mesh.faces.push(_i5 + EDGE_LOOP_RESOLUTION + 1);
+        this.mesh.faces.push(_i4);
+        this.mesh.faces.push(_i4 + 1);
+        this.mesh.faces.push(_i4 + EDGE_LOOP_RESOLUTION + 1);
 
         //second triangle
-        this.mesh.faces.push(_i5 + 1);
-        this.mesh.faces.push(_i5 + EDGE_LOOP_RESOLUTION + 2);
-        this.mesh.faces.push(_i5 + EDGE_LOOP_RESOLUTION + 1);
+        this.mesh.faces.push(_i4 + 1);
+        this.mesh.faces.push(_i4 + EDGE_LOOP_RESOLUTION + 2);
+        this.mesh.faces.push(_i4 + EDGE_LOOP_RESOLUTION + 1);
 
         /*triangle configuration
               t2 , t2      t1
@@ -3291,7 +3379,7 @@ var Slope = function (_GameObject) {
         this.mesh.vertices.shift();
       }
       //values per face is 3, there are two faces per segment
-      for (var _i6 = 0; _i6 < EDGE_LOOP_RESOLUTION * 6; ++_i6) {
+      for (var _i5 = 0; _i5 < EDGE_LOOP_RESOLUTION * 6; ++_i5) {
         this.mesh.faces.pop();
       }
       this.segmentMatrices.shift();
@@ -3430,6 +3518,18 @@ exports.default = {
 
     "animations": {}
 };
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports) {
+
+module.exports = {"vertexNormalIndices":[0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5],"vertexNormals":[0,-1,0,0,-1,-2.88361e-7,0,-1,0,0,-1,0,0,-1,0,0,-1,0],"vertexPositionIndices":[1,2,3,5,7,4,9,10,11,1,0,2,5,6,7,9,8,10],"vertexPositions":[-44.8994,0.05830764,41.70965,-42.68512,0.05830746,41.70965,-44.89939,0.05830627,-31.0142,-42.68511,0.05830627,-31.0142,42.86183,0.05830496,26.30216,42.86181,0.05830061,41.30216,-42.68512,0.05830746,41.30216,-42.68511,0.05830627,26.30216,42.67117,0.05830764,41.70965,44.88545,0.05830746,41.70965,42.67119,0.05830627,-31.0142,44.88547,0.05830627,-31.0142],"vertexColors":[],"vertexColorIndices":[],"jointParents":{"Bone":null},"vertexUVIndices":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"vertexUVs":[0.06513917,0.8626151,0.05330669,0.6880213,0.06513917,0.6880214,2.708732,0.9698154,-1.871233,0.01333433,2.708734,0.01333367,0.06513917,0.8626151,0.05330669,0.6880213,0.06513917,0.6880214,0.06513917,0.8626151,0.05330681,0.8626151,0.05330669,0.6880213,2.708732,0.9698154,-1.871234,0.9698154,-1.871233,0.01333433,0.06513917,0.8626151,0.05330681,0.8626151,0.05330669,0.6880213]}
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports) {
+
+module.exports = {"vertexNormalIndices":[0,1,2,3,4,5,1,6,7,8,9,4,10,8,3,1,11,12,13,14,15,5,16,17,18,17,12,10,16,19,15,16,13,10,9,20,19,21,9,22,10,3,22,5,17,23,24,18,25,23,11,26,14,27,15,26,24,18,26,28,18,29,22,13,29,27,30,7,6,16,31,17,12,31,6,1,32,2,2,30,16,21,33,34,5,34,33,5,35,19,4,21,34,2,15,0,15,24,0,0,25,1,3,8,4,1,12,6,8,20,9,10,20,8,1,25,11,13,27,14,5,19,16,12,11,23,18,22,17,12,23,18,10,13,16,15,2,16,10,19,9,19,35,21,22,13,10,22,3,5,23,0,24,25,0,23,29,28,27,28,26,27,15,14,26,18,24,26,18,28,29,13,22,29,6,31,30,30,32,7,16,30,31,12,17,31,1,7,32,2,32,30,21,35,33,5,4,34,5,33,35,4,9,21],"vertexNormals":[0.1578441,0.07709085,0.9844502,-0.2435438,0.5958583,0.7652708,-0.2607595,-0.3937944,0.8814366,0.6830729,0.1380062,-0.717193,-0.5637241,-0.6948965,-0.4464685,-0.797869,-0.0900017,-0.5960747,-0.8359538,0.3990397,0.3767606,-0.8025128,0.1959358,0.5635444,0.7628527,-0.6322009,-0.1355654,-0.2324382,-0.4536756,0.8603203,0.3912606,-0.3868658,0.8350149,0.6799009,0.6213961,-0.3893606,-0.5481228,0.6993754,-0.4587324,0.3417558,-0.851948,0.3967211,0.9343093,-0.06503599,0.3504804,0.4040173,-0.2824581,0.8700503,-0.1534189,-0.4457603,0.8819073,-0.7695468,-0.3245128,-0.5499902,0.7566905,0.1214355,-0.6423965,-0.2692422,0.6817729,0.6802164,0.4464956,-0.2739402,0.8518208,-0.7151586,-0.2561484,0.6503356,0.8723926,-0.2313969,-0.4305655,0.8389486,0.03027522,-0.5433679,0.2152521,0.5606687,0.7995732,0.5735419,0.1811602,0.7988935,0.7396067,0.5798683,0.3416645,0.8152847,-0.4512845,0.3628404,0.8285446,0.5221894,0.2020699,0.911274,-0.3381227,0.2350592,-0.6468455,-0.6713521,0.3617696,-0.8574784,-0.3455123,0.3812507,-0.83705,-0.3543279,0.4168922,-0.8633521,0.4751504,0.1698688,-0.8550981,-0.4235205,0.2990615,-0.5927205,0.6913902,0.4131128],"vertexPositionIndices":[21,6,12,17,3,14,6,29,28,1,2,3,15,1,17,6,5,7,10,22,13,14,8,9,18,9,7,15,8,16,13,8,10,15,2,0,16,34,2,11,15,17,11,14,9,20,19,18,4,20,5,25,22,23,13,25,19,18,25,26,18,24,11,10,24,23,31,28,29,8,30,9,7,30,29,6,27,12,12,31,8,34,32,33,14,33,32,14,35,16,3,34,33,12,13,21,13,19,21,21,4,6,17,1,3,6,7,29,1,0,2,15,0,1,6,4,5,10,23,22,14,16,8,7,5,20,18,11,9,7,20,18,15,10,8,13,12,8,15,16,2,16,35,34,11,10,15,11,17,14,20,21,19,4,21,20,24,26,23,26,25,23,13,22,25,18,19,25,18,26,24,10,11,24,29,30,31,31,27,28,8,31,30,7,9,30,6,28,27,12,27,31,34,35,32,14,3,33,14,32,35,3,2,34],"vertexPositions":[9.13724,-8.441002,16.42844,21.40076,-14.86361,-6.043671,-8.205769,-8.477887,16.43557,-20.89053,-15.02145,-6.189342,9.193512,9.071981,20.0153,21.39018,15.35777,-6.241027,-8.214997,9.1348,20.02372,-20.91537,15.55163,-6.224918,-5.169699,-2.668061,15.12361,-23.00105,-2.229995,-7.516958,12.32366,-2.860654,14.46453,21.41224,-3.935491,-6.678593,-7.146565,1.508543,21.19001,11.80308,1.287835,20.92481,-20.98055,-5.485781,-6.357476,8.379414,-3.666539,13.62816,-8.332114,-3.142496,15.43783,20.89326,-7.531758,-10.6343,21.35365,5.993031,-6.578738,10.51145,5.281824,20.46234,21.42121,10.51972,-6.419772,5.929622,6.301643,19.05932,16.08014,1.73341,15.37579,16.35935,-0.7306554,11.60713,21.72446,-1.105398,-0.4456169,15.25643,4.204691,15.03962,21.67695,4.809314,-0.3727903,-13.11554,2.72943,17.00121,-13.74988,7.065863,16.38793,-21.05705,11.21178,1.681342,-22.16477,0.9264541,0.9901357,-11.9815,0.2096481,13.39752,-21.50366,-6.041234,-2.828486,-21.52686,-12.82521,-2.748916,-12.34281,-7.719856,13.13712,-12.3451,-3.757639,12.25144],"vertexColors":[0.9294118,0.9490196,1,0.9058824,0.9254902,1,0.8235294,0.8470588,0.8862745,0.4784314,0.4862745,0.4431372,0.4745098,0.4862745,0.4509804,0.4431372,0.4549019,0.4156863,0.9058824,0.9254902,1,0.6156863,0.6392157,0.6235294,0.7607843,0.7843137,0.8156863,0.5215687,0.5372549,0.4941176,0.772549,0.7960785,0.8235294,0.4745098,0.4901961,0.4509804,0.9098039,0.9294118,0.9960784,0.5215687,0.5372549,0.4941176,0.4784314,0.4862745,0.4431372,0.9058824,0.9254902,1,0.6509804,0.6588236,0.6784314,0.4823529,0.4980392,0.4588235,0.8352941,0.8588235,0.9019608,0.8745098,0.8901961,0.9568628,0.9058824,0.9254902,0.9882353,0.4431372,0.4549019,0.4196078,0.8156863,0.8431373,0.8784314,0.4470588,0.4588235,0.4235294,0.5176471,0.5294118,0.4862745,0.4470588,0.4588235,0.4235294,0.4823529,0.4980392,0.4588235,0.9098039,0.9294118,0.9960784,0.8156863,0.8392157,0.8784314,0.8509804,0.8745098,0.9254902,0.9058824,0.9254902,0.9882353,0.8156863,0.8431373,0.8784314,0.8352941,0.8588235,0.9019608,0.9098039,0.9294118,0.9960784,0.772549,0.8,0.8235294,0.8509804,0.8745098,0.9254902,0.8509804,0.8745098,0.9254902,0.7215687,0.7450981,0.7568628,0.772549,0.7960785,0.8235294,0.4980392,0.509804,0.4666666,0.9098039,0.9294118,0.9960784,0.4784314,0.4862745,0.4431372,0.4980392,0.509804,0.4666666,0.4431372,0.4549019,0.4156863,0.4470588,0.4588235,0.4235294,0.5019608,0.509804,0.4705882,0.9490196,0.9647059,1,0.4901961,0.4980392,0.4588235,0.9607843,0.9764706,1,0.5019608,0.509804,0.4705882,0.6509804,0.6588236,0.6784314,0.9058824,0.9215686,1,0.8745098,0.8901961,0.9568628,0.8313726,0.8509804,0.9019608,0.9058824,0.9254902,0.9882353,0.9058824,0.9215686,1,0.9490196,0.9647059,1,0.4901961,0.4980392,0.4588235,0.9058824,0.9215686,1,0.8352941,0.8509804,0.9098039,0.4901961,0.4980392,0.4588235,0.7764706,0.7921569,0.8313726,0.4980392,0.509804,0.4666666,0.8352941,0.8588235,0.9019608,0.7764706,0.7921569,0.8313726,0.8313726,0.8509804,0.9019608,0.6470589,0.6745098,0.6588236,0.7607843,0.7843137,0.8156863,0.6156863,0.6392157,0.6235294,0.8156863,0.8431373,0.8784314,0.5686275,0.5960785,0.5568628,0.4470588,0.4588235,0.4235294,0.4823529,0.4980392,0.4588235,0.5686275,0.5960785,0.5568628,0.6156863,0.6392157,0.6235294,0.9058824,0.9254902,1,0.7254902,0.7529412,0.7647059,0.8235294,0.8470588,0.8862745,0.8235294,0.8470588,0.8862745,0.6470589,0.6745098,0.6588236,0.8156863,0.8431373,0.8784314,0.7215687,0.7450981,0.7568628,0.5764706,0.6,0.5725491,0.5568628,0.5803922,0.5411765,0.4431372,0.4549019,0.4156863,0.5568628,0.5803922,0.5411765,0.5764706,0.6,0.5725491,0.4431372,0.4549019,0.4156863,0.7764706,0.7960785,0.8352941,0.8509804,0.8745098,0.9254902,0.4745098,0.4862745,0.4509804,0.7215687,0.7450981,0.7568628,0.5568628,0.5803922,0.5411765,0.8235294,0.8470588,0.8862745,0.9058824,0.9254902,0.9882353,0.9294118,0.9490196,1,0.9058824,0.9254902,0.9882353,0.9490196,0.9647059,1,0.9294118,0.9490196,1,0.9294118,0.9490196,1,0.9607843,0.9764706,1,0.9058824,0.9254902,1,0.4784314,0.4862745,0.4431372,0.5215687,0.5372549,0.4941176,0.4745098,0.4862745,0.4509804,0.9058824,0.9254902,1,0.4823529,0.4980392,0.4588235,0.6156863,0.6392157,0.6235294,0.5215687,0.5372549,0.4941176,0.8509804,0.8745098,0.9254902,0.772549,0.7960785,0.8235294,0.9098039,0.9294118,0.9960784,0.8509804,0.8745098,0.9254902,0.5215687,0.5372549,0.4941176,0.9058824,0.9254902,1,0.9607843,0.9764706,1,0.6509804,0.6588236,0.6784314,0.8352941,0.8588235,0.9019608,0.8313726,0.8509804,0.9019608,0.8745098,0.8901961,0.9568628,0.4431372,0.4549019,0.4196078,0.8509804,0.8745098,0.9254902,0.8156863,0.8431373,0.8784314,0.4823529,0.4980392,0.4588235,0.6509804,0.6588236,0.6784314,0.5019608,0.509804,0.4705882,0.5176471,0.5294118,0.4862745,0.4980392,0.509804,0.4666666,0.4470588,0.4588235,0.4235294,0.4823529,0.4980392,0.4588235,0.5019608,0.509804,0.4705882,0.5176471,0.5294118,0.4862745,0.9098039,0.9294118,0.9960784,0.8352941,0.8588235,0.9019608,0.8156863,0.8392157,0.8784314,0.9058824,0.9254902,0.9882353,0.8235294,0.8470588,0.8862745,0.8156863,0.8431373,0.8784314,0.9098039,0.9294118,0.9960784,0.8509804,0.8745098,0.9254902,0.772549,0.8,0.8235294,0.8509804,0.8745098,0.9254902,0.7764706,0.7960785,0.8352941,0.7215687,0.7450981,0.7568628,0.4980392,0.509804,0.4666666,0.8352941,0.8588235,0.9019608,0.9098039,0.9294118,0.9960784,0.4980392,0.509804,0.4666666,0.4784314,0.4862745,0.4431372,0.4431372,0.4549019,0.4156863,0.5019608,0.509804,0.4705882,0.9294118,0.9490196,1,0.9490196,0.9647059,1,0.9607843,0.9764706,1,0.9294118,0.9490196,1,0.5019608,0.509804,0.4705882,0.7764706,0.7921569,0.8313726,0.8352941,0.8509804,0.9098039,0.8313726,0.8509804,0.9019608,0.8352941,0.8509804,0.9098039,0.9058824,0.9215686,1,0.8313726,0.8509804,0.9019608,0.9058824,0.9254902,0.9882353,0.8745098,0.8901961,0.9568628,0.9058824,0.9215686,1,0.4901961,0.4980392,0.4588235,0.9490196,0.9647059,1,0.9058824,0.9215686,1,0.4901961,0.4980392,0.4588235,0.8352941,0.8509804,0.9098039,0.7764706,0.7921569,0.8313726,0.8352941,0.8588235,0.9019608,0.4980392,0.509804,0.4666666,0.7764706,0.7921569,0.8313726,0.6156863,0.6392157,0.6235294,0.5686275,0.5960785,0.5568628,0.6470589,0.6745098,0.6588236,0.6470589,0.6745098,0.6588236,0.7254902,0.7529412,0.7647059,0.7607843,0.7843137,0.8156863,0.8156863,0.8431373,0.8784314,0.6470589,0.6745098,0.6588236,0.5686275,0.5960785,0.5568628,0.4823529,0.4980392,0.4588235,0.4470588,0.4588235,0.4235294,0.5686275,0.5960785,0.5568628,0.9058824,0.9254902,1,0.7607843,0.7843137,0.8156863,0.7254902,0.7529412,0.7647059,0.8235294,0.8470588,0.8862745,0.7254902,0.7529412,0.7647059,0.6470589,0.6745098,0.6588236,0.7215687,0.7450981,0.7568628,0.7764706,0.7960785,0.8352941,0.5764706,0.6,0.5725491,0.4431372,0.4549019,0.4156863,0.4745098,0.4862745,0.4509804,0.5568628,0.5803922,0.5411765,0.4431372,0.4549019,0.4156863,0.5764706,0.6,0.5725491,0.7764706,0.7960785,0.8352941,0.4745098,0.4862745,0.4509804,0.772549,0.8,0.8235294,0.7215687,0.7450981,0.7568628],"vertexColorIndices":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203],"jointParents":{"Bone":null}}
 
 /***/ })
 /******/ ]);

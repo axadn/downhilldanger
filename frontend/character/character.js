@@ -14,13 +14,11 @@ const COLLISION_INTENSITY_MIN_VELOCITY = 2;
 const COLLISION_INTENSITY_MAX_VELOCITY = 10;
 const SPEED_VOLUME_INTENSITY_MIN_VELOCITY = 0.2;
 const SPEED_VOLUME_INTENSITY_MAX_VELOCITY = 20;
-const HUD_DISPLAY_SPEED_MULTIPLIER = 8;
 
 import * as MathUtils from "../utils/math_utils";
 import * as HUD from "../hud/hud";
 window.MathUtils = MathUtils;
 import * as CollisionUtils from "../utils/collision_utils";
-import {UPDATE_INTERVAL} from "../game_object/game_object";
 import * as AssetUtils from "../utils/asset_utils";
 
 import snowboarder_data from "../snowboarder";
@@ -67,16 +65,33 @@ export default function createCharacter(slope){
 }
 
 class Character extends GameObject{
-  constructor({mesh, boundingBox, slope, transformationMatrix}){
-    super(mesh, transformationMatrix || MathUtils.identityMatrix4);
+  constructor({mesh, boundingBox, slope}){
+    super(mesh);
     window.character = this;
     this.mesh = mesh;
     this.boundingBox = boundingBox;
-    this.state = "ground";
-    this.speed = 0.2;
-    this.fallSpeed = 0.15;
+    
     this.slope = slope;
     this.currentSegmentNumber = 0;
+    
+    this.capsuleRadius = 2;
+    this.setPosition([0,0,16]);
+    this.name = "snowboarder";
+    
+    window.character = this;
+    this.mixedAnimations = Array(this.mesh.numBones * 8);
+    this.snowSound = AudioMixer.play({buffer: effectBuffers.sliding,
+      priority: 10, volume: 0, loop: true});
+    this._setup();
+  }
+  _setup(){
+    this.segmentsSinceStart = 0;
+    this.setPosition([0,0,16]);
+    this.setRotation(MathUtils.IdentityQuaternion);
+    this.setAngularVelocity(MathUtils.IdentityQuaternion);
+    this.state = "ground";
+    this.speed = 0.3;
+    this.fallSpeed = 0.15;
     this.input = {left: false, right: false, back: false, jump: false};
     this.velocity = [0,1,0];
     this.localVelocity = [0,0,0];
@@ -84,20 +99,16 @@ class Character extends GameObject{
     this.friction = SNOWBOARD_FRICTION;
     this.restitution = SNOWBOARD_RESTITUTION;
     this.boxDimensions = [0.5,5,0.5];
-    this.capsuleRadius = 2;
-    this.setPosition([0,0,16]);
-    this.name = "snowboarder";
     this.currentAnimations = {
       "neutral":{influence: 1, loop: true, frame: 0},
       "left":{influence: 0, loop: true, frame: 0},
       "right":{influence: 0, loop: true, frame: 0},
       "brake":{influence: 0, loop: false, frame: 0}
     };
-    this.currentAnimationFrame = 0;
-    window.character = this;
-    this.mixedAnimations = Array(this.mesh.numBones * 8);
-    this.snowSound = AudioMixer.play({buffer: effectBuffers.sliding,
-      priority: 10, volume: 0, loop: true});
+
+  }
+  reset(){
+    this._setup();
   }
   _applyGravityStep(){
     this.velocity[2] -= this.fallSpeed;
@@ -117,7 +128,6 @@ class Character extends GameObject{
     const surfaceOffset = MathUtils.subtractVectors
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
-    HUD.updateSpeed(MathUtils.vectorMag(this.velocity)*HUD_DISPLAY_SPEED_MULTIPLIER);
     switch(this.state){
       case "ground":
         this._groundControls();
@@ -386,6 +396,7 @@ class Character extends GameObject{
     if(this.currentSegmentNumber < this.slope.segmentMatrices.length -1 &&
       this.slope.positionIsPastSegmentStart(this.getPosition(),
       this.currentSegmentNumber + 1)){
+        ++this.segmentsSinceStart;
       this.currentSegmentNumber = this.slope.updateCharacterSegmentNumber(this.currentSegmentNumber);
       let triangleAfterMove = this.slope.getSurroundingTriangle(this.getPosition(),
          this.currentSegmentNumber) || this.floorTriangle;

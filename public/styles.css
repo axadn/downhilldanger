@@ -15,10 +15,11 @@ body{
   }
   .game-display{
       position: relative;
-      width: 720px;
+      width: 620px;
     height: 526px;
   }
   .hud{
+    z-index: 1000;
     width: 100%;
     position: absolute;
     display: flex;
@@ -32,6 +33,20 @@ body{
     -webkit-text-stroke-color: black;
     font-family: 'PT Mono', monospace;
     font-weight: 900;
+  }
+  .start-menu{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-top: 100px;
+  }
+  .start-button{
+    width: 100px;
+    height: 55px;
+  }
+  .start-button:hover{
+    cursor:pointer; 
+
   }
   .hud-speed_val{
     margin-left: 40px;
