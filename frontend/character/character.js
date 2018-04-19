@@ -128,9 +128,12 @@ class Character extends GameObject{
     const surfaceOffset = MathUtils.subtractVectors
       (this.getPosition(),this.surfacePoint);
     const distanceFromSurface = MathUtils.vectorSquareMag(surfaceOffset);
+    this._steerControls();
     switch(this.state){
       case "ground":
-        this._groundControls();
+        if(this.input.jump){
+          this._jump();
+        }
         let snowVolume = MathUtils.vectorMag(this.velocity);
         snowVolume -= SPEED_VOLUME_INTENSITY_MIN_VELOCITY;
         if (snowVolume < 0) snowVolume = 0;
@@ -367,17 +370,15 @@ class Character extends GameObject{
       this.currentAnimations[key].reverse = false;
     }
   }
-  _groundControls(){
+  _steerControls(){
     if(this.input.back){
       this.friction = BREAK_FRICTION
       this.brakeAnimation();
     }
     else{
       this.friction = SNOWBOARD_FRICTION;
-      if(this.input.jump){
-        this._jump();
-      }
-      else if(this.input.left ? !this.input.right : this.input.right){
+      
+      if(this.input.left ? !this.input.right : this.input.right){
         if(this.input.right){
           this._steer(-1);
           this.steerAnimationRight();
