@@ -1366,11 +1366,9 @@ var Game = function () {
       this.camera.setRotation(finalRotation);
       this.camera.setPosition(this.camera.target.getPosition());
       if (this.slope.positionIsBeyondEdge(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET), this.character.currentSegmentNumber)) {
-        this.camera.setPosition(currentPosition);
         this.camera.setRotation(currentRotation);
-      } else {
-        this.camera.setPosition(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
       }
+      this.camera.setPosition(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
     }
   }, {
     key: "start",
