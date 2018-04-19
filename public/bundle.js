@@ -1318,16 +1318,7 @@ function positionCamera(camera) {
     //newPos[2] = this.cameraTarget.getPosition()[2] + 10;
     // this.camera.setPosition(newPos);
     //this.camera.setRotation(this.cameraTarget.getRotation());
-    var rotation = camera.target.getRotation();
 
-    var upLocal = camera.target.inverseTransformDirection([0, 0, 1]);
-    var angleToUp = MathUtils.angleBetweenVectors([0, 0, 1], upLocal);
-    var upAlignAxis = MathUtils.vectorCross(upLocal, [0, 0, 1]);
-    var targetRotation = MathUtils.multiplyQuaternions(MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp), rotation);
-    var finalRotation = MathUtils.lerpQuaternions(camera.getRotation(), targetRotation, 0.9);
-    camera.setRotation(finalRotation);
-    camera.setPosition(camera.target.getPosition());
-    camera.setPosition(camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
   };
 }
 
@@ -1346,7 +1337,7 @@ var Game = function () {
     rasterizer.camera = new _game_object2.default();
     rasterizer.camera.target = this.character;
     rasterizer.drawObjects.bind(rasterizer)();
-    this._updateCamera = positionCamera(rasterizer.camera);
+    this.camera = rasterizer.camera;
     this.fixedUpdate = this.fixedUpdate.bind(this);
   }
 
@@ -1354,12 +1345,32 @@ var Game = function () {
     key: "fixedUpdate",
     value: function fixedUpdate() {
       this.character.update();
-      this._updateCamera();
+      this.positionCamera();
     }
   }, {
     key: "startMenu",
     value: function startMenu() {
       HUD.doStartMenuHUD(this.start);
+    }
+  }, {
+    key: "positionCamera",
+    value: function positionCamera() {
+      var rotation = this.camera.target.getRotation();
+      var upLocal = this.camera.target.inverseTransformDirection([0, 0, 1]);
+      var angleToUp = MathUtils.angleBetweenVectors([0, 0, 1], upLocal);
+      var upAlignAxis = MathUtils.vectorCross(upLocal, [0, 0, 1]);
+      var targetRotation = MathUtils.multiplyQuaternions(MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp), rotation);
+      var finalRotation = MathUtils.lerpQuaternions(this.camera.getRotation(), targetRotation, 0.9);
+      var currentPosition = this.camera.getPosition();
+      var currentRotation = this.camera.getRotation();
+      this.camera.setRotation(finalRotation);
+      this.camera.setPosition(this.camera.target.getPosition());
+      if (this.slope.positionIsBeyondEdge(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET), this.character.currentSegmentNumber)) {
+        this.camera.setPosition(currentPosition);
+        this.camera.setRotation(currentRotation);
+      } else {
+        this.camera.setPosition(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
+      }
     }
   }, {
     key: "start",

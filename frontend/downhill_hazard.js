@@ -32,16 +32,16 @@ function assetsLoaded({character, slope, skybox}){
   skybox.mesh.buffers = rasterizer.sendMeshToGPU(skybox.mesh);
   rasterizer.skyBox = skybox;
   rasterizer.objects.character = character;
-    window.rasterizer = rasterizer;
-    rasterizer.cameraTarget = character;
-    rasterizer.position[1] -= 2;
-    rasterizer.position[0] += 0.3;
-    rasterizer.rotation[0] -= 0.4;
-    rasterizer.position[2] += 0.7;
-    rasterizer.objects.slope = slope;
-    rasterizer.position = [0,-6,0];
-    const game = new Game(slope, character);
-    game.startMenu();
+  window.rasterizer = rasterizer;
+  rasterizer.cameraTarget = character;
+  rasterizer.position[1] -= 2;
+  rasterizer.position[0] += 0.3;
+  rasterizer.rotation[0] -= 0.4;
+  rasterizer.position[2] += 0.7;
+  rasterizer.objects.slope = slope;
+  rasterizer.position = [0,-6,0];
+  const game = new Game(slope, character);
+  game.startMenu();
 };
 function positionCamera(camera){
   return ()=>{
@@ -49,19 +49,7 @@ function positionCamera(camera){
     //newPos[2] = this.cameraTarget.getPosition()[2] + 10;
     // this.camera.setPosition(newPos);
     //this.camera.setRotation(this.cameraTarget.getRotation());
-    let rotation = camera.target.getRotation();
-    
-    const upLocal = camera.target.inverseTransformDirection([0,0,1]);
-    const angleToUp = MathUtils.angleBetweenVectors([0,0,1], upLocal);
-    const upAlignAxis = MathUtils.vectorCross(upLocal, [0,0,1]);
-    const targetRotation = MathUtils.multiplyQuaternions(
-        MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp),
-        rotation
-    );
-    const finalRotation = MathUtils.lerpQuaternions(camera.getRotation(), targetRotation, 0.9);
-    camera.setRotation(finalRotation);
-    camera.setPosition(camera.target.getPosition());
-    camera.setPosition(camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
+   
   };
  }
 class Game{
@@ -77,15 +65,38 @@ class Game{
     rasterizer.camera = new GameObject();
     rasterizer.camera.target = this.character;
     rasterizer.drawObjects.bind(rasterizer)();
-    this._updateCamera = positionCamera(rasterizer.camera);
+    this.camera = rasterizer.camera;
     this.fixedUpdate = this.fixedUpdate.bind(this);
   }
   fixedUpdate(){
     this.character.update();
-    this._updateCamera();
+    this.positionCamera();
   }
   startMenu(){
     HUD.doStartMenuHUD(this.start);
+  }
+  positionCamera(){
+    let rotation = this.camera.target.getRotation();
+    const upLocal = this.camera.target.inverseTransformDirection([0,0,1]);
+    const angleToUp = MathUtils.angleBetweenVectors([0,0,1], upLocal);
+    const upAlignAxis = MathUtils.vectorCross(upLocal, [0,0,1]);
+    const targetRotation = MathUtils.multiplyQuaternions(
+        MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp),
+        rotation
+    );
+    const finalRotation = MathUtils.lerpQuaternions(this.camera.getRotation(), targetRotation, 0.9);
+    const currentPosition = this.camera.getPosition();
+    const currentRotation = this.camera.getRotation();
+    this.camera.setRotation(finalRotation);
+    this.camera.setPosition(this.camera.target.getPosition());
+    if(this.slope.positionIsBeyondEdge(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET),
+     this.character.currentSegmentNumber)){
+      this.camera.setPosition(currentPosition);
+      this.camera.setRotation(currentRotation);
+    }
+    else{
+      this.camera.setPosition(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
+    }
   }
   start(){
     HUD.startGameplayHUD();
