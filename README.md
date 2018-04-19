@@ -88,7 +88,9 @@ These allow you to draw lines and circles between points in 3D space from the co
 - [x] Implement an object pool for the trees to help slowdowns due to garbage collection
 - [x] Do more math and physics operations in place to create less garbage
 - [x] Add skeletal animation support
-- [ ] texture the player
-- [ ] implement the finish line
+- [x] texture the player
+- [x] implement the finish line
 - [ ] add other obstacle types
+- [ ] database for storing high scores
 - [x] sound effects
+- [ ] prevent camera from colliding with edge of course
