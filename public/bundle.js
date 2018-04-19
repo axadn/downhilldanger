@@ -1417,7 +1417,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var DEFAULT_CAMERA_DIST = 1;
+var GAMEPLAY_CAMERA_POS_OFFSET = [-0.5, -14, 10];
+var GAMEPLAY_CAMERA_ROT_OFFSET = [];
 var BONE_INFLUENCES = 2;
 
 var ObjectsRasterizer = exports.ObjectsRasterizer = function () {
@@ -1436,7 +1437,6 @@ var ObjectsRasterizer = exports.ObjectsRasterizer = function () {
       alert("Unable to initialize WebGL. Your browser or machine may not support it");
       return;
     }
-    this.cameraDist = DEFAULT_CAMERA_DIST;
     this.viewMatrix = MathUtils.identityMatrix4;
     this.perspectiveMatrix = MathUtils.simple_perspective_matrix;
     this.compileDefaultShaders();
@@ -1722,15 +1722,18 @@ var ObjectsRasterizer = exports.ObjectsRasterizer = function () {
   }, {
     key: "positionCamera",
     value: function positionCamera() {
-      this.camera.setPosition(this.cameraTarget.transformPoint([0, -18, 6]));
-      var newPos = this.camera.getPosition();
-      newPos[2] = this.cameraTarget.getPosition()[2] + 10;
-      this.camera.setPosition(newPos);
+      // const newPos = this.camera.getPosition();
+      //newPos[2] = this.cameraTarget.getPosition()[2] + 10;
+      // this.camera.setPosition(newPos);
+      this.camera.setRotation(this.cameraTarget.getRotation());
       var rotation = this.cameraTarget.getRotation();
+
       var upLocal = this.cameraTarget.inverseTransformDirection([0, 0, 1]);
       var angleToUp = MathUtils.angleBetweenVectors([0, 0, 1], upLocal);
       var upAlignAxis = MathUtils.vectorCross(upLocal, [0, 0, 1]);
       this.camera.setRotation(MathUtils.multiplyQuaternions(MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp), rotation));
+      this.camera.setPosition(this.cameraTarget.getPosition());
+      this.camera.setPosition(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
     }
   }, {
     key: "calculateViewMatrix",

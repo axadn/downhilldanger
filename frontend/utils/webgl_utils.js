@@ -1,4 +1,5 @@
-const DEFAULT_CAMERA_DIST = 1;
+const GAMEPLAY_CAMERA_POS_OFFSET = [-0.5,-14, 10];
+const GAMEPLAY_CAMERA_ROT_OFFSET = [];
 const BONE_INFLUENCES = 2;
 
 import * as MathUtils from "./math_utils";
@@ -17,7 +18,6 @@ export class ObjectsRasterizer{
       alert("Unable to initialize WebGL. Your browser or machine may not support it");
       return;
     }
-    this.cameraDist = DEFAULT_CAMERA_DIST;
     this.viewMatrix = MathUtils.identityMatrix4;
     this.perspectiveMatrix = 
       MathUtils.simple_perspective_matrix;
@@ -290,11 +290,12 @@ export class ObjectsRasterizer{
     this.gl.drawElements(this.gl.TRIANGLES, 3, this.gl.UNSIGNED_SHORT,0);
   }
   positionCamera(){
-    this.camera.setPosition(this.cameraTarget.transformPoint([0, -18, 6]));
-    const newPos = this.camera.getPosition();
-    newPos[2] = this.cameraTarget.getPosition()[2] + 10;
-    this.camera.setPosition(newPos);
+   // const newPos = this.camera.getPosition();
+    //newPos[2] = this.cameraTarget.getPosition()[2] + 10;
+   // this.camera.setPosition(newPos);
+   this.camera.setRotation(this.cameraTarget.getRotation());
     let rotation = this.cameraTarget.getRotation();
+    
     const upLocal = this.cameraTarget.inverseTransformDirection([0,0,1]);
     const angleToUp = MathUtils.angleBetweenVectors([0,0,1], upLocal);
     const upAlignAxis = MathUtils.vectorCross(upLocal, [0,0,1]);
@@ -303,7 +304,9 @@ export class ObjectsRasterizer{
         MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp),
         rotation
       )
-    );
+   );
+   this.camera.setPosition(this.cameraTarget.getPosition());
+   this.camera.setPosition(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
   }
   calculateViewMatrix(){
     //let cameraMatrix =  MathUtils.swapYZMatrix;
