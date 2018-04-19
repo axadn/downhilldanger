@@ -1,5 +1,5 @@
 export const DEFAULT_ANIMATION_FRAMERATE = 60;
-export const UPDATE_INTERVAL = 33;
+
 const ANGULAR_DRAG = 0.3;
 const DRAG = 0.4;
 import * as MathUtils from "../utils/math_utils";
@@ -14,16 +14,7 @@ export default class GameObject {
     this._position = MathUtils.mat4TranslationComponent(transformationMatrix);
     this._rotation = MathUtils.IdentityQuaternion;
     this.velocity = [0,0,0];
-    this.start();
     this.angularVelocity = MathUtils.IdentityQuaternion.slice(0,4);
-  }
-  start(){
-    if(!this.isStatic){
-      this.updateHandle = setInterval(this.update.bind(this), UPDATE_INTERVAL);
-    }
-  }
-  stop(){
-    clearInterval(this.updateHandle);
   }
   update(timestamp){
     this._applyVelocityStep();

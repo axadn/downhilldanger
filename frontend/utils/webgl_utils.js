@@ -1,5 +1,4 @@
-const GAMEPLAY_CAMERA_POS_OFFSET = [-0.5,-14, 10];
-const GAMEPLAY_CAMERA_ROT_OFFSET = [];
+
 const BONE_INFLUENCES = 2;
 const CAMERA_ROT_SPEED = 0.1;
 
@@ -29,7 +28,7 @@ export class ObjectsRasterizer{
     this.position = [0,0,0];
 
     this.objects = {};
-    this.camera = new GameObject();
+    this.camera = options.camera;
   }
   compileDefaultShaders(){
     this.defaultProgram = this.compileByID("default-vertex-shader", "default-fragment-shader");
@@ -306,7 +305,6 @@ export class ObjectsRasterizer{
     this.adjustToCanvas();
     this.gl.clearColor(0.8, 0.8, 0.81, 1);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-    this.positionCamera();
     this.viewMatrix = this.calculateViewMatrix();
     if(this.skyBox){
       this.drawSkyBox();

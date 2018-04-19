@@ -563,7 +563,7 @@ var scaleQuaternion = exports.scaleQuaternion = function scaleQuaternion(quat1, 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.UPDATE_INTERVAL = exports.DEFAULT_ANIMATION_FRAMERATE = undefined;
+exports.DEFAULT_ANIMATION_FRAMERATE = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -576,7 +576,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var DEFAULT_ANIMATION_FRAMERATE = exports.DEFAULT_ANIMATION_FRAMERATE = 60;
-var UPDATE_INTERVAL = exports.UPDATE_INTERVAL = 33;
+
 var ANGULAR_DRAG = 0.3;
 var DRAG = 0.4;
 
@@ -595,23 +595,10 @@ var GameObject = function () {
     this._position = MathUtils.mat4TranslationComponent(transformationMatrix);
     this._rotation = MathUtils.IdentityQuaternion;
     this.velocity = [0, 0, 0];
-    this.start();
     this.angularVelocity = MathUtils.IdentityQuaternion.slice(0, 4);
   }
 
   _createClass(GameObject, [{
-    key: "start",
-    value: function start() {
-      if (!this.isStatic) {
-        this.updateHandle = setInterval(this.update.bind(this), UPDATE_INTERVAL);
-      }
-    }
-  }, {
-    key: "stop",
-    value: function stop() {
-      clearInterval(this.updateHandle);
-    }
-  }, {
     key: "update",
     value: function update(timestamp) {
       this._applyVelocityStep();
@@ -1232,6 +1219,11 @@ var boxColliderToPoints = exports.boxColliderToPoints = function boxColliderToPo
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.UPDATE_INTERVAL = undefined;
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _math_utils = __webpack_require__(0);
@@ -1278,6 +1270,10 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var GAMEPLAY_CAMERA_POS_OFFSET = [-0.5, -14, 10];
+var GAMEPLAY_CAMERA_ROT_OFFSET = [];
+var UPDATE_INTERVAL = exports.UPDATE_INTERVAL = 30;
+
 var HUD_DISPLAY_SPEED_MULTIPLIER = 8;
 document.addEventListener("DOMContentLoaded", main);
 function main() {
@@ -1316,6 +1312,24 @@ function assetsLoaded(_ref2) {
   var game = new Game(slope, character);
   game.startMenu();
 };
+function positionCamera(camera) {
+  return function () {
+    // const newPos = this.camera.getPosition();
+    //newPos[2] = this.cameraTarget.getPosition()[2] + 10;
+    // this.camera.setPosition(newPos);
+    //this.camera.setRotation(this.cameraTarget.getRotation());
+    var rotation = camera.target.getRotation();
+
+    var upLocal = camera.target.inverseTransformDirection([0, 0, 1]);
+    var angleToUp = MathUtils.angleBetweenVectors([0, 0, 1], upLocal);
+    var upAlignAxis = MathUtils.vectorCross(upLocal, [0, 0, 1]);
+    var targetRotation = MathUtils.multiplyQuaternions(MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp), rotation);
+    var finalRotation = MathUtils.lerpQuaternions(camera.getRotation(), targetRotation, 0.9);
+    camera.setRotation(finalRotation);
+    camera.setPosition(camera.target.getPosition());
+    camera.setPosition(camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
+  };
+}
 
 var Game = function () {
   function Game(slope, character) {
@@ -1323,17 +1337,26 @@ var Game = function () {
 
     this.slope = slope;
     this.character = character;
-    this.character.stop();
     this.keyDown = Input.keyDown(character);
     this.keyUp = Input.keyUp(character);
     this.blur = Input.releaseKeys(character);
-    rasterizer.drawObjects.bind(rasterizer)();
     this.run = this.run.bind(this);
     this.start = this.start.bind(this);
     this.restart = this.restart.bind(this);
+    rasterizer.camera = new _game_object2.default();
+    rasterizer.camera.target = this.character;
+    rasterizer.drawObjects.bind(rasterizer)();
+    this._updateCamera = positionCamera(rasterizer.camera);
+    this.fixedUpdate = this.fixedUpdate.bind(this);
   }
 
   _createClass(Game, [{
+    key: "fixedUpdate",
+    value: function fixedUpdate() {
+      this.character.update();
+      this._updateCamera();
+    }
+  }, {
     key: "startMenu",
     value: function startMenu() {
       HUD.doStartMenuHUD(this.start);
@@ -1344,13 +1367,12 @@ var Game = function () {
       HUD.startGameplayHUD();
       HUD.setStartTime(Date.now());
 
-      this.character.start();
-
       window.addEventListener("keydown", this.keyDown);
       window.addEventListener("keyup", this.keyUp);
       window.addEventListener("blur", this.blur);
 
       this.animationHandle = window.requestAnimationFrame(this.run);
+      this.fixedUpdateHandle = setInterval(this.fixedUpdate, UPDATE_INTERVAL);
     }
   }, {
     key: "run",
@@ -1368,7 +1390,7 @@ var Game = function () {
     key: "displayScores",
     value: function displayScores() {
       HUD.displayScoresStructure();
-      this.character.stop();
+      window.clearInterval(this.fixedUpdateHandle);
       window.removeEventListener("keydown", this.keyDown);
       window.removeEventListener("keyup", this.keyUp);
       window.removeEventListener("blur", this.blur);
@@ -1417,8 +1439,6 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var GAMEPLAY_CAMERA_POS_OFFSET = [-0.5, -14, 10];
-var GAMEPLAY_CAMERA_ROT_OFFSET = [];
 var BONE_INFLUENCES = 2;
 var CAMERA_ROT_SPEED = 0.1;
 
@@ -1447,7 +1467,7 @@ var ObjectsRasterizer = exports.ObjectsRasterizer = function () {
     this.position = [0, 0, 0];
 
     this.objects = {};
-    this.camera = new _game_object2.default();
+    this.camera = options.camera;
   }
 
   _createClass(ObjectsRasterizer, [{
@@ -1738,7 +1758,6 @@ var ObjectsRasterizer = exports.ObjectsRasterizer = function () {
       this.adjustToCanvas();
       this.gl.clearColor(0.8, 0.8, 0.81, 1);
       this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-      this.positionCamera();
       this.viewMatrix = this.calculateViewMatrix();
       if (this.skyBox) {
         this.drawSkyBox();

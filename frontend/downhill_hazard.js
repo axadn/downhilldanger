@@ -6,6 +6,9 @@ import GameObject from "./game_object/game_object";
 import createSkybox from "./skybox/skybox";
 import createCharacter from "./character/character";
 import {createSlope, COURSE_LENGTH} from "./slope/slope";
+const GAMEPLAY_CAMERA_POS_OFFSET = [-0.5,-14, 10];
+const GAMEPLAY_CAMERA_ROT_OFFSET = [];
+export const UPDATE_INTERVAL = 30;
 
 import Mesh from "./game_object/mesh";
 import * as HUD from "./hud/hud";
@@ -40,19 +43,46 @@ function assetsLoaded({character, slope, skybox}){
     const game = new Game(slope, character);
     game.startMenu();
 };
-
+function positionCamera(camera){
+  return ()=>{
+    // const newPos = this.camera.getPosition();
+    //newPos[2] = this.cameraTarget.getPosition()[2] + 10;
+    // this.camera.setPosition(newPos);
+    //this.camera.setRotation(this.cameraTarget.getRotation());
+    let rotation = camera.target.getRotation();
+    
+    const upLocal = camera.target.inverseTransformDirection([0,0,1]);
+    const angleToUp = MathUtils.angleBetweenVectors([0,0,1], upLocal);
+    const upAlignAxis = MathUtils.vectorCross(upLocal, [0,0,1]);
+    const targetRotation = MathUtils.multiplyQuaternions(
+        MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp),
+        rotation
+    );
+    const finalRotation = MathUtils.lerpQuaternions(camera.getRotation(), targetRotation, 0.9);
+    camera.setRotation(finalRotation);
+    camera.setPosition(camera.target.getPosition());
+    camera.setPosition(camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
+  };
+ }
 class Game{
   constructor(slope, character){
     this.slope = slope;
     this.character = character;
-    this.character.stop();
     this.keyDown = Input.keyDown(character);
     this.keyUp = Input.keyUp(character);
-    this.blur = Input.releaseKeys(character);
-    rasterizer.drawObjects.bind(rasterizer)();
+    this.blur = Input.releaseKeys(character);  
     this.run = this.run.bind(this);
     this.start = this.start.bind(this);
     this.restart = this.restart.bind(this);
+    rasterizer.camera = new GameObject();
+    rasterizer.camera.target = this.character;
+    rasterizer.drawObjects.bind(rasterizer)();
+    this._updateCamera = positionCamera(rasterizer.camera);
+    this.fixedUpdate = this.fixedUpdate.bind(this);
+  }
+  fixedUpdate(){
+    this.character.update();
+    this._updateCamera();
   }
   startMenu(){
     HUD.doStartMenuHUD(this.start);
@@ -61,13 +91,12 @@ class Game{
     HUD.startGameplayHUD();
     HUD.setStartTime(Date.now());
 
-    this.character.start();
-
     window.addEventListener("keydown", this.keyDown );
     window.addEventListener("keyup", this.keyUp );
     window.addEventListener("blur", this.blur );
 
     this.animationHandle = window.requestAnimationFrame(this.run);
+    this.fixedUpdateHandle = setInterval(this.fixedUpdate, UPDATE_INTERVAL);
   }
   run(timestamp){
     HUD.updateTime(Date.now());
@@ -82,7 +111,7 @@ class Game{
   }
   displayScores(){
     HUD.displayScoresStructure();
-    this.character.stop();
+    window.clearInterval(this.fixedUpdateHandle);
     window.removeEventListener("keydown", this.keyDown);
     window.removeEventListener("keyup", this.keyUp);
     window.removeEventListener("blur", this.blur);
