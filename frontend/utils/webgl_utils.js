@@ -1,6 +1,7 @@
 const GAMEPLAY_CAMERA_POS_OFFSET = [-0.5,-14, 10];
 const GAMEPLAY_CAMERA_ROT_OFFSET = [];
 const BONE_INFLUENCES = 2;
+const CAMERA_ROT_SPEED = 0.1;
 
 import * as MathUtils from "./math_utils";
 import GameObject from "../game_object/game_object";
@@ -289,25 +290,7 @@ export class ObjectsRasterizer{
     this.gl.clearColor(0.5, 0.5, 0.5, 0.9);
     this.gl.drawElements(this.gl.TRIANGLES, 3, this.gl.UNSIGNED_SHORT,0);
   }
-  positionCamera(){
-   // const newPos = this.camera.getPosition();
-    //newPos[2] = this.cameraTarget.getPosition()[2] + 10;
-   // this.camera.setPosition(newPos);
-   this.camera.setRotation(this.cameraTarget.getRotation());
-    let rotation = this.cameraTarget.getRotation();
-    
-    const upLocal = this.cameraTarget.inverseTransformDirection([0,0,1]);
-    const angleToUp = MathUtils.angleBetweenVectors([0,0,1], upLocal);
-    const upAlignAxis = MathUtils.vectorCross(upLocal, [0,0,1]);
-    this.camera.setRotation(
-      MathUtils.multiplyQuaternions(
-        MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp),
-        rotation
-      )
-   );
-   this.camera.setPosition(this.cameraTarget.getPosition());
-   this.camera.setPosition(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
-  }
+  
   calculateViewMatrix(){
     //let cameraMatrix =  MathUtils.swapYZMatrix;
     let cameraMatrix = this.camera.getTransformationMatrix();

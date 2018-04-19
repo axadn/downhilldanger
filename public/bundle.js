@@ -1420,6 +1420,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var GAMEPLAY_CAMERA_POS_OFFSET = [-0.5, -14, 10];
 var GAMEPLAY_CAMERA_ROT_OFFSET = [];
 var BONE_INFLUENCES = 2;
+var CAMERA_ROT_SPEED = 0.1;
 
 var ObjectsRasterizer = exports.ObjectsRasterizer = function () {
   function ObjectsRasterizer() {
@@ -1718,22 +1719,6 @@ var ObjectsRasterizer = exports.ObjectsRasterizer = function () {
       this.gl.vertexAttribPointer(posAttrIndex, 3, this.gl.FLOAT, false, 0, 0);
       this.gl.clearColor(0.5, 0.5, 0.5, 0.9);
       this.gl.drawElements(this.gl.TRIANGLES, 3, this.gl.UNSIGNED_SHORT, 0);
-    }
-  }, {
-    key: "positionCamera",
-    value: function positionCamera() {
-      // const newPos = this.camera.getPosition();
-      //newPos[2] = this.cameraTarget.getPosition()[2] + 10;
-      // this.camera.setPosition(newPos);
-      this.camera.setRotation(this.cameraTarget.getRotation());
-      var rotation = this.cameraTarget.getRotation();
-
-      var upLocal = this.cameraTarget.inverseTransformDirection([0, 0, 1]);
-      var angleToUp = MathUtils.angleBetweenVectors([0, 0, 1], upLocal);
-      var upAlignAxis = MathUtils.vectorCross(upLocal, [0, 0, 1]);
-      this.camera.setRotation(MathUtils.multiplyQuaternions(MathUtils.axisAngleToQuaternion(upAlignAxis, angleToUp), rotation));
-      this.camera.setPosition(this.cameraTarget.getPosition());
-      this.camera.setPosition(this.camera.transformPoint(GAMEPLAY_CAMERA_POS_OFFSET));
     }
   }, {
     key: "calculateViewMatrix",
