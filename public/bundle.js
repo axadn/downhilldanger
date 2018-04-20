@@ -1336,7 +1336,7 @@ var Game = function () {
     this.restart = this.restart.bind(this);
     rasterizer.camera = new _game_object2.default();
     rasterizer.camera.target = this.character;
-    rasterizer.drawObjects.bind(rasterizer)();
+    //rasterizer.drawObjects.bind(rasterizer)();
     this.camera = rasterizer.camera;
     this.fixedUpdate = this.fixedUpdate.bind(this);
   }
