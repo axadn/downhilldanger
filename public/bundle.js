@@ -1006,6 +1006,8 @@ exports.setStartTime = setStartTime;
 exports.startGameplayHUD = startGameplayHUD;
 exports.doStartMenuHUD = doStartMenuHUD;
 exports.displayScoresStructure = displayScoresStructure;
+exports.doControlsMenu = doControlsMenu;
+exports.closeControlsMenu = closeControlsMenu;
 var state = { time: 0, startTime: 0,
     bestTime: 0, points: 0, speed: 0 };
 
@@ -1060,12 +1062,20 @@ function startGameplayHUD() {
 
 function doStartMenuHUD(callback) {
     var startButton = document.createElement("button");
-    startButton.classList.add('start-button');
+    startButton.classList.add('menu-button');
     startButton.onclick = callback;
     startButton.textContent = "START";
+
+    var controlsButton = document.createElement("button");
+    controlsButton.onclick = doControlsMenu;
+    controlsButton.classList.add("menu-button");
+    controlsButton.textContent = "CONTROLS";
+
     var startMenu = document.createElement("div");
     startMenu.appendChild(startButton);
+    startMenu.appendChild(controlsButton);
     startMenu.classList.add("start-menu");
+
     var hud = document.querySelector('.hud');
     hud.innerHTML = "";
     hud.appendChild(startMenu);
@@ -1074,6 +1084,56 @@ function doStartMenuHUD(callback) {
 function displayScoresStructure() {
     var hud = document.querySelector(".hud");
     hud.innerHTML = "FINISHED";
+}
+
+function doControlsMenu() {
+    var hud = document.querySelector(".hud");
+
+    var menu = document.createElement("section");
+    menu.classList.add("controls-menu");
+
+    var controlsList = document.createElement("ul");
+    controlsList.classList.add("controls-list");
+
+    var keys = ["w/a", "s/down", "d/right", "space"];
+    var descriptions = ["steer left", "brake", "steer right", "jump"];
+
+    var listItem = void 0,
+        controlKey = void 0,
+        controlDesc = void 0;
+    keys.forEach(function (key, idx) {
+        listItem = document.createElement("li");
+        controlKey = document.createElement('div');
+        controlDesc = document.createElement('div');
+
+        controlKey.textContent = key;
+        controlDesc.textContent = descriptions[idx];
+
+        controlKey.classList.add("controls-key");
+        controlDesc.classList.add("controls-desc");
+        listItem.classList.add("controls-item");
+
+        listItem.appendChild(controlKey);
+        listItem.appendChild(controlDesc);
+        controlsList.appendChild(listItem);
+    });
+
+    menu.appendChild(controlsList);
+
+    var closeButton = document.createElement("button");
+    closeButton.textContent = "X";
+    closeButton.classList.add("menu-close");
+    closeButton.onclick = closeControlsMenu;
+
+    menu.appendChild(closeButton);
+
+    hud.appendChild(menu);
+}
+
+function closeControlsMenu() {
+    var hud = document.querySelector(".hud");
+    var menu = document.querySelector(".controls-menu");
+    hud.removeChild(menu);
 }
 
 /***/ }),

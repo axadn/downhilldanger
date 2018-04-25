@@ -71,12 +71,20 @@ export function startGameplayHUD(){
 
 export function doStartMenuHUD(callback){
     const startButton = document.createElement("button");
-    startButton.classList.add('start-button');
+    startButton.classList.add('menu-button');
     startButton.onclick = callback;
     startButton.textContent = "START";
+
+    const controlsButton = document.createElement("button");
+    controlsButton.onclick = doControlsMenu;
+    controlsButton.classList.add("menu-button");
+    controlsButton.textContent = "CONTROLS";
+
     const startMenu = document.createElement("div");
     startMenu.appendChild(startButton);
+    startMenu.appendChild(controlsButton);
     startMenu.classList.add("start-menu");
+
     const hud = document.querySelector('.hud');
     hud.innerHTML = "";
     hud.appendChild(startMenu);
@@ -85,4 +93,52 @@ export function doStartMenuHUD(callback){
 export function displayScoresStructure(){
     const hud = document.querySelector(".hud");
     hud.innerHTML = "FINISHED";
+}
+
+export function doControlsMenu(){
+    const hud = document.querySelector(".hud");
+
+    const menu = document.createElement("section");
+    menu.classList.add("controls-menu");
+
+    const controlsList = document.createElement("ul");
+    controlsList.classList.add("controls-list");
+
+    const keys = ["w/a", "s/down", "d/right", "space"];
+    const descriptions = ["steer left", "brake", "steer right", "jump"];
+
+    let listItem, controlKey, controlDesc;
+    keys.forEach((key, idx)=>{
+        listItem = document.createElement("li");
+        controlKey = document.createElement('div');
+        controlDesc = document.createElement('div');
+
+        controlKey.textContent = key;
+        controlDesc.textContent = descriptions[idx];
+
+        controlKey.classList.add("controls-key");
+        controlDesc.classList.add("controls-desc");
+        listItem.classList.add("controls-item");
+
+        listItem.appendChild(controlKey);
+        listItem.appendChild(controlDesc);
+        controlsList.appendChild(listItem);
+    });
+
+    menu.appendChild(controlsList);
+
+    const closeButton = document.createElement("button");
+    closeButton.textContent = "X";
+    closeButton.classList.add("menu-close");  
+    closeButton.onclick = closeControlsMenu;
+
+    menu.appendChild(closeButton);
+
+    hud.appendChild(menu);
+}
+
+export function closeControlsMenu(){
+    const hud = document.querySelector(".hud");
+    const menu = document.querySelector(".controls-menu");
+    hud.removeChild(menu);
 }
