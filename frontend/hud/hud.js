@@ -104,7 +104,7 @@ export function doControlsMenu(){
     const controlsList = document.createElement("ul");
     controlsList.classList.add("controls-list");
 
-    const keys = ["w/a", "s/down", "d/right", "space"];
+    const keys = ["a/left", "s/down", "d/right", "space"];
     const descriptions = ["steer left", "brake", "steer right", "jump"];
 
     let listItem, controlKey, controlDesc;
