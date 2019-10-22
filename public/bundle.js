@@ -1095,7 +1095,7 @@ function doControlsMenu() {
     var controlsList = document.createElement("ul");
     controlsList.classList.add("controls-list");
 
-    var keys = ["w/a", "s/down", "d/right", "space"];
+    var keys = ["a/left", "s/down", "d/right", "space"];
     var descriptions = ["steer left", "brake", "steer right", "jump"];
 
     var listItem = void 0,
@@ -1399,6 +1399,8 @@ var Game = function () {
     //rasterizer.drawObjects.bind(rasterizer)();
     this.camera = rasterizer.camera;
     this.fixedUpdate = this.fixedUpdate.bind(this);
+    this.camera.setPosition([0, 0, 5]);
+    rasterizer.drawObjects(0);
   }
 
   _createClass(Game, [{

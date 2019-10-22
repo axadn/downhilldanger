@@ -67,6 +67,8 @@ class Game{
     //rasterizer.drawObjects.bind(rasterizer)();
     this.camera = rasterizer.camera;
     this.fixedUpdate = this.fixedUpdate.bind(this);
+    this.camera.setPosition([0,0,5]);
+    rasterizer.drawObjects(0);
   }
   fixedUpdate(){
     this.character.update();
